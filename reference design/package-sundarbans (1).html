@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sundarbans Wildlife Tour — Roam Bengal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Caveat:wght@600;700&family=Poppins:wght@400;500;600;700&family=Permanent+Marker&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1E5F3B;
+    --green-dark:#123D26;
+    --orange:#F0791E;
+    --gold:#F2B705;
+    --blue:#C4390E;
+    --purple:#F2B705;
+    --teal:#1E5F3B;
+    --ink:#20291F;
+    --paper:#FFFFFF;
+    --mint:#EAF4EC;
+    --muted:#6B7770;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Poppins', sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.5;
+  }
+  h1,h2,h3{font-family:'Playfair Display', serif; font-weight:700;}
+  .script{font-family:'Caveat', cursive;}
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 40px;}
+  section{position:relative;}
+  .eyebrow{
+    font-size:0.78rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--orange); text-align:center; display:block; margin-bottom:8px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; min-height:640px; color:#fff; overflow:hidden;
+    background:linear-gradient(160deg, #7A2408 0%, #C4390E 35%, #F0791E 65%, #F2B705 100%);
+  }
+  .hero-photo{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+  }
+  .hero-overlay{
+    position:absolute; inset:0; z-index:1;
+    background: linear-gradient(180deg, rgba(10,20,15,0.55) 0%, rgba(10,20,15,0.15) 45%, rgba(10,20,15,0.7) 100%);
+  }
+  header{position:relative; z-index:5;}
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 40px; max-width:1240px; margin:0 auto;
+  }
+  .logo-block{line-height:1;}
+  .logo-row{display:flex; align-items:center; gap:10px;}
+  .logo-mark{flex:none; width:38px; height:38px; display:block; filter:drop-shadow(0 3px 8px rgba(0,0,0,0.25));}
+  .logo-mark svg{width:100%; height:100%;}
+  .logo-block .lg1{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:#fff; letter-spacing:-0.01em;}
+  .logo-block .lg2{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--orange); margin-left:5px;}
+  .logo-block .tag{font-size:0.48rem; font-weight:700; letter-spacing:0.1em; color:rgba(255,255,255,0.75); margin-top:5px; margin-left:48px; white-space:nowrap;}
+  .navlinks{display:flex; gap:30px; font-size:0.9rem; font-weight:500;}
+  .navlinks a{position:relative; padding-bottom:6px; opacity:0.92;}
+  .navlinks a.active{color:#fff;}
+  .navlinks a.active::after{content:''; position:absolute; left:0; bottom:0; width:100%; height:2px; background:var(--orange);}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    padding:12px 24px; border-radius:30px; font-weight:600; font-size:0.88rem; cursor:pointer;
+    border:1.5px solid transparent; transition:all .2s ease;
+  }
+  .btn-green{background:var(--orange); color:#fff;}
+  .btn-green:hover{background:#D9600F;}
+  .btn-outline-light{border-color:rgba(255,255,255,0.6); color:#fff;}
+  .btn-outline-light:hover{background:rgba(255,255,255,0.15);}
+  .btn-orange{background:var(--orange); color:#fff;}
+  .btn-orange:hover{background:#d96a15;}
+
+  .hero-content{position:relative; z-index:4; max-width:1240px; margin:0 auto; padding:60px 40px 0;}
+  .hero-content h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(2.4rem,5.6vw,4.1rem); line-height:1.08; margin:2px 0 18px; text-shadow:0 4px 24px rgba(0,0,0,0.3); letter-spacing:0.01em;}
+  .hero-content .script{font-size:clamp(1.8rem,3.4vw,2.6rem); color:var(--gold); display:block; margin-bottom:-6px;}
+  .hero-content p{font-size:1.02rem; max-width:480px; opacity:0.92; margin-bottom:30px;}
+  .hero-ctas{display:flex; gap:14px; margin-bottom:56px;}
+
+  /* search bar */
+  .search-bar{
+    position:relative; z-index:6; max-width:1160px; margin:0 auto; transform:translateY(50%);
+    background:#fff; border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,0.18);
+    padding:22px 26px; display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr auto; gap:0;
+  }
+  .search-field{padding:0 22px; border-right:1px solid #ECECEC; display:flex; align-items:center; gap:12px;}
+  .search-field:first-child{padding-left:4px;}
+  .search-field svg{flex:none; width:20px; height:20px; color:var(--purple);}
+  .search-field:nth-child(2) svg{color:var(--orange);}
+  .search-field:nth-child(3) svg{color:var(--blue);}
+  .search-field:nth-child(4) svg{color:var(--teal);}
+  .search-field .sf-label{font-size:0.78rem; font-weight:600; color:var(--ink);}
+  .search-field .sf-sub{font-size:0.76rem; color:var(--muted); margin-top:1px;}
+  .search-btn{
+    background:linear-gradient(120deg,var(--orange),#D9450F); color:#fff; border:none; border-radius:12px;
+    padding:0 30px; font-weight:600; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+
+  /* ---------- GALLERY ---------- */
+  .gallery{padding:20px 40px 90px;}
+  .gallery-head{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:36px; flex-wrap:wrap;
+  }
+  .gallery-head h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.4vw,2.6rem); line-height:1.3; margin-bottom:14px;}
+  .g-line1{color:var(--green);}
+  .g-line2{color:var(--gold);}
+  .gallery-head p{font-size:0.92rem; color:var(--muted); max-width:520px; font-family:'Poppins',sans-serif;}
+  .gallery-head .g-bold{font-weight:700; color:var(--ink); margin-top:8px;}
+  .btn-green-dark{background:var(--green-dark); color:#fff; white-space:nowrap;}
+  .btn-green-dark:hover{background:#0B2818;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .gallery-photo{
+    aspect-ratio:1/1; border-radius:14px; position:relative; overflow:hidden;
+    display:flex; align-items:flex-end; transition:transform .3s ease;
+  }
+  .gallery-photo:hover{transform:translateY(-6px);}
+  .gallery-photo::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);}
+  .gp-tag{position:relative; z-index:2; color:#fff; font-size:0.78rem; font-weight:600; padding:14px;}
+
+  /* ---------- FEATURE STRIP ---------- */
+  .feature-strip{padding:60px 40px; background:linear-gradient(120deg,#FCEFD9,#F7E2C0);}
+  .feature-grid{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(6,1fr); gap:10px;
+  }
+  .feature-item{text-align:center;}
+  .feature-icon{
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    margin:0 auto 12px; color:#fff;
+  }
+  .feature-item h4{font-size:0.85rem; font-weight:600; margin-bottom:4px; font-family:'Poppins',sans-serif;}
+  .feature-item p{font-size:0.72rem; color:var(--muted);}
+  .fi1 .feature-icon{background:var(--orange);}
+  .fi2 .feature-icon{background:var(--orange);}
+  .fi3 .feature-icon{background:var(--orange);}
+  .fi4 .feature-icon{background:var(--orange);}
+  .fi5 .feature-icon{background:var(--orange);}
+  .fi6 .feature-icon{background:var(--orange);}
+
+  /* ---------- STORY / WHY CHOOSE US ---------- */
+  .story{padding:90px 40px; background:linear-gradient(120deg,#FDF0E4,#EAF4EC);}
+  .story-grid{display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;}
+  .story-copy h2{font-size:clamp(2rem,3.6vw,2.7rem); margin-bottom:18px; line-height:1.15; color:var(--ink);}
+  .story-accent{color:var(--orange);}
+  .story-copy > p{font-size:0.95rem; color:var(--muted); margin-bottom:30px; max-width:480px;}
+  .why-list{display:flex; flex-direction:column; gap:26px;}
+  .why-item{display:flex; gap:18px; align-items:flex-start;}
+  .why-icon{
+    flex:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .why-item h3{font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:4px; color:var(--ink);}
+  .why-item p{font-size:0.86rem; color:var(--muted); max-width:420px;}
+  .story-visual{position:relative;}
+  .story-photo-frame{
+    width:100%; aspect-ratio:4/4.6; border-radius:20px; overflow:hidden; position:relative;
+    box-shadow:0 20px 46px rgba(0,0,0,0.16);
+    background:linear-gradient(150deg,#22B57A,#F2B705 60%,#C4390E);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photo-placeholder-label{
+    position:absolute; z-index:1; color:#fff; font-size:0.85rem; font-weight:600; text-align:center;
+    padding:0 30px; opacity:0.9;
+  }
+  .story-photo-img{
+    position:relative; z-index:2; width:100%; height:100%; object-fit:cover;
+  }
+
+  /* ---------- DESTINATIONS ---------- */
+  .destinations{padding:80px 40px 30px; text-align:center;}
+  .destinations h2{font-size:clamp(1.9rem,3.4vw,2.5rem); margin-bottom:16px;}
+  .divider{width:70px; height:4px; background:linear-gradient(90deg,var(--orange),var(--gold)); margin:0 auto 44px; border-radius:2px;}
+  .dest-scroll{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:left;
+  }
+  .dest-card{
+    border-radius:14px; overflow:hidden; position:relative; aspect-ratio:3/3.7;
+    display:flex; flex-direction:column; justify-content:flex-end; color:#fff;
+    box-shadow:0 10px 24px rgba(0,0,0,0.10); transition:transform .3s ease;
+  }
+  .dest-card:hover{transform:translateY(-6px);}
+  .dest-card::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.72) 100%);}
+  .dest-card .dc-label{position:relative; z-index:2; padding:16px;}
+  .dest-card .dc-loc{font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:5px; margin-bottom:3px;}
+  .dest-card .dc-title{font-family:'Poppins',sans-serif; font-weight:600; font-size:0.72rem; opacity:0.9;}
+  .dest-card .dc-desc{font-size:0.68rem; opacity:0.85; margin-top:6px; line-height:1.4;}
+  .dest-card .dc-season{font-size:0.6rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; opacity:0.75; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.25);}
+  .dest-card:nth-child(1){background:linear-gradient(160deg,#22B57A,#0B6B47);}
+  .dest-card:nth-child(2){background:linear-gradient(160deg,#F0791E,#C43B0E);}
+  .dest-card:nth-child(3){background:linear-gradient(160deg,#F2B705,#B5810A);}
+  .dest-card:nth-child(4){background:linear-gradient(160deg,#C4390E,#7A2408);}
+  .dest-card:nth-child(5){background:linear-gradient(160deg,#D9450F,#7A2408);}
+
+  /* ---------- BLOG CARDS V2 ---------- */
+  .blog-scroll{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; text-align:center;}
+  .blog-card-v2{background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.08); padding-bottom:26px; transition:transform .25s ease;}
+  .blog-card-v2:hover{transform:translateY(-6px);}
+  .bc-photo-frame{
+    position:relative; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; margin-bottom:20px;
+    background:linear-gradient(160deg,#F0791E,#C43B0E);
+  }
+  .bc-photo-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .bc-photo-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 20px; opacity:0.9;}
+  .blog-card-v2 h3{font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--green); line-height:1.3; margin:0 22px 14px;}
+  .blog-card-v2 > p{font-size:0.85rem; color:var(--muted); line-height:1.6; margin:0 22px 20px;}
+  .bc-foot{display:flex; align-items:center; justify-content:space-between; margin:0 22px; padding-top:16px; border-top:1px dashed #E4E4E4;}
+  .bc-more{font-size:0.85rem; font-weight:600; color:var(--green); border-bottom:2px solid var(--green); padding-bottom:2px;}
+  .bc-date{font-size:0.76rem; color:var(--muted);}
+  .view-all-wrap{text-align:center; margin:44px 0 90px;}
+  .btn-line{
+    display:inline-flex; align-items:center; gap:8px; padding:12px 26px; border-radius:30px;
+    border:1.5px solid var(--green); color:var(--green); font-weight:600; font-size:0.86rem;
+  }
+  .btn-line:hover{background:var(--green); color:#fff;}
+
+  /* ---------- POPULAR TOURS ---------- */
+  .tours{padding:80px 40px 60px; background:linear-gradient(120deg,#EAF4EC,#FDF0E4); text-align:center;}
+  .tour-grid{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; text-align:left;
+  }
+  .tour-card{background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.08); transition:transform .25s ease; border:1px solid #E7E7E7;}
+  .tour-card:hover{transform:translateY(-6px);}
+  .tour-photo-frame{
+    position:relative; aspect-ratio:4/3.2; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#F0791E,#C43B0E);
+  }
+  .tour-photo-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .tour-photo-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 20px; opacity:0.9;}
+  .tour-ribbon{
+    position:absolute; top:16px; left:50%; transform:translateX(-50%); z-index:3;
+    background:var(--orange); color:#fff; font-size:0.78rem; font-weight:700; padding:7px 18px; border-radius:20px;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18); display:flex; align-items:center; gap:6px;
+  }
+  .tour-body-v2{padding:22px 22px 24px;}
+  .tour-body-v2 h4{font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--green); margin-bottom:8px;}
+  .tour-loc{font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:5px; margin-bottom:14px;}
+  .tour-body-v2 > p{font-size:0.85rem; color:var(--muted); line-height:1.6; margin-bottom:18px;}
+  .tour-stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; margin-bottom:20px;
+    padding:16px 0; border-top:1px dashed #E4E4E4; border-bottom:1px dashed #E4E4E4;
+  }
+  .tour-stats div{font-size:0.8rem; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .tour-footer{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .tf-price{font-size:0.76rem; color:var(--muted); line-height:1.3;}
+  .tf-price span{display:block; font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--ink); font-weight:700;}
+  .tf-btn{padding:11px 20px; font-size:0.8rem; border-radius:30px; white-space:nowrap; background:var(--orange) !important;}
+  .tf-btn:hover{background:#D96A15 !important;}
+
+  /* ---------- REVIEWS ---------- */
+  .reviews{padding:80px 40px; text-align:center; position:relative; overflow:hidden; background:linear-gradient(160deg,#0B2818,#123D26 55%,#0B2818);}
+  .reviews::before{
+    content:''; position:absolute; inset:0; opacity:0.35; pointer-events:none;
+    background:
+      radial-gradient(ellipse 420px 300px at 12% 15%, #22B57A, transparent 70%),
+      radial-gradient(ellipse 380px 320px at 90% 10%, #F2B705, transparent 70%),
+      radial-gradient(ellipse 400px 340px at 85% 90%, #C4390E, transparent 70%),
+      radial-gradient(ellipse 320px 300px at 8% 90%, #D9450F, transparent 70%);
+  }
+  .reviews-map{
+    position:absolute; inset:0; opacity:0.25; pointer-events:none;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.5) 1.6px, transparent 1.8px);
+    background-size:16px 16px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 20% 20%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 60% 50% at 80% 15%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 55% 60% at 75% 75%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 40% 40% at 10% 80%, black 40%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 20% 20%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 60% 50% at 80% 15%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 55% 60% at 75% 75%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 40% 40% at 10% 80%, black 40%, transparent 75%);
+  }
+  .reviews-inner{position:relative; z-index:2; max-width:1160px; margin:0 auto;}
+  .reviews-h2{font-size:clamp(1.9rem,3.6vw,2.7rem); line-height:1.25; margin-bottom:34px; color:#fff;}
+  .rev-accent{color:var(--gold);}
+  .platform-row{display:flex; justify-content:center; gap:16px; margin-bottom:50px; flex-wrap:wrap;}
+  .platform-badge{
+    background:#fff; border-radius:12px; padding:16px 26px; box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    text-align:left; min-width:190px;
+  }
+  .pb-top{font-weight:700; font-size:1rem; display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .pb-icon{font-size:1.1rem;}
+  .pb-bottom{font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:6px;}
+  .pb-dots{color:#00A870; letter-spacing:1px; font-size:0.7rem;}
+  .pb-star{color:var(--gold);}
+  .pb-square{color:#00B67A; font-size:0.7rem;}
+  .review-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; text-align:left;}
+  .review-card{background:transparent; padding:16px 20px; text-align:center;}
+  .review-card p{font-size:0.98rem; color:#F2F5F2; margin-bottom:18px; line-height:1.6;}
+  .rc-stars-center{color:var(--gold); font-size:0.95rem; margin-bottom:16px;}
+  .rc-who-center{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .rc-avatar{width:52px; height:52px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display',serif; font-size:1.1rem;}
+  .rc-name{font-size:0.9rem; font-weight:700; color:#fff;}
+  .rc-loc{font-size:0.76rem; color:rgba(255,255,255,0.6);}
+  .carousel-dots{display:flex; justify-content:center; gap:8px; margin:36px 0 26px;}
+  .cd{width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); display:inline-block;}
+  .cd.active{background:var(--gold); width:22px; border-radius:5px;}
+  .btn-blue{background:#3EA8E0; color:#fff;}
+  .btn-blue:hover{background:#2384B8;}
+
+  /* ---------- FAITH / WHY TRAVELLERS CHOOSE US ---------- */
+  .faith{padding:100px 40px 90px;}
+  .faith-grid{display:grid; grid-template-columns:0.85fr 1.15fr; gap:70px; align-items:center;}
+  .faith-visual{position:relative; min-height:440px;}
+  .faith-blob{
+    position:absolute; top:-20px; left:-30px; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(34,181,122,0.18), transparent 70%);
+  }
+  .faith-frame{
+    position:absolute; border-radius:22px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,0.14);
+    background:linear-gradient(150deg,#3E7A6E,#123D30); display:flex; align-items:center; justify-content:center;
+  }
+  .faith-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .faith-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 16px; opacity:0.9;}
+  .faith-frame-a{width:78%; aspect-ratio:4/4.6; top:0; left:0; transform:rotate(-3deg); z-index:1;}
+  .faith-frame-b{width:60%; aspect-ratio:4/4.6; bottom:-30px; right:0; transform:rotate(3deg); z-index:2; background:linear-gradient(150deg,#F0791E,#8C3D0C);}
+  .faith-pin{
+    position:absolute; top:14px; right:-6px; z-index:3; background:#fff; color:var(--ink);
+    font-size:0.72rem; font-weight:700; padding:6px 12px; border-radius:20px; box-shadow:0 6px 14px rgba(0,0,0,0.15);
+  }
+  .faith-h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.2vw,2.5rem); line-height:1.3; color:var(--green); margin:8px 0 22px;}
+  .faith-accent{color:var(--orange);}
+  .faith-list{list-style:none; display:flex; flex-direction:column; gap:12px; margin-bottom:30px;}
+  .faith-list li{
+    position:relative; padding-left:26px; font-size:0.92rem; color:var(--ink); line-height:1.5;
+  }
+  .faith-list li::before{
+    content:'✓'; position:absolute; left:0; top:1px; color:var(--green); font-weight:700;
+  }
+  .faith-callout{display:flex; gap:12px; margin-bottom:18px; align-items:flex-start;}
+  .fc-mark{flex:none; color:var(--gold); font-size:1.1rem; font-weight:700; margin-top:2px;}
+  .faith-callout p{font-size:0.88rem; color:var(--muted); line-height:1.6;}
+  .faith-callout p strong{color:var(--ink);}
+
+  /* ---------- HIGHLIGHT TILES ---------- */
+  .highlights{display:grid; grid-template-columns:repeat(4,1fr); margin-top:20px;}
+  .h-tile{
+    min-height:210px; padding:28px; color:#fff; display:flex; flex-direction:column; justify-content:flex-end;
+    position:relative;
+  }
+  .h-tile::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.45));}
+  .h-tile .ht-eyebrow{position:relative; z-index:2; font-size:0.7rem; opacity:0.85; margin-bottom:6px;}
+  .h-tile h3{position:relative; z-index:2; font-family:'Poppins',sans-serif; font-size:1.15rem; font-weight:600; line-height:1.25;}
+  .h-tile:nth-child(1){background:linear-gradient(160deg,#22B57A,#0B6B47);}
+  .h-tile:nth-child(2){background:linear-gradient(160deg,#C4390E,#5C1C05);}
+  .h-tile:nth-child(3){background:linear-gradient(160deg,#F0791E,#C43B0E);}
+  .h-tile:nth-child(4){background:linear-gradient(160deg,#F2B705,#B5810A);}
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{padding:0 40px 90px;}
+  .nl-inner{
+    background:var(--mint); border-radius:18px; padding:44px 50px;
+    display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+  }
+  .nl-inner h3{font-size:1.4rem; margin-bottom:6px;}
+  .nl-inner p{font-size:0.86rem; color:var(--muted); max-width:380px;}
+  .nl-form{display:flex; gap:10px; flex-wrap:wrap;}
+  .nl-form input{
+    padding:13px 18px; border-radius:30px; border:1.5px solid #D8E5DB; min-width:240px; font-family:'Poppins',sans-serif; font-size:0.88rem;
+  }
+  .nl-form input:focus{outline:none; border-color:var(--green);}
+
+  /* ---------- DREAM CTA (DHAKA) ---------- */
+  .dream-cta{padding:70px 40px; background:linear-gradient(120deg,#EAF4EC,#FDF0E4);}
+  .dream-grid{display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center;}
+  .dream-copy h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.4vw,2.5rem); line-height:1.3; margin-bottom:22px;}
+  .dream-copy p{font-size:0.95rem; color:var(--ink); margin-bottom:18px; max-width:480px; line-height:1.6;}
+  .dream-copy p strong{color:var(--ink);}
+  .dream-art svg{width:100%; height:auto;}
+  .dhaka-text{
+    font-family:'Caveat',cursive; font-weight:700; font-size:52px; fill:#E63238;
+  }
+
+  /* ---------- WHATSAPP FLOAT ---------- */
+  .wa-float{
+    position:fixed; right:22px; bottom:22px; z-index:60; display:flex; align-items:center; gap:10px;
+    background:#25D366; color:#fff; padding:12px 18px 12px 14px; border-radius:40px;
+    font-size:0.86rem; font-weight:600; box-shadow:0 10px 24px rgba(0,0,0,0.2);
+  }
+  .wa-float:hover{background:#1FBE5A;}
+  .wa-float svg{width:22px; height:22px;}
+
+  /* ---------- CTA + FOOTER ---------- */
+  .cta-banner{
+    margin:80px 40px; border-radius:20px; background:linear-gradient(120deg,#F2B705,#D9450F 55%,#F0791E);
+    color:#fff; padding:60px 50px; text-align:center;
+  }
+  .cta-banner h2{color:#fff; font-size:clamp(1.7rem,3vw,2.3rem); margin-bottom:12px;}
+  .cta-banner p{opacity:0.85; margin-bottom:26px;}
+
+  footer{background:linear-gradient(160deg,#123D26,#B5810A); color:#fff; padding:56px 40px 26px;}
+  .foot-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.3fr 0.9fr 0.9fr 0.9fr 0.9fr; gap:32px; margin-bottom:40px;}
+  .foot-brand p{font-size:0.85rem; opacity:0.7; margin-top:14px; max-width:260px;}
+  .foot-col h4{font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; color:var(--gold);}
+  .foot-col a{display:block; font-size:0.87rem; margin-bottom:10px; opacity:0.85;}
+  .foot-col a:hover{opacity:1;}
+  .foot-bottom{max-width:1240px; margin:0 auto; padding-top:22px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; font-size:0.78rem; opacity:0.6; flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:980px){
+    .search-bar{grid-template-columns:1fr 1fr; gap:14px; transform:translateY(20%);}
+    .search-field{border-right:none; padding:8px 0;}
+    .feature-grid{grid-template-columns:repeat(3,1fr); gap:24px;}
+    .dest-scroll{grid-template-columns:1fr;}
+    .blog-scroll{grid-template-columns:1fr;}
+    .tour-grid{grid-template-columns:1fr;}
+    .highlights{grid-template-columns:repeat(2,1fr);}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .bf-grid{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+    .feature-strip{padding-top:70px;}
+    .story-grid{grid-template-columns:1fr; gap:40px;}
+    .story-visual{order:-1;}
+    .review-grid{grid-template-columns:1fr;}
+    .nl-inner{flex-direction:column; align-items:flex-start;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr);}
+    .dream-grid{grid-template-columns:1fr;}
+    .faith-grid{grid-template-columns:1fr; gap:40px;}
+    .faith-visual{min-height:340px; max-width:340px; margin:0 auto;}
+  }
+
+  /* ---------- TOURS PAGE BANNER ---------- */
+  .page-banner{
+    position:relative; min-height:460px; color:#fff; overflow:hidden;
+    background:linear-gradient(160deg, #1E5F3B 0%, #123D26 100%);
+    display:flex; flex-direction:column;
+  }
+  .page-banner-photo{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .page-banner > .photo-placeholder-label{top:50%; left:50%; transform:translate(-50%,-50%); width:80%;}
+  .page-banner-overlay{position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, rgba(8,15,10,0.35) 0%, rgba(8,15,10,0.15) 40%, rgba(8,15,10,0.55) 100%);}
+  .page-banner-content{
+    position:relative; z-index:2; flex:1; display:flex; align-items:center; justify-content:center; padding:40px;
+  }
+  .page-banner h1{
+    font-family:'Poppins',sans-serif; font-weight:300; font-size:clamp(1.5rem,3.4vw,2.4rem);
+    letter-spacing:0.06em; text-transform:uppercase; text-align:center; max-width:900px;
+    text-shadow:0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  /* ---------- TOURS INTRO ---------- */
+  .tours-intro{padding:70px 40px 20px;}
+  .tours-intro h2{
+    font-family:'Kalam',cursive; font-weight:700; text-transform:uppercase; font-size:clamp(1.7rem,3vw,2.3rem);
+    line-height:1.3; margin-bottom:24px;
+  }
+  .ti-green{color:var(--green);}
+  .ti-orange{color:var(--orange);}
+  .tours-intro p{font-size:0.98rem; color:var(--ink); max-width:900px; margin-bottom:16px; line-height:1.7;}
+  .tours-intro p strong{color:var(--ink);}
+  .tours-intro .ti-bold{font-weight:700;}
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-section{padding:60px 40px 20px;}
+  .filter-bar{
+    max-width:1240px; margin:0 auto 40px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
+  }
+  .filter-pill{
+    padding:10px 22px; border-radius:30px; border:1.5px solid #E7DDD0; background:#fff;
+    font-size:0.85rem; font-weight:600; color:var(--muted); cursor:pointer; transition:all .2s ease;
+  }
+  .filter-pill:hover{border-color:var(--orange); color:var(--orange);}
+  .filter-pill.active{background:var(--orange); border-color:var(--orange); color:#fff;}
+  .tours-count{text-align:center; font-size:0.85rem; color:var(--muted); margin-bottom:30px;}
+  .tours-listing-grid{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; text-align:left; padding:0 40px 90px;
+  }
+  @media (max-width:980px){
+    .tours-listing-grid{grid-template-columns:1fr; padding:0 20px 60px;}
+    .filter-bar{padding:0 20px;}
+  }
+
+  /* ---------- PACKAGE DETAIL PAGE ---------- */
+  .pkg-hero{position:relative; min-height:360px; overflow:hidden; color:#fff; display:flex; flex-direction:column;}
+  .pkg-hero-photo{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .pkg-hero-overlay{position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, rgba(8,15,10,0.35) 0%, rgba(8,15,10,0.2) 40%, rgba(8,15,10,0.75) 100%);}
+  .pkg-hero-content{position:relative; z-index:2; flex:1; display:flex; flex-direction:column; justify-content:flex-end; max-width:1240px; margin:0 auto; padding:0 40px 34px; width:100%;}
+  .pkg-breadcrumb{font-size:0.8rem; opacity:0.85; margin-bottom:12px;}
+  .pkg-breadcrumb a{opacity:0.9;} .pkg-breadcrumb a:hover{text-decoration:underline;}
+  .pkg-tag{display:inline-flex; align-items:center; gap:6px; background:var(--orange); padding:5px 14px; border-radius:20px; font-size:0.72rem; font-weight:700; margin-bottom:14px;}
+  .pkg-hero-content h1{font-family:'Playfair Display',serif; font-size:clamp(2rem,4.4vw,3.2rem); margin-bottom:8px; text-shadow:0 4px 20px rgba(0,0,0,0.35);}
+  .pkg-loc{font-size:0.92rem; opacity:0.9;}
+
+  .pkg-facts{background:#fff; border-bottom:1px solid #EEE7DA;}
+  .pkg-facts-grid{
+    max-width:1240px; margin:0 auto; padding:22px 40px; display:grid; grid-template-columns:repeat(6,1fr); gap:16px; text-align:center;
+  }
+  .pkg-facts-grid div{font-size:0.78rem; color:var(--muted);}
+  .pkg-facts-grid div b{display:block; font-size:0.92rem; color:var(--ink); font-family:'Playfair Display',serif; margin-top:2px;}
+
+  .pkg-tabs{position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid #EEE7DA;}
+  .pkg-tabs-inner{max-width:1240px; margin:0 auto; padding:0 40px; display:flex; gap:6px; overflow-x:auto;}
+  .pkg-tabs a{padding:16px 16px; font-size:0.85rem; font-weight:600; color:var(--muted); white-space:nowrap; border-bottom:3px solid transparent;}
+  .pkg-tabs a:hover{color:var(--ink);}
+
+  .pkg-main{padding-top:36px;}
+  .pkg-main section{margin-bottom:56px; scroll-margin-top:70px;}
+  .pkg-main h2{font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--green); margin-bottom:16px;}
+  .pkg-main p{font-size:0.95rem; color:var(--ink); line-height:1.75; margin-bottom:14px;}
+  .pkg-main p strong{color:var(--green);}
+  .pkg-tip{background:var(--mint); border-left:4px solid var(--green); padding:14px 18px; border-radius:6px; font-size:0.88rem; color:var(--ink); margin-top:16px;}
+
+  .pkg-highlights{list-style:none; display:flex; flex-direction:column; gap:12px;}
+  .pkg-highlights li{position:relative; padding-left:28px; font-size:0.93rem; color:var(--ink); line-height:1.55;}
+  .pkg-highlights li::before{content:'✦'; position:absolute; left:0; top:1px; color:var(--orange);}
+
+  .itinerary-item{display:flex; gap:20px; margin-bottom:30px; position:relative;}
+  .itinerary-item:not(:last-child)::before{content:''; position:absolute; left:19px; top:44px; bottom:-30px; width:2px; background:#E7DDD0;}
+  .itinerary-num{
+    flex:none; width:40px; height:40px; border-radius:50%; background:var(--green); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:700; z-index:1;
+  }
+  .itinerary-body h3{font-size:1.05rem; margin-bottom:6px; color:var(--ink); font-family:'Poppins',sans-serif; font-weight:600;}
+  .itinerary-body p{font-size:0.9rem; color:var(--muted); margin-bottom:0;}
+
+  .price-box{background:#fff; border:1px solid #EEE7DA; border-radius:16px; padding:26px; box-shadow:0 12px 30px rgba(0,0,0,0.06); position:sticky; top:70px;}
+  .price-box .pb-label{font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;}
+  .price-box .pb-amount{font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--ink); font-weight:700; margin:4px 0 18px;}
+  .price-box .pb-amount span{font-size:0.85rem; color:var(--muted); font-family:'Poppins',sans-serif; font-weight:400;}
+  .pb-features{list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:22px;}
+  .pb-features li{font-size:0.84rem; color:var(--ink); display:flex; align-items:flex-start; gap:8px; line-height:1.4;}
+  .pb-features li::before{content:'✓'; color:var(--green); font-weight:700; flex:none;}
+  .price-box .btn{width:100%; justify-content:center; margin-bottom:12px;}
+  .pb-note{font-size:0.76rem; color:var(--muted); text-align:center;}
+
+  .incl-grid{display:grid; grid-template-columns:1fr 1fr; gap:30px;}
+  .incl-col h3{font-size:1rem; margin-bottom:14px; font-family:'Poppins',sans-serif; font-weight:700;}
+  .incl-col.yes h3{color:var(--green);} .incl-col.no h3{color:#B5432E;}
+  .incl-col ul{list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .incl-col li{font-size:0.86rem; color:var(--ink); padding-left:22px; position:relative; line-height:1.5;}
+  .incl-col.yes li::before{content:'✓'; position:absolute; left:0; color:var(--green); font-weight:700;}
+  .incl-col.no li::before{content:'✕'; position:absolute; left:0; color:#B5432E; font-weight:700;}
+
+  .faq-item{border-bottom:1px solid #EEE7DA; padding:18px 0;}
+  .faq-item h3{font-size:0.95rem; font-weight:600; color:var(--ink); margin-bottom:8px; font-family:'Poppins',sans-serif;}
+  .faq-item p{font-size:0.88rem; color:var(--muted); margin:0;}
+
+  /* gallery strip */
+  .pkg-gallery{
+    display:grid; grid-template-columns:1.3fr 0.65fr 0.65fr; grid-template-rows:1fr 1fr;
+    grid-template-areas:"big top top" "big bottom1 bottom2";
+    gap:14px; max-width:1240px; margin:0 auto; padding:16px 40px 0; height:440px;
+  }
+  .pkg-gallery-item.gi-big{grid-area:big;}
+  .pkg-gallery-item.gi-top{grid-area:top;}
+  .pkg-gallery-item.gi-b1{grid-area:bottom1;}
+  .pkg-gallery-item.gi-b2{grid-area:bottom2;}
+  .pkg-gallery-item{border-radius:10px; overflow:hidden; position:relative; background:linear-gradient(150deg,#22B57A,#0B6B47); height:100%; width:100%;}
+  .pkg-gallery-item img{width:100%; height:100%; object-fit:cover;}
+  .pkg-gallery-item .photo-placeholder-label{font-size:0.62rem;}
+
+  /* glance list */
+  .glance-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .glance-list li{font-size:0.9rem; color:var(--ink); padding-left:4px;}
+  .glance-list li b{color:var(--green);}
+
+  /* add-ons */
+  .addon-item{background:var(--mint); border-radius:10px; padding:14px 18px; margin-bottom:10px; font-size:0.88rem; color:var(--ink);}
+  .addon-item b{color:var(--green);}
+
+  /* offers */
+  .offer-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:20px;}
+  .offer-card{background:#fff; border:1px solid #EEE7DA; border-radius:12px; padding:18px;}
+  .offer-card h4{font-size:0.88rem; margin-bottom:10px; color:var(--green); font-family:'Poppins',sans-serif; font-weight:700;}
+  .offer-card ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
+  .offer-card li{font-size:0.82rem; color:var(--muted); padding-left:16px; position:relative; line-height:1.4;}
+  .offer-card li::before{content:'•'; position:absolute; left:0; color:var(--orange);}
+
+  /* advice subsections */
+  .advice-block{margin-bottom:26px;}
+  .advice-block h3{font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--ink); font-family:'Poppins',sans-serif;}
+  .advice-block ul{list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .advice-block li{font-size:0.88rem; color:var(--muted); padding-left:20px; position:relative; line-height:1.55;}
+  .advice-block li::before{content:'—'; position:absolute; left:0; color:var(--orange);}
+  .advice-block li strong{color:var(--ink);}
+
+  /* responsible travel */
+  .pledge-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .pledge-item{font-size:0.86rem; color:var(--muted); line-height:1.55;}
+  .pledge-item strong{color:var(--green); display:block; margin-bottom:3px;}
+
+  /* map & video placeholders */
+  .placeholder-block{
+    aspect-ratio:16/7; border-radius:14px; background:var(--mint); display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:0.88rem; font-weight:600; text-align:center; border:1.5px dashed #C9DBCB;
+  }
+
+  /* why choose this page */
+  .why-tour-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .why-tour-item{font-size:0.88rem; color:var(--ink); display:flex; gap:10px; align-items:flex-start; line-height:1.5;}
+  .why-tour-item span{flex:none;}
+
+  /* full booking form */
+  .booking-form-section{background:var(--mint); padding:60px 40px;}
+  .booking-form{max-width:900px; margin:0 auto; background:#fff; border-radius:16px; padding:36px; box-shadow:0 14px 34px rgba(0,0,0,0.08);}
+  .bf-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .bf-field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .bf-field label{font-size:0.8rem; font-weight:600; color:var(--ink);}
+  .bf-field input, .bf-field select, .bf-field textarea{
+    padding:11px 14px; border:1.5px solid #E7DDD0; border-radius:8px; font-family:'Poppins',sans-serif; font-size:0.88rem; color:var(--ink);
+  }
+  .bf-field input:focus, .bf-field select:focus, .bf-field textarea:focus{outline:none; border-color:var(--green);}
+  .bf-radio-row{display:flex; gap:18px; font-size:0.85rem; align-items:center;}
+  .bf-full{grid-column:1/-1;}
+  .booking-form h2{margin-bottom:6px;}
+  .booking-form > p{color:var(--muted); font-size:0.88rem; margin-bottom:24px;}
+  .booking-form .btn{width:100%; justify-content:center; margin-top:8px;}
+
+  @media (max-width:980px){
+    .pkg-gallery{grid-template-columns:1fr 1fr; grid-template-rows:200px 140px; grid-template-areas:"big big" "bottom1 bottom2"; height:auto; padding:16px 20px 0;}
+    .pkg-gallery .gi-top{display:none;}
+    .offer-grid{grid-template-columns:1fr;}
+    .pledge-grid{grid-template-columns:1fr;}
+    .why-tour-grid{grid-template-columns:1fr;}
+    .bf-grid{grid-template-columns:1fr;}
+  }
+
+  .related-grid{max-width:1240px; margin:0 auto; padding:0 40px 90px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+
+  @media (max-width:980px){
+    .price-box{position:static; margin-bottom:10px;}
+    .pkg-facts-grid{grid-template-columns:repeat(3,1fr); padding:20px;}
+    .incl-grid{grid-template-columns:1fr;}
+    .related-grid{grid-template-columns:1fr; padding:0 20px 60px;}
+    .pkg-tabs-inner{padding:0 20px;}
+    .pkg-facts-icons{grid-template-columns:1fr 1fr; padding:20px;}
+    .pkg-title-row{padding:24px 20px 16px;}
+    .pkg-title-divider{padding:0 20px;}
+  }
+
+  /* ---------- PLAIN WHITE HEADER (package page) ---------- */
+  .pkg-header-plain{background:#fff; border-bottom:1px solid #EEE7DA;}
+  .pkg-header-plain .navlinks a{font-weight:600; font-size:0.88rem;}
+  .pkg-header-plain .navlinks a.pkg-nav-active{color:var(--orange) !important;}
+  .pkg-header-plain .navlinks a:hover{color:var(--orange) !important;}
+
+  /* ---------- TITLE ROW (title + day badge + cost mini) ---------- */
+  .pkg-title-row{
+    max-width:1240px; margin:0 auto; padding:36px 40px 20px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .pkg-breadcrumb{font-size:0.8rem; color:var(--muted); margin-bottom:10px;}
+  .pkg-breadcrumb a{color:var(--muted);} .pkg-breadcrumb a:hover{color:var(--orange); text-decoration:underline;}
+  .pkg-title-left h1{font-family:'Playfair Display',serif; font-size:clamp(1.9rem,3.6vw,2.6rem); color:var(--green); font-weight:700;}
+  .pkg-title-right{display:flex; align-items:center; gap:18px;}
+  .day-badge{
+    background:var(--orange); color:#fff; border-radius:10px; padding:10px 18px; text-align:center; min-width:64px;
+    font-size:0.72rem; font-weight:700; text-transform:uppercase; line-height:1.2;
+  }
+  .day-badge span{display:block; font-family:'Playfair Display',serif; font-size:1.4rem; line-height:1;}
+  .cost-mini{background:#fff; border:1px solid #EEE7DA; border-radius:12px; padding:14px 22px; box-shadow:0 8px 20px rgba(0,0,0,0.06);}
+  .cost-mini .cm-label{font-size:0.78rem; font-weight:700; color:var(--green); margin-bottom:4px;}
+  .cost-mini .cm-row{display:flex; align-items:baseline; gap:12px; font-size:0.78rem; color:var(--muted);}
+  .cost-mini .cm-row b{font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--ink);}
+
+  .pkg-title-divider{max-width:1240px; margin:0 auto; padding:0 40px;}
+  .pkg-title-divider::after{content:''; display:block; height:1px; background:#EEE7DA;}
+
+  /* ---------- ICON FACTS GRID ---------- */
+  .pkg-facts-icons{
+    max-width:1240px; margin:0 auto; padding:28px 40px 10px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px 40px;
+  }
+  .pfi-item{display:flex; align-items:flex-start; gap:14px;}
+  .pfi-icon{flex:none; font-size:1.3rem; width:34px; text-align:center; opacity:0.85;}
+  .pfi-label{font-size:0.8rem; color:var(--muted);}
+  .pfi-value{font-size:0.92rem; font-weight:700; color:var(--ink); margin-top:2px;}
+
+  /* ---------- TOP GRID (title+facts beside price box) ---------- */
+  .pkg-top-grid{max-width:1240px; margin:0 auto; padding:36px 40px 10px; display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start;}
+  .pkg-top-left .pkg-title-row{max-width:none; margin:0; padding:0 0 20px;}
+  .pkg-top-left .pkg-title-divider{max-width:none; margin:0; padding:0;}
+  .pkg-top-left .pkg-facts-icons{max-width:none; margin:0; padding:24px 0 0; grid-template-columns:repeat(3,1fr);}
+  .pkg-top-price{position:sticky; top:70px; align-self:start;}
+  .pkg-top-price .price-box{position:relative; top:0;}
+  .pkg-top-price .price-box .pb-features li{padding-left:0;}
+  .pkg-top-price .price-box .pb-features li::before{display:none;}
+  .pkg-top-price .price-box .pb-features li strong{display:block; color:var(--ink); font-size:0.86rem; margin-bottom:2px;}
+  .pkg-top-price .price-box .pb-features li strong::before{content:'✓ '; color:var(--green);}
+  .pkg-top-price .price-box .pb-features li{font-size:0.78rem; color:var(--muted); margin-bottom:2px;}
+
+  @media (max-width:980px){
+    .pkg-top-grid{grid-template-columns:1fr; padding:24px 20px 10px;}
+    .pkg-top-left .pkg-facts-icons{grid-template-columns:1fr 1fr;}
+  }
+
+  /* ---------- MINI RELATED TOURS (below price box) ---------- */
+  .mini-related{margin-top:18px;}
+  .mini-related h4{font-size:0.85rem; font-weight:700; color:var(--ink); margin-bottom:12px;}
+  .mini-tour-card{
+    display:flex; gap:12px; align-items:center; background:#fff; border:1px solid #EEE7DA; border-radius:12px;
+    padding:10px; margin-bottom:10px; transition:box-shadow .2s ease, transform .2s ease;
+  }
+  .mini-tour-card:hover{box-shadow:0 8px 20px rgba(0,0,0,0.08); transform:translateY(-2px);}
+  .mtc-photo{flex:none; width:64px; height:64px; border-radius:8px; overflow:hidden; position:relative;}
+  .mtc-photo img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .mtc-body{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .mtc-body h5{font-size:0.82rem; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mtc-loc{font-size:0.7rem; color:var(--muted);}
+  .mtc-price{font-size:0.76rem; font-weight:700; color:var(--green);}
+</style>
+
+<body>
+
+<header class="pkg-header-plain">
+  <nav>
+    <div class="logo-block">
+      <div class="logo-row">
+        <span class="logo-mark">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="22" r="21" fill="url(#lg-grad)"/>
+            <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+            <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+            <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+            <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+            <defs>
+              <linearGradient id="lg-grad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <div><span class="lg1" style="color:var(--ink);">Roam</span><span class="lg2">Bengal</span></div>
+      </div>
+      <div class="tag" style="color:var(--muted);">EXPLORE THE HEART OF BANGLADESH</div>
+    </div>
+    <div class="navlinks" style="color:var(--ink);">
+      <a href="roam-bengal-v3.html" style="color:var(--ink);">Home</a>
+      <a href="tours.html" style="color:var(--ink);" class="pkg-nav-active">Tours</a>
+      <a href="blog.html" style="color:var(--ink);">Blog</a>
+      <a href="roam-bengal-v3.html#reviews" style="color:var(--ink);">Reviews</a>
+      <a href="#booking" style="color:var(--ink);">Contact</a>
+    </div>
+    <div class="nav-right">
+      <a href="#booking" class="btn btn-green">Plan Your Trip</a>
+    </div>
+  </nav>
+</header>
+
+<div class="pkg-gallery">
+  <div class="pkg-gallery-item gi-big">
+    <span class="photo-placeholder-label">📷 images/pkg-sundarbans-1.jpg</span>
+    <img src="images/pkg-sundarbans-1.jpg" alt="Boat cruising a Sundarbans mangrove channel" onerror="this.style.display='none'">
+  </div>
+  <div class="pkg-gallery-item gi-top" style="background:linear-gradient(150deg,#F0791E,#C4390E);">
+    <span class="photo-placeholder-label">📷 images/pkg-sundarbans-2.jpg</span>
+    <img src="images/pkg-sundarbans-2.jpg" alt="Watchtower view over the Sundarbans forest" onerror="this.style.display='none'">
+  </div>
+  <div class="pkg-gallery-item gi-b1" style="background:linear-gradient(150deg,#1E5F3B,#0B2818);">
+    <span class="photo-placeholder-label">📷 images/pkg-sundarbans-3.jpg</span>
+    <img src="images/pkg-sundarbans-3.jpg" alt="Spotted deer along the riverbank" onerror="this.style.display='none'">
+  </div>
+  <div class="pkg-gallery-item gi-b2" style="background:linear-gradient(150deg,#F2B705,#8C6A3D);">
+    <span class="photo-placeholder-label">📷 images/pkg-sundarbans-4.jpg</span>
+    <img src="images/pkg-sundarbans-4.jpg" alt="Sunset over the Sundarbans river mouth" onerror="this.style.display='none'">
+  </div>
+</div>
+
+<div class="pkg-top-grid">
+  <div class="pkg-top-left">
+
+    <div class="pkg-title-row">
+      <div class="pkg-title-left">
+        <div class="pkg-breadcrumb"><a href="roam-bengal-v3.html">Home</a> / <a href="tours.html">Tours</a> / <span>Sundarbans Wildlife Tour</span></div>
+        <h1>Sundarbans Wildlife Tour</h1>
+      </div>
+      <div class="pkg-title-right">
+        <div class="day-badge"><span>4</span>Days</div>
+      </div>
+    </div>
+
+    <div class="pkg-title-divider"></div>
+
+    <div class="pkg-facts-icons">
+      <div class="pfi-item"><span class="pfi-icon">🚶</span><div><div class="pfi-label">Tour Type</div><div class="pfi-value">Wildlife</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🕐</span><div><div class="pfi-label">Tour Duration</div><div class="pfi-value">4 Days</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">📍</span><div><div class="pfi-label">Tour Location</div><div class="pfi-value">Khulna</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🌤️</span><div><div class="pfi-label">Best Season</div><div class="pfi-value">Nov – Feb</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">👥</span><div><div class="pfi-label">Group Size</div><div class="pfi-value">Up to 8</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🏨</span><div><div class="pfi-label">Accommodation</div><div class="pfi-value">Included</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🚐</span><div><div class="pfi-label">Transport</div><div class="pfi-value">Private</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🍽️</span><div><div class="pfi-label">Tour Meals</div><div class="pfi-value">Included</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🧭</span><div><div class="pfi-label">Guiding Method</div><div class="pfi-value">Full Time</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🗣️</span><div><div class="pfi-label">Tour Language</div><div class="pfi-value">English</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">📅</span><div><div class="pfi-label">Age Limit</div><div class="pfi-value">10+ Years</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">💓</span><div><div class="pfi-label">Fitness Level</div><div class="pfi-value">Moderate</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🚗</span><div><div class="pfi-label">Pickup &amp; Drop</div><div class="pfi-value">Included</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🛬</span><div><div class="pfi-label">Arrival On</div><div class="pfi-value">Khulna</div></div></div>
+      <div class="pfi-item"><span class="pfi-icon">🛫</span><div><div class="pfi-label">Depart From</div><div class="pfi-value">Khulna</div></div></div>
+    </div>
+
+    <div class="pkg-tabs">
+  <div class="pkg-tabs-inner">
+    <a href="#overview">Overview</a>
+    <a href="#highlights">Highlights</a>
+    <a href="#itinerary">Itinerary</a>
+    <a href="#cost">Cost</a>
+    <a href="#inclusions">Inclusions</a>
+    <a href="#advice">Advise</a>
+    <a href="#faq">FAQs</a>
+    <a href="#map">Map</a>
+    <a href="#video">Video</a>
+  </div>
+</div>
+
+  <div class="pkg-main">
+
+    <section id="overview">
+      <h2>📜 Trip Overview</h2>
+      <p>The Sundarbans is the largest mangrove forest on earth, and the only place where the Royal Bengal tiger still roams a tidal wilderness of rivers, mudflats, and salt-tolerant forest. This four-day private expedition trades the usual tour-boat crowds for a smaller vessel, a slower pace, and a guide who has spent years reading this landscape.</p>
+      <p>You'll sleep aboard the boat as it moves quietly between narrow channels, wake to birdsong instead of engine noise, and spend your days scanning riverbanks from watchtowers, drifting past spotted deer and estuarine crocodiles, and stopping in fishing villages that sit right at the forest's edge.</p>
+      <p><strong>This isn't a wildlife guarantee tour</strong> — tiger sightings in the Sundarbans are rare and unscripted, and we won't pretend otherwise. What we can promise is an honest, unhurried look at one of the world's last great tidal forests, guided by people who grew up along its rivers.</p>
+      <div class="pkg-tip">💡 <strong>Good to know:</strong> Winter (November–February) offers the calmest water and clearest skies for wildlife spotting — this is when we run most departures.</div>
+    </section>
+
+    <section id="highlights">
+      <h2>⭐ Trip Highlights</h2>
+      <ul class="pkg-highlights">
+        <li>Cruise narrow tidal channels aboard a private boat, away from the larger tour vessels</li>
+        <li>Scan for the Royal Bengal tiger and spotted deer from three riverside watchtowers</li>
+        <li>Sleep aboard the boat for two nights, anchored in the quiet of the mangrove forest</li>
+        <li>Visit a honey-collectors' village and hear firsthand what it means to work inside tiger territory</li>
+        <li>Early-morning birdwatching for kingfishers, eagles, and migratory waders along the banks</li>
+        <li>Sunset on the open water where the Sundarbans meets the Bay of Bengal</li>
+      </ul>
+    </section>
+
+    <section id="glance">
+      <h2>📍 Journey at a Glance</h2>
+      <ul class="glance-list">
+        <li><b>Day 1, Morning</b> — Pick-up from Khulna → drive to the river launch (~1.5 hrs)</li>
+        <li><b>Day 1, Afternoon</b> — Board private boat, cruise into the buffer zone, first watchtower stop</li>
+        <li><b>Day 2, Full Day</b> — Core forest watchtowers, narrow-creek cruising, honey-collectors' village</li>
+        <li><b>Day 3, Morning</b> — Birdwatching at dawn along the riverbanks</li>
+        <li><b>Day 3, Afternoon</b> — Cruise to the river mouth, beach walk if tides allow</li>
+        <li><b>Day 4</b> — Slower return cruise → drive back to Khulna, drop-off by evening</li>
+      </ul>
+    </section>
+
+    <section id="addons">
+      <h2>➕ Optional Add-Ons</h2>
+      <div class="addon-item">🎣 <b>Sunset Fishing with Locals:</b> Join a fisherman's boat for an hour at golden hour and try traditional net-casting.</div>
+      <div class="addon-item">📷 <b>Extended Watchtower Session:</b> An additional early-morning hour at the best-positioned tower for photographers.</div>
+      <div class="addon-item">🍯 <b>Honey-Tasting Session:</b> Sample forest honey harvested by the village you visit, paired with local snacks.</div>
+    </section>
+
+    <section id="itinerary">
+      <h2>🗺️ Day-by-Day Itinerary</h2>
+
+      <div class="itinerary-item">
+        <div class="itinerary-num">1</div>
+        <div class="itinerary-body">
+          <h3>Khulna to Mangrove Edge</h3>
+          <p>Morning pick-up in Khulna, then a scenic drive to the river launch point. Board your private boat and cruise into the outer buffer zone, watching the landscape shift from farmland to forest. First watchtower stop before dinner and an overnight anchor on calm water.</p>
+        </div>
+      </div>
+      <div class="itinerary-item">
+        <div class="itinerary-num">2</div>
+        <div class="itinerary-body">
+          <h3>Deep Forest &amp; Watchtowers</h3>
+          <p>A full day inside the core forest. Visit two more watchtowers on foot with a forest-department guide, cruise narrow creeks by smaller boat for a closer look at wildlife, and stop at a honey-collectors' village to hear how local families work safely inside tiger territory.</p>
+        </div>
+      </div>
+      <div class="itinerary-item">
+        <div class="itinerary-num">3</div>
+        <div class="itinerary-body">
+          <h3>Birdlife &amp; the River Mouth</h3>
+          <p>Early start for the best birdwatching light — kingfishers, sea eagles, and migratory waders along the banks. Afternoon cruise toward where the Sundarbans meets the open Bay of Bengal, with a beach walk if tides allow, then a final night aboard.</p>
+        </div>
+      </div>
+      <div class="itinerary-item">
+        <div class="itinerary-num">4</div>
+        <div class="itinerary-body">
+          <h3>Return to Khulna</h3>
+          <p>A slower morning cruise back through the buffer zone, with time for last photographs and a stop at a riverside market. Drive back to Khulna, arriving by early evening.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="cost">
+      <h2>💵 Tour Price &amp; Offers</h2>
+      <p><strong>From $175 per person</strong> for a group of 2, with private boat, guide, meals, and permits included. Larger groups reduce the per-person rate — message us for a group quote.</p>
+      <div class="offer-grid">
+        <div class="offer-card">
+          <h4>🎉 Special Offers</h4>
+          <ul>
+            <li>Early-bird: save 10% booking 60+ days ahead</li>
+            <li>Multi-tour bonus: free souvenir on 2+ tours</li>
+            <li>Free airport transfer on multi-day bookings</li>
+          </ul>
+        </div>
+        <div class="offer-card">
+          <h4>💳 Fair Pricing Promise</h4>
+          <ul>
+            <li>All entry fees and permits included upfront</li>
+            <li>No factory visits or shopping commissions</li>
+            <li>Direct booking — no third-party markup</li>
+          </ul>
+        </div>
+        <div class="offer-card">
+          <h4>🔁 Rescheduling &amp; Cancellation</h4>
+          <ul>
+            <li>Free date change up to 72 hours before departure</li>
+            <li>Full refund if cancelled 30+ days ahead</li>
+            <li>See our full cancellation policy for details</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="inclusions">
+      <h2>🛑 What's Included</h2>
+      <div class="incl-grid">
+        <div class="incl-col yes">
+          <h3>✅ Included</h3>
+          <ul>
+            <li>Private boat with cabin accommodation (2 nights)</li>
+            <li>All meals aboard the boat, prepared fresh daily</li>
+            <li>English-speaking naturalist guide throughout</li>
+            <li>Forest department entry permits and watchtower fees</li>
+            <li>Khulna pick-up and drop-off</li>
+            <li>Life jackets and basic safety equipment</li>
+            <li>Bottled water and tea/coffee throughout</li>
+          </ul>
+        </div>
+        <div class="incl-col no">
+          <h3>❌ Not Included</h3>
+          <ul>
+            <li>International or domestic airfare</li>
+            <li>Bangladesh visa fees</li>
+            <li>Travel and medical insurance</li>
+            <li>Alcoholic beverages</li>
+            <li>Tips for guide and boat crew</li>
+            <li>Personal purchases and souvenirs</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="accessibility">
+      <h2>♿ Accessibility &amp; Special Requests</h2>
+      <div class="advice-block">
+        <ul>
+          <li><strong>Step minimisation:</strong> We plan closer boat landings and minimise stairs at watchtowers where possible.</li>
+          <li><strong>Family pacing:</strong> Shorter walking segments and flexible stops available on request.</li>
+          <li><strong>Dietary needs:</strong> Vegetarian, vegan, and gluten-free meals arranged with advance notice.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="advice">
+      <h2>🎯 Trip Advice &amp; Responsibilities</h2>
+
+      <div class="advice-block">
+        <h3>📌 Essential Trip Information</h3>
+        <ul>
+          <li><strong>Availability:</strong> Runs year-round, though each season changes the water level and wildlife activity noticeably.</li>
+          <li><strong>Best season:</strong> November–February for the calmest water and clearest skies; monsoon (June–August) is greener but choppier.</li>
+          <li><strong>Site closures:</strong> Occasionally restricted during government or forest-department holidays — we'll flag this at booking.</li>
+        </ul>
+      </div>
+
+      <div class="advice-block">
+        <h3>🚶 Practical Travel Information</h3>
+        <ul>
+          <li><strong>Fitness level:</strong> Light to moderate — watchtower visits involve short walks and stairs; most of each day is spent on the boat.</li>
+          <li><strong>What to pack:</strong> Neutral-coloured clothing, a light jacket for cool mornings, insect repellent, and binoculars if you have them.</li>
+          <li><strong>Food &amp; hygiene:</strong> All meals are prepared fresh aboard; bottled water provided throughout.</li>
+          <li><strong>Photography:</strong> Allowed throughout; drones require forest-department permission your guide can help arrange.</li>
+        </ul>
+      </div>
+
+      <div class="advice-block">
+        <h3>⚠️ Safety &amp; Expectations</h3>
+        <ul>
+          <li><strong>Safety rules:</strong> Life jackets are mandatory during all boat transfers — no exceptions.</li>
+          <li><strong>Travel realities:</strong> Tides, weather, and wildlife are unpredictable by nature. Your guide adapts the plan as needed, and a flexible mindset goes a long way here.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="pledge">
+      <h2>🌍 Responsible Travel Pledge</h2>
+      <div class="pledge-grid">
+        <div class="pledge-item"><strong>🤝 Community First</strong>Fair pay for guides, boat crews, and the villages we visit along the way.</div>
+        <div class="pledge-item"><strong>🐦 Wildlife Comes First</strong>No baiting, no chasing, no flash photography near animals.</div>
+        <div class="pledge-item"><strong>🗑️ Leave No Trace</strong>We pack out everything we bring in and minimise waste on every trip.</div>
+        <div class="pledge-item"><strong>🌱 Carbon-Aware</strong>Fuel-efficient boats wherever possible, with local tree-planting offsets.</div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2>❓ Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <h3>Will I definitely see a tiger?</h3>
+        <p>No tour can guarantee that — Bengal tigers are elusive and the Sundarbans is vast. What's consistent is the wildlife around them: deer, crocodiles, and exceptional birdlife on nearly every trip.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the boat accommodation comfortable?</h3>
+        <p>Cabins are simple but clean, with proper beds, fans, and shared bathrooms. This is an expedition-style trip rather than a luxury cruise.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can this tour be combined with other destinations?</h3>
+        <p>Yes — many guests pair this with our Barisal Backwater Tour or a few days in Sreemangal. Message us and we'll build a combined itinerary.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is it safe for solo travellers?</h3>
+        <p>Yes. Our guides accompany guests at all times inside the forest, and solo travellers are welcome to join or book the boat privately.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I book?</h3>
+        <p>Send us your preferred dates and group size via the form below or WhatsApp — we'll confirm availability and send a booking link within a day.</p>
+      </div>
+    </section>
+
+    <section id="map">
+      <h2>🗺️ Tour Map</h2>
+      <div class="placeholder-block">Interactive route map — Khulna → Sundarbans buffer zone → core forest → river mouth<br><span style="font-size:0.76rem; opacity:0.8;">(embed Google Maps or a custom route graphic here)</span></div>
+    </section>
+
+    <section id="video">
+      <h2>📽️ Tour Video</h2>
+      <div class="placeholder-block">🎬 Sundarbans tour video<br><span style="font-size:0.76rem; opacity:0.8;">(embed a YouTube/Vimeo player here)</span></div>
+    </section>
+
+    <section id="why-tour">
+      <h2>🌟 Why Choose Roam Bengal for This Tour</h2>
+      <div class="why-tour-grid">
+        <div class="why-tour-item"><span>🐅</span>No wildlife guarantees oversold — we tell you honestly what to expect.</div>
+        <div class="why-tour-item"><span>🔒</span>Fully private boat — your group only, never combined with strangers.</div>
+        <div class="why-tour-item"><span>🌿</span>Guides who grew up along these rivers, not scripted tour narrators.</div>
+        <div class="why-tour-item"><span>🛑</span>No shopping detours or commission-driven stops, ever.</div>
+        <div class="why-tour-item"><span>💰</span>Transparent pricing — permits, meals, and guiding all included upfront.</div>
+        <div class="why-tour-item"><span>📅</span>Flexible dates — no fixed departures to work around.</div>
+      </div>
+    </section>
+
+  </div>
+  </div>
+
+  <div class="pkg-top-price">
+    <div class="price-box" id="booking">
+      <div class="pb-label">Tour Cost</div>
+      <div class="pb-amount">$175 <span>/ Person* From</span></div>
+      <ul class="pb-features">
+        <li><strong>100% Exclusive Private Tours</strong></li>
+        <li><strong>Fully Flexible &amp; Customisable</strong></li>
+        <li><strong>Transparent Pricing Promise</strong></li>
+        <li><strong>Expert, Knowledgeable Guides</strong></li>
+        <li><strong>No Shopping Detours, Ever</strong></li>
+        <li><strong>Direct Booking Savings</strong></li>
+      </ul>
+      <a href="#" class="btn btn-green-dark">Book Now</a>
+    </div>
+
+    <div class="mini-related">
+      <h4>You Might Also Like</h4>
+
+      <a href="#" class="mini-tour-card">
+        <div class="mtc-photo" style="background:linear-gradient(160deg,#22B57A,#0B6B47);">
+          <span class="photo-placeholder-label" style="font-size:0.58rem; padding:0 8px;">📷 tour-sreemangal.jpg</span>
+          <img src="images/tour-sreemangal.jpg" alt="Sreemangal tea garden tour" onerror="this.style.display='none'">
+        </div>
+        <div class="mtc-body">
+          <h5>Sreemangal Nature Escape</h5>
+          <span class="mtc-loc">📍 Sylhet · 3 Days</span>
+          <span class="mtc-price">From $115</span>
+        </div>
+      </a>
+
+      <a href="#" class="mini-tour-card">
+        <div class="mtc-photo" style="background:linear-gradient(160deg,#1E5F3B,#0B2818);">
+          <span class="photo-placeholder-label" style="font-size:0.58rem; padding:0 8px;">📷 tour-barisal.jpg</span>
+          <img src="images/tour-barisal.jpg" alt="Barisal backwater tour" onerror="this.style.display='none'">
+        </div>
+        <div class="mtc-body">
+          <h5>Barisal Backwater Tour</h5>
+          <span class="mtc-loc">📍 Barisal · 2 Days</span>
+          <span class="mtc-price">From $90</span>
+        </div>
+      </a>
+
+      <a href="#" class="mini-tour-card">
+        <div class="mtc-photo" style="background:linear-gradient(160deg,#8C6A3D,#5A3E1B);">
+          <span class="photo-placeholder-label" style="font-size:0.58rem; padding:0 8px;">📷 tour-bagerhat.jpg</span>
+          <img src="images/tour-bagerhat.jpg" alt="Bagerhat heritage tour" onerror="this.style.display='none'">
+        </div>
+        <div class="mtc-body">
+          <h5>Heritage of Bagerhat</h5>
+          <span class="mtc-loc">📍 Bagerhat · 3 Days</span>
+          <span class="mtc-price">From $105</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<section style="padding:60px 40px 30px; max-width:1240px; margin:0 auto;">
+  <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--green); margin-bottom:20px;">You Might Also Like</h2>
+</section>
+
+<div class="related-grid">
+
+  <div class="tour-card">
+    <div class="tour-photo-frame" style="background:linear-gradient(160deg,#22B57A,#0B6B47);">
+      <span class="photo-placeholder-label">📷 images/tour-sreemangal.jpg</span>
+      <img src="images/tour-sreemangal.jpg" alt="Sreemangal tea garden tour" onerror="this.style.display='none'">
+    </div>
+    <div class="tour-body-v2">
+      <h4>Sreemangal Nature Escape</h4>
+      <div class="tour-loc">📍 Sylhet</div>
+      <p>Walk between seven-layer tea gardens, trek Lawachara's rainforest trails, and spend a night in a local homestay.</p>
+      <div class="tour-stats">
+        <div>🕐 Days: 3</div>
+        <div>🚶 Activities: 5+</div>
+        <div>👥 Group: 10</div>
+        <div>📍 Stops: 4+</div>
+      </div>
+      <div class="tour-footer">
+        <div class="tf-price">From<br><span>$115</span></div>
+        <a href="#" class="btn btn-green-dark tf-btn">View Details →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tour-card">
+    <div class="tour-photo-frame" style="background:linear-gradient(160deg,#1E5F3B,#0B2818);">
+      <span class="photo-placeholder-label">📷 images/tour-barisal.jpg</span>
+      <img src="images/tour-barisal.jpg" alt="Barisal floating market backwater tour" onerror="this.style.display='none'">
+    </div>
+    <div class="tour-body-v2">
+      <h4>Barisal Backwater Tour</h4>
+      <div class="tour-loc">📍 Barisal</div>
+      <p>Drift past floating guava markets on Bangladesh's own "Venice of the East," with village lunches along the way.</p>
+      <div class="tour-stats">
+        <div>🕐 Days: 2</div>
+        <div>🚶 Activities: 4+</div>
+        <div>👥 Group: 10</div>
+        <div>📍 Stops: 4+</div>
+      </div>
+      <div class="tour-footer">
+        <div class="tf-price">From<br><span>$90</span></div>
+        <a href="#" class="btn btn-green-dark tf-btn">View Details →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tour-card">
+    <div class="tour-photo-frame" style="background:linear-gradient(160deg,#8C6A3D,#5A3E1B);">
+      <span class="photo-placeholder-label">📷 images/tour-bagerhat.jpg</span>
+      <img src="images/tour-bagerhat.jpg" alt="Bagerhat heritage mosque tour" onerror="this.style.display='none'">
+    </div>
+    <div class="tour-body-v2">
+      <h4>Heritage of Bagerhat</h4>
+      <div class="tour-loc">📍 Bagerhat</div>
+      <p>Explore the 15th-century Shat Gombuj Mosque and the UNESCO-listed ruins left by Khan Jahan Ali.</p>
+      <div class="tour-stats">
+        <div>🕐 Days: 3</div>
+        <div>🚶 Activities: 4+</div>
+        <div>👥 Group: 10</div>
+        <div>📍 Stops: 6+</div>
+      </div>
+      <div class="tour-footer">
+        <div class="tf-price">From<br><span>$105</span></div>
+        <a href="#" class="btn btn-green-dark tf-btn">View Details →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="logo-block">
+        <div class="logo-row">
+          <span class="logo-mark">
+            <svg viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="21" fill="url(#lg-grad2)"/>
+              <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+              <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+              <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+              <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+              <defs>
+                <linearGradient id="lg-grad2" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="lg1" style="color:#fff;">Roam</span><span class="lg2">Bengal</span>
+        </div>
+      </div>
+      <p>Small-group tours across Bangladesh, planned by the boatmen, tea-garden guides, and hill-trekkers who call these routes home since 2014.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Explore</h4>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="roam-bengal-v3.html#reviews">Reviews</a>
+    </div>
+    <div class="foot-col">
+      <h4>Travel Essential</h4>
+      <a href="#">Bangladesh Visa Info</a>
+      <a href="#">Embassy Directory</a>
+      <a href="#">Custom Tour Booking</a>
+      <a href="#">Travel FAQs</a>
+    </div>
+    <div class="foot-col">
+      <h4>Guest Support</h4>
+      <a href="#">Refund Policy</a>
+      <a href="#">Payment Policy</a>
+      <a href="#">Cancellation Policy</a>
+      <a href="#">Responsible Travel</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="about.html">About Us</a>
+      <a href="#">Guides</a>
+      <a href="#">Careers</a>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="#">hello@roambengal.com</a>
+      <a href="#">WhatsApp: +880 1XXX-XXXXXX</a>
+      <a href="#">Dhaka, Bangladesh</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Roam Bengal. All rights reserved.</span>
+    <span>roambengal.com</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-float"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.6 14.3c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.1.2-.1.3-.3.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.7-.1.3.1 1.7.8 2 .9.3.2.5.2.6.4.1.2.1.9-.1 1.6Z"/></svg>Chat on WhatsApp</a>
+
+</body>
+</html>

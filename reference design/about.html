@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — Roam Bengal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Caveat:wght@600;700&family=Poppins:wght@400;500;600;700&family=Permanent+Marker&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1E5F3B;
+    --green-dark:#123D26;
+    --orange:#F0791E;
+    --gold:#F2B705;
+    --blue:#C4390E;
+    --ink:#20291F;
+    --paper:#FFFFFF;
+    --mint:#EAF4EC;
+    --cream:#FBF7F0;
+    --muted:#6B7770;
+    --rule:#E7E1D3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Poppins', sans-serif; color:var(--ink); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Playfair Display', serif; font-weight:700;}
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 40px;}
+  .btn{display:inline-flex; align-items:center; gap:8px; justify-content:center; padding:12px 24px; border-radius:30px; font-weight:600; font-size:0.88rem; cursor:pointer; border:1.5px solid transparent; transition:all .2s ease;}
+  .btn-green-dark{background:var(--green-dark); color:#fff;}
+  .btn-green-dark:hover{background:#0B2818;}
+  .btn-orange{background:var(--orange); color:#fff;}
+  .btn-orange:hover{background:#D9600F;}
+  .eyebrow{font-size:0.78rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--orange); text-align:center; display:block; margin-bottom:10px;}
+
+  /* ---------- HEADER ---------- */
+  header.site-header{background:#fff; border-bottom:1px solid #EEE7DA;}
+  nav{display:flex; align-items:center; justify-content:space-between; padding:22px 40px; max-width:1240px; margin:0 auto;}
+  .logo-block{line-height:1;}
+  .logo-row{display:flex; align-items:center; gap:10px;}
+  .logo-mark{flex:none; width:38px; height:38px; display:block;}
+  .logo-mark svg{width:100%; height:100%;}
+  .logo-block .lg1{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--ink); letter-spacing:-0.01em;}
+  .logo-block .lg2{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--orange); margin-left:5px;}
+  .logo-block .tag{font-size:0.48rem; font-weight:700; letter-spacing:0.1em; color:var(--muted); margin-top:5px; margin-left:48px; white-space:nowrap;}
+  .navlinks{display:flex; gap:30px; font-size:0.9rem; font-weight:500;}
+  .navlinks a{color:var(--ink);}
+  .navlinks a.active{color:var(--orange); font-weight:600;}
+  .nav-right .btn{background:var(--orange); color:#fff;}
+  .nav-right .btn:hover{background:#D9600F;}
+
+  /* ---------- HERO ---------- */
+  .about-hero{padding:70px 40px 0;}
+  .hero-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;}
+  .hero-copy h1{font-size:clamp(2.1rem,4vw,2.9rem); line-height:1.18; margin-bottom:18px;}
+  .hero-copy h1 span{color:var(--orange);}
+  .hero-copy p{font-size:0.98rem; color:var(--muted); line-height:1.75; margin-bottom:26px; max-width:480px;}
+  .hero-photo-frame{
+    aspect-ratio:4/3.2; border-radius:20px; overflow:hidden; position:relative;
+    background:linear-gradient(155deg,#0B2818,#1E5F3B 55%,#22B57A);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 20px 44px rgba(20,30,20,0.14);
+  }
+  .hero-photo-frame img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .photo-placeholder-label{position:relative; z-index:1; color:#fff; font-size:0.82rem; font-weight:600; opacity:0.85; text-align:center; padding:0 30px;}
+
+  /* ---------- INTRO STRIP ---------- */
+  .intro-strip{max-width:1000px; margin:60px auto 0; padding:0 40px; text-align:center;}
+  .intro-strip p{font-size:1.02rem; color:var(--ink); line-height:1.85;}
+  .intro-strip p strong{color:var(--green);}
+
+  /* ---------- STATS STRIP ---------- */
+  .stats-strip{max-width:1160px; margin:50px auto 0; padding:0 40px; display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .stat-box{text-align:center; padding:26px 16px; background:var(--cream); border-radius:16px; border:1px solid var(--rule);}
+  .stat-box .num{font-family:'Playfair Display',serif; font-weight:900; font-size:2rem; color:var(--green-dark);}
+  .stat-box .label{font-size:0.8rem; color:var(--muted); margin-top:4px;}
+
+  /* ---------- MISSION/VISION/VALUE ---------- */
+  .mvv-wrap{max-width:1160px; margin:0 auto; padding:90px 40px 20px;}
+  .mvv-head{text-align:center; max-width:640px; margin:0 auto 46px;}
+  .mvv-head h2{font-size:clamp(1.8rem,3.2vw,2.4rem); margin-bottom:12px;}
+  .mvv-head p{font-size:0.94rem; color:var(--muted); line-height:1.7;}
+  .mvv-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:26px;}
+  .mvv-card{background:var(--cream); border:1px solid var(--rule); border-radius:16px; padding:30px 26px; text-align:center;}
+  .mvv-card .mvv-icon{font-size:1.8rem; margin-bottom:14px;}
+  .mvv-card h3{font-size:1.1rem; margin-bottom:8px; color:var(--green-dark);}
+  .mvv-card p{font-size:0.86rem; color:var(--muted); line-height:1.65;}
+
+  /* ---------- WHY TRAVEL WITH US ---------- */
+  .why-wrap{max-width:1160px; margin:0 auto; padding:90px 40px;}
+  .why-head{text-align:center; max-width:600px; margin:0 auto 46px;}
+  .why-head h2{font-size:clamp(1.8rem,3.2vw,2.4rem);}
+  .why-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .why-card{text-align:left;}
+  .why-card .why-icon{
+    width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; margin-bottom:16px; color:#fff;
+  }
+  .why-card h3{font-size:1.05rem; margin-bottom:8px;}
+  .why-card p{font-size:0.86rem; color:var(--muted); line-height:1.6;}
+
+  /* ---------- REVIEWS ---------- */
+  .reviews-wrap{padding:90px 40px; text-align:center; position:relative; overflow:hidden; background:linear-gradient(160deg,#0B2818,#123D26 55%,#0B2818);}
+  .reviews-wrap::before{
+    content:''; position:absolute; inset:0; opacity:0.3; pointer-events:none;
+    background:
+      radial-gradient(ellipse 420px 300px at 12% 15%, #22B57A, transparent 70%),
+      radial-gradient(ellipse 380px 320px at 90% 10%, #F2B705, transparent 70%),
+      radial-gradient(ellipse 400px 340px at 85% 90%, #C4390E, transparent 70%);
+  }
+  .reviews-inner{position:relative; z-index:2; max-width:1160px; margin:0 auto;}
+  .reviews-h2{font-size:clamp(1.9rem,3.4vw,2.5rem); line-height:1.3; color:#fff; margin-bottom:34px;}
+  .reviews-h2 span{color:var(--gold);}
+  .platform-row{display:flex; justify-content:center; gap:16px; margin-bottom:50px; flex-wrap:wrap;}
+  .platform-badge{background:#fff; border-radius:12px; padding:16px 26px; box-shadow:0 6px 18px rgba(0,0,0,0.06); text-align:left; min-width:180px;}
+  .pb-top{font-weight:700; font-size:0.98rem; display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .pb-bottom{font-size:0.8rem; color:var(--muted); display:flex; align-items:center; gap:6px;}
+  .review-grid{max-width:1160px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; text-align:left;}
+  .review-card{padding:16px 20px; text-align:center;}
+  .review-card p{font-size:0.95rem; color:#F2F5F2; margin-bottom:18px; line-height:1.6;}
+  .rc-stars{color:var(--gold); font-size:0.9rem; margin-bottom:16px;}
+  .rc-who{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .rc-avatar{width:48px; height:48px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display',serif;}
+  .rc-name{font-size:0.88rem; font-weight:700; color:#fff;}
+  .rc-loc{font-size:0.74rem; color:rgba(255,255,255,0.6);}
+  .view-all-wrap{margin-top:40px;}
+  .btn-line{display:inline-flex; align-items:center; gap:8px; padding:12px 26px; border-radius:30px; border:1.5px solid #fff; color:#fff; font-weight:600; font-size:0.86rem;}
+  .btn-line:hover{background:#fff; color:var(--ink);}
+
+  /* ---------- DREAM CTA ---------- */
+  .dream-cta{padding:90px 40px; background:linear-gradient(120deg,#EAF4EC,#FDF0E4);}
+  .dream-grid{max-width:1160px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center;}
+  .dream-copy h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.4vw,2.5rem); line-height:1.3; margin-bottom:20px;}
+  .dream-copy .story-accent{color:var(--orange);}
+  .dream-copy p{font-size:0.95rem; color:var(--muted); margin-bottom:24px; max-width:460px; line-height:1.7;}
+  .dream-art svg{width:100%; height:auto;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:linear-gradient(160deg,#123D26,#B5810A); color:#fff; padding:56px 40px 26px;}
+  .foot-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.3fr 0.9fr 0.9fr 0.9fr 0.9fr; gap:32px; margin-bottom:40px;}
+  .foot-brand p{font-size:0.85rem; opacity:0.7; margin-top:14px; max-width:260px;}
+  .foot-col h4{font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; color:var(--gold);}
+  .foot-col a{display:block; font-size:0.87rem; margin-bottom:10px; opacity:0.85; color:#fff;}
+  .foot-col a:hover{opacity:1;}
+  .foot-social{display:flex; gap:10px; margin-top:16px;}
+  .foot-social a{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-size:0.85rem;}
+  .foot-social a:hover{background:rgba(255,255,255,0.25);}
+  .foot-bottom{max-width:1240px; margin:0 auto; padding-top:22px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; font-size:0.78rem; opacity:0.6; flex-wrap:wrap; gap:10px;}
+
+  .wa-float{
+    position:fixed; right:22px; bottom:22px; z-index:60; display:flex; align-items:center; gap:10px;
+    background:#25D366; color:#fff; padding:12px 18px 12px 14px; border-radius:40px;
+    font-size:0.86rem; font-weight:600; box-shadow:0 10px 24px rgba(0,0,0,0.2);
+  }
+  .wa-float:hover{background:#1FBE5A;}
+  .wa-float svg{width:22px; height:22px;}
+
+  @media (max-width:980px){
+    .navlinks{display:none;}
+    .hero-grid{grid-template-columns:1fr; gap:32px;}
+    .stats-strip{grid-template-columns:1fr 1fr;}
+    .mvv-grid{grid-template-columns:1fr;}
+    .why-grid{grid-template-columns:1fr 1fr;}
+    .review-grid{grid-template-columns:1fr;}
+    .dream-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:640px){
+    .stats-strip{grid-template-columns:1fr 1fr;}
+    .why-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav>
+    <div class="logo-block">
+      <div class="logo-row">
+        <span class="logo-mark">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="22" r="21" fill="url(#lg-grad-about)"/>
+            <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+            <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+            <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+            <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+            <defs>
+              <linearGradient id="lg-grad-about" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <div><span class="lg1">Roam</span><span class="lg2">Bengal</span></div>
+      </div>
+      <div class="tag">EXPLORE THE HEART OF BANGLADESH</div>
+    </div>
+    <div class="navlinks">
+      <a href="roam-bengal-v3.html">Home</a>
+      <a href="about.html" class="active">About</a>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-right">
+      <a href="contact.html" class="btn">Plan Your Trip</a>
+    </div>
+  </nav>
+</header>
+
+<section class="about-hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow" style="text-align:left;">About Roam Bengal</span>
+      <h1>Explore Bangladesh, <span>Told Honestly</span></h1>
+      <p>Roam Bengal is a small, dedicated team of local guides and planners passionate about crafting private journeys through Bangladesh's rivers, hills, and tea gardens.</p>
+      <p>With deep roots in the regions we guide and a commitment to fair, transparent travel, every trip with us is built to be genuine — never staged, never rushed.</p>
+      <a href="tours.html" class="btn btn-green-dark">Find Your Journey →</a>
+    </div>
+    <div class="hero-photo-frame">
+      <span class="photo-placeholder-label">📷 images/about-hero.jpg</span>
+      <img src="images/about-hero.jpg" alt="Roam Bengal guide on a Sundarbans river boat" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<div class="intro-strip">
+  <p>A new journey begins with finding a destination that <strong>truly suits you</strong>. As international travel to Bangladesh grows each year, so does the need for operators who put safety, honesty, and local knowledge first. Roam Bengal was founded to close that gap — built by the boatmen, tea-garden guides, and hill-trekkers who call these routes home.</p>
+</div>
+
+<div class="stats-strip">
+  <div class="stat-box"><div class="num">40+</div><div class="label">Tours &amp; Itineraries</div></div>
+  <div class="stat-box"><div class="num">25+</div><div class="label">Outdoor Activities</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="label">Regions Covered</div></div>
+  <div class="stat-box"><div class="num">6.5K+</div><div class="label">Happy Travellers</div></div>
+</div>
+
+<div class="mvv-wrap">
+  <div class="mvv-head">
+    <span class="eyebrow">Your Ultimate Guide</span>
+    <h2>To Explore Bangladesh</h2>
+    <p>As more travellers discover Bangladesh each year, we stay focused on three things that never change.</p>
+  </div>
+  <div class="mvv-grid">
+    <div class="mvv-card">
+      <div class="mvv-icon">🧭</div>
+      <h3>Mission</h3>
+      <p>Deliver honest, locally-led travel experiences to anyone curious about Bangladesh, from any corner of the world.</p>
+    </div>
+    <div class="mvv-card">
+      <div class="mvv-icon">🌅</div>
+      <h3>Vision</h3>
+      <p>To become the trusted bridge between international travellers and the real, everyday Bangladesh.</p>
+    </div>
+    <div class="mvv-card">
+      <div class="mvv-icon">🤝</div>
+      <h3>Values</h3>
+      <p>Fair pay for local guides, transparent pricing, and zero shopping-commission detours — always.</p>
+    </div>
+  </div>
+</div>
+
+<div class="why-wrap">
+  <div class="why-head">
+    <span class="eyebrow">Why Choose Us</span>
+    <h2>Why Travel With Roam Bengal</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--green);">📍</div>
+      <h3>Handpicked Destinations</h3>
+      <p>Our strict screening process means you're only seeing the best quality routes across Bangladesh.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--orange);">💰</div>
+      <h3>Transparent Pricing</h3>
+      <p>No hidden add-ons at checkout — the rate you see is the rate you pay, guides included.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--blue);">🕐</div>
+      <h3>24/7 Customer Support</h3>
+      <p>Our team is standing by around the clock, by WhatsApp or email, wherever you're travelling from.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--gold);">💡</div>
+      <h3>Expert Local Advice</h3>
+      <p>Every itinerary is shaped by guides who grew up on that exact route, not a call-centre script.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:#7A2408;">🗺️</div>
+      <h3>Personalised Itineraries</h3>
+      <p>We tailor the pacing, stops, and add-ons of every trip to match what you actually want to see.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:#1E5F3B;">✈️</div>
+      <h3>Seamless Planning</h3>
+      <p>From airport pickup to permits and accommodation — we handle every detail before you land.</p>
+    </div>
+  </div>
+</div>
+
+<section class="reviews-wrap">
+  <div class="reviews-inner">
+    <h2 class="reviews-h2">Don't Take Our Word For It.<br><span>Travellers</span> Say It Best</h2>
+
+    <div class="platform-row">
+      <div class="platform-badge">
+        <div class="pb-top">🦉 Tripadvisor</div>
+        <div class="pb-bottom">●●●●● Reviews 5/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top">⭐ Google</div>
+        <div class="pb-bottom">★ Reviews 4.9/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top">⭐ Trustpilot</div>
+        <div class="pb-bottom">■ Reviews 5/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top">f Facebook</div>
+        <div class="pb-bottom">★ Reviews 5/5</div>
+      </div>
+    </div>
+
+    <div class="review-grid">
+      <div class="review-card">
+        <div class="rc-stars">★★★★★</div>
+        <p>"Our Sundarbans trip was seamless thanks to Roam Bengal. Fun activities and such personal touches!"</p>
+        <div class="rc-who"><div class="rc-avatar" style="background:linear-gradient(150deg,#22B57A,#0B6B47);">S</div><div><div class="rc-name">Sarah Mitchell</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+      <div class="review-card">
+        <div class="rc-stars">★★★★★</div>
+        <p>"The Sylhet tea trail was unhurried and beautifully planned. Airport pickup made it completely stress-free."</p>
+        <div class="rc-who"><div class="rc-avatar" style="background:linear-gradient(150deg,#F0791E,#C4390E);">L</div><div><div class="rc-name">Lars Andersen</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+      <div class="review-card">
+        <div class="rc-stars">★★★★★</div>
+        <p>"Anniversary in Cox's Bazar felt magical with Roam Bengal. Loved the sunrise walk and the little dinner surprise!"</p>
+        <div class="rc-who"><div class="rc-avatar" style="background:linear-gradient(150deg,#7B4FD9,#4A2A99);">E</div><div><div class="rc-name">Emma Rodriguez</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+    </div>
+
+    <div class="view-all-wrap"><a href="blog.html#reviews" class="btn-line">View All Testimonials</a></div>
+  </div>
+</section>
+
+<section class="dream-cta">
+  <div class="dream-grid">
+    <div class="dream-copy">
+      <h2><span>Ready To Explore? Let's Chat</span><br>About <span class="story-accent">Your Dream Trip</span></h2>
+      <p>Turn your travel ideas into reality — with Roam Bengal as your local companion, your next Bangladesh adventure is just a message away. Let's craft an experience tailored just for you.</p>
+      <a href="contact.html" class="btn btn-orange">Plan Your Trip →</a>
+    </div>
+    <div class="dream-art">
+      <svg viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="120" cy="140" rx="110" ry="80" fill="#22B57A" opacity="0.18"/>
+        <ellipse cx="330" cy="100" rx="100" ry="90" fill="#F2B705" opacity="0.20"/>
+        <ellipse cx="360" cy="260" rx="120" ry="90" fill="#C4390E" opacity="0.16"/>
+        <ellipse cx="150" cy="280" rx="90" ry="70" fill="#D9450F" opacity="0.14"/>
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="150" y="150" width="110" height="90"/>
+          <circle cx="205" cy="140" r="34"/>
+          <rect x="195" y="95" width="20" height="30"/>
+          <circle cx="205" cy="90" r="6"/>
+          <rect x="160" y="170" width="14" height="70"/>
+          <rect x="236" y="170" width="14" height="70"/>
+          <rect x="192" y="190" width="26" height="50"/>
+        </g>
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="270" y="60" width="28" height="180"/>
+          <polygon points="270,60 284,20 298,60"/>
+          <line x1="270" y1="90" x2="298" y2="90"/>
+          <line x1="270" y1="120" x2="298" y2="120"/>
+          <line x1="270" y1="150" x2="298" y2="150"/>
+        </g>
+        <g transform="translate(48,255)">
+          <path d="M0 55 Q6 20 40 18 Q64 18 64 40 L64 55" fill="#1E5F3B" opacity="0.9"/>
+          <path d="M4 46 Q30 30 60 46" fill="#F0791E" opacity="0.85"/>
+          <circle cx="14" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <circle cx="60" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="30" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="70" stroke="#1B1B1B" stroke-width="2.2"/>
+        </g>
+        <text x="290" y="365" font-family="'Caveat',cursive" font-weight="700" font-size="52" fill="#E63238" transform="rotate(-4 290 365)">DHAKA</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="logo-block">
+        <div class="logo-row">
+          <span class="logo-mark">
+            <svg viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="21" fill="url(#lg-grad2-about)"/>
+              <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+              <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+              <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+              <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+              <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <defs>
+                <linearGradient id="lg-grad2-about" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="lg1" style="color:#fff;">Roam</span><span class="lg2">Bengal</span>
+        </div>
+      </div>
+      <p>Small-group tours across Bangladesh, planned by the boatmen, tea-garden guides, and hill-trekkers who call these routes home since 2014.</p>
+      <div class="foot-social">
+        <a href="#">f</a><a href="#">𝕏</a><a href="#">◎</a>
+      </div>
+    </div>
+    <div class="foot-col">
+      <h4>Destinations</h4>
+      <a href="#">Sundarbans</a>
+      <a href="#">Sreemangal</a>
+      <a href="#">Cox's Bazar</a>
+      <a href="#">Bandarban</a>
+      <a href="#">Bagerhat</a>
+    </div>
+    <div class="foot-col">
+      <h4>Activities</h4>
+      <a href="#">Wildlife Safari</a>
+      <a href="#">Tea Trail Trekking</a>
+      <a href="#">River Cruising</a>
+      <a href="#">Heritage Walks</a>
+      <a href="#">Photography Tours</a>
+    </div>
+    <div class="foot-col">
+      <h4>Explore</h4>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About Us</a>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@roambengal.com">hello@roambengal.com</a>
+      <a href="#">WhatsApp: +880 1XXX-XXXXXX</a>
+      <a href="#">Dhaka, Bangladesh</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Roam Bengal. All rights reserved.</span>
+    <span>roambengal.com</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-float"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.6 14.3c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.1.2-.1.3-.3.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.7-.1.3.1 1.7.8 2 .9.3.2.5.2.6.4.1.2.1.9-.1 1.6Z"/></svg>Chat on WhatsApp</a>
+
+</body>
+</html>

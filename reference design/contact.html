@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Plan Your Trip | Roam Bengal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Caveat:wght@600;700&family=Poppins:wght@400;500;600;700&family=Permanent+Marker&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1E5F3B;
+    --green-dark:#123D26;
+    --orange:#F0791E;
+    --gold:#F2B705;
+    --blue:#C4390E;
+    --ink:#20291F;
+    --paper:#FFFFFF;
+    --mint:#EAF4EC;
+    --cream:#FBF7F0;
+    --muted:#6B7770;
+    --rule:#E7E1D3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Poppins', sans-serif; color:var(--ink); background:var(--paper); line-height:1.5;}
+  h1,h2,h3{font-family:'Playfair Display', serif; font-weight:700;}
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .btn{display:inline-flex; align-items:center; gap:8px; justify-content:center; padding:12px 24px; border-radius:30px; font-weight:600; font-size:0.88rem; cursor:pointer; border:1.5px solid transparent; transition:all .2s ease;}
+  .btn-green-dark{background:var(--green-dark); color:#fff;}
+  .btn-green-dark:hover{background:#0B2818;}
+
+  /* ---------- HEADER ---------- */
+  header.site-header{background:#fff; border-bottom:1px solid #EEE7DA;}
+  nav{display:flex; align-items:center; justify-content:space-between; padding:22px 40px; max-width:1240px; margin:0 auto;}
+  .logo-block{line-height:1;}
+  .logo-row{display:flex; align-items:center; gap:10px;}
+  .logo-mark{flex:none; width:38px; height:38px; display:block;}
+  .logo-mark svg{width:100%; height:100%;}
+  .logo-block .lg1{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--ink); letter-spacing:-0.01em;}
+  .logo-block .lg2{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--orange); margin-left:5px;}
+  .logo-block .tag{font-size:0.48rem; font-weight:700; letter-spacing:0.1em; color:var(--muted); margin-top:5px; margin-left:48px; white-space:nowrap;}
+  .navlinks{display:flex; gap:30px; font-size:0.9rem; font-weight:500;}
+  .navlinks a{color:var(--ink);}
+  .navlinks a.active{color:var(--orange); font-weight:600;}
+  .nav-right .btn{background:var(--orange); color:#fff;}
+  .nav-right .btn:hover{background:#D9600F;}
+
+  /* ---------- HERO ---------- */
+  .contact-hero{padding:64px 40px 20px; text-align:center; max-width:760px; margin:0 auto;}
+  .contact-hero span.eyebrow{
+    display:inline-block; font-size:0.78rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--orange); margin-bottom:16px;
+  }
+  .contact-hero h1{font-size:clamp(2rem,4.2vw,2.8rem); line-height:1.2; margin-bottom:16px;}
+  .contact-hero p{font-size:1rem; color:var(--muted); line-height:1.7;}
+
+  /* ---------- INFO CARDS ---------- */
+  .info-row{max-width:1160px; margin:0 auto; padding:46px 40px 10px; display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .info-card{
+    background:var(--cream); border-radius:16px; padding:28px 22px; text-align:center;
+    border:1px solid var(--rule); transition:transform .2s ease;
+  }
+  .info-card:hover{transform:translateY(-4px);}
+  .info-card .ic-icon{font-size:1.6rem; margin-bottom:14px;}
+  .info-card h4{font-size:0.98rem; margin-bottom:6px;}
+  .info-card p{font-size:0.84rem; color:var(--muted); line-height:1.5;}
+  .info-card a.ic-link{display:block; font-size:0.84rem; color:var(--green-dark); font-weight:600; margin-top:4px;}
+
+  /* ---------- MAIN GRID: FORM + ART ---------- */
+  .contact-main{max-width:1160px; margin:0 auto; padding:56px 40px 90px; display:grid; grid-template-columns:1.1fr 1fr; gap:60px; align-items:center;}
+  .contact-form-box h2{font-size:1.7rem; margin-bottom:10px;}
+  .contact-form-box > p{font-size:0.92rem; color:var(--muted); margin-bottom:28px;}
+  .cf-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .cf-field{margin-bottom:16px;}
+  .cf-field.cf-full{grid-column:1/-1;}
+  .cf-field label{display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; color:var(--ink);}
+  .cf-field input, .cf-field select, .cf-field textarea{
+    width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--rule); font-family:'Poppins',sans-serif;
+    font-size:0.9rem; color:var(--ink); background:#fff;
+  }
+  .cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus{outline:none; border-color:var(--green);}
+  .cf-field textarea{resize:vertical;}
+  .contact-form-box .btn{width:100%; justify-content:center; margin-top:6px; padding:14px;}
+
+  .contact-art{position:relative;}
+  .contact-art svg{width:100%; height:auto;}
+  .contact-art-note{
+    text-align:center; font-family:'Caveat',cursive; font-size:1.3rem; color:var(--green-dark); margin-top:14px;
+  }
+
+  /* ---------- WHATSAPP STRIP ---------- */
+  .wa-strip-wrap{padding:0 40px 90px;}
+  .wa-strip{
+    max-width:1160px; margin:0 auto; background:linear-gradient(120deg,#E9FBF0,#FDF0E4); border-radius:20px;
+    padding:36px 46px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .wa-strip h3{font-size:1.2rem; margin-bottom:6px;}
+  .wa-strip p{font-size:0.86rem; color:var(--muted);}
+  .btn-whatsapp{background:#25D366; color:#fff;}
+  .btn-whatsapp:hover{background:#1FBE5A;}
+
+  /* ---------- MAP ---------- */
+  .map-wrap{max-width:1160px; margin:0 auto 90px; padding:0 40px;}
+  .map-frame{
+    aspect-ratio:21/7; border-radius:18px; background:linear-gradient(155deg,#DCE9DF,#EAF4EC 60%,#F5EEE0);
+    display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:0.88rem; font-weight:600;
+    border:1px solid var(--rule);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{background:linear-gradient(160deg,#123D26,#B5810A); color:#fff; padding:56px 40px 26px;}
+  .foot-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px;}
+  .foot-brand p{font-size:0.85rem; opacity:0.7; margin-top:14px; max-width:260px;}
+  .foot-col h4{font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; color:var(--gold);}
+  .foot-col a{display:block; font-size:0.87rem; margin-bottom:10px; opacity:0.85; color:#fff;}
+  .foot-col a:hover{opacity:1;}
+  .foot-bottom{max-width:1240px; margin:0 auto; padding-top:22px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; font-size:0.78rem; opacity:0.6; flex-wrap:wrap; gap:10px;}
+
+  .wa-float{
+    position:fixed; right:22px; bottom:22px; z-index:60; display:flex; align-items:center; gap:10px;
+    background:#25D366; color:#fff; padding:12px 18px 12px 14px; border-radius:40px;
+    font-size:0.86rem; font-weight:600; box-shadow:0 10px 24px rgba(0,0,0,0.2);
+  }
+  .wa-float:hover{background:#1FBE5A;}
+  .wa-float svg{width:22px; height:22px;}
+
+  @media (max-width:980px){
+    .navlinks{display:none;}
+    .info-row{grid-template-columns:1fr 1fr;}
+    .contact-main{grid-template-columns:1fr;}
+    .contact-art{order:-1; max-width:340px; margin:0 auto;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .wa-strip{flex-direction:column; align-items:flex-start;}
+  }
+  @media (max-width:640px){
+    .info-row{grid-template-columns:1fr;}
+    .cf-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav>
+    <div class="logo-block">
+      <div class="logo-row">
+        <span class="logo-mark">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="22" r="21" fill="url(#lg-grad-contact)"/>
+            <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+            <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+            <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+            <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+            <defs>
+              <linearGradient id="lg-grad-contact" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <div><span class="lg1">Roam</span><span class="lg2">Bengal</span></div>
+      </div>
+      <div class="tag">EXPLORE THE HEART OF BANGLADESH</div>
+    </div>
+    <div class="navlinks">
+      <a href="roam-bengal-v3.html">Home</a>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="contact.html" class="active">Contact</a>
+    </div>
+    <div class="nav-right">
+      <a href="contact.html" class="btn">Plan Your Trip</a>
+    </div>
+  </nav>
+</header>
+
+<div class="contact-hero">
+  <span class="eyebrow">Get In Touch</span>
+  <h1>Let's Plan Your Bangladesh Trip</h1>
+  <p>Questions about a tour, a custom itinerary, or just not sure where to start? Send us a message — a real guide replies within 24 hours, not a chatbot.</p>
+</div>
+
+<div class="info-row">
+  <div class="info-card">
+    <div class="ic-icon">📧</div>
+    <h4>Email Us</h4>
+    <a class="ic-link" href="mailto:hello@roambengal.com">hello@roambengal.com</a>
+  </div>
+  <div class="info-card">
+    <div class="ic-icon">💬</div>
+    <h4>WhatsApp</h4>
+    <a class="ic-link" href="#">+880 1XXX-XXXXXX</a>
+  </div>
+  <div class="info-card">
+    <div class="ic-icon">📍</div>
+    <h4>Our Office</h4>
+    <p>Gulshan, Dhaka, Bangladesh</p>
+  </div>
+  <div class="info-card">
+    <div class="ic-icon">🕒</div>
+    <h4>Office Hours</h4>
+    <p>Sat – Thu, 9am – 7pm (BST)</p>
+  </div>
+</div>
+
+<div class="contact-main">
+  <div class="contact-form-box">
+    <h2>Send Us A Message</h2>
+    <p>Tell us a bit about the trip you're picturing — dates, group size, must-sees — and we'll come back with a plan.</p>
+    <form>
+      <div class="cf-grid">
+        <div class="cf-field">
+          <label>Full Name</label>
+          <input type="text" placeholder="Your name" required>
+        </div>
+        <div class="cf-field">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@email.com" required>
+        </div>
+        <div class="cf-field">
+          <label>Phone / WhatsApp</label>
+          <input type="tel" placeholder="+880 1XXX-XXXXXX">
+        </div>
+        <div class="cf-field">
+          <label>Country</label>
+          <input type="text" placeholder="Where are you travelling from?">
+        </div>
+        <div class="cf-field">
+          <label>Interested Tour</label>
+          <select>
+            <option>Sundarbans Wildlife Tour</option>
+            <option>Sreemangal Tea Trail</option>
+            <option>Cox's Bazar Getaway</option>
+            <option>Bandarban Hill Trek</option>
+            <option>Old Dhaka Food Walk</option>
+            <option>Not sure yet — help me choose</option>
+          </select>
+        </div>
+        <div class="cf-field cf-full">
+          <label>Your Message</label>
+          <textarea rows="5" placeholder="Tell us your travel dates, group size, and anything else we should know"></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-green-dark">Send Message →</button>
+    </form>
+  </div>
+
+  <div class="contact-art">
+    <svg viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="120" cy="140" rx="110" ry="80" fill="#22B57A" opacity="0.18"/>
+      <ellipse cx="330" cy="100" rx="100" ry="90" fill="#F2B705" opacity="0.20"/>
+      <ellipse cx="360" cy="260" rx="120" ry="90" fill="#C4390E" opacity="0.16"/>
+      <ellipse cx="150" cy="280" rx="90" ry="70" fill="#D9450F" opacity="0.14"/>
+      <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="150" y="150" width="110" height="90"/>
+        <circle cx="205" cy="140" r="34"/>
+        <rect x="195" y="95" width="20" height="30"/>
+        <circle cx="205" cy="90" r="6"/>
+        <rect x="160" y="170" width="14" height="70"/>
+        <rect x="236" y="170" width="14" height="70"/>
+        <rect x="192" y="190" width="26" height="50"/>
+      </g>
+      <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="270" y="60" width="28" height="180"/>
+        <polygon points="270,60 284,20 298,60"/>
+        <line x1="270" y1="90" x2="298" y2="90"/>
+        <line x1="270" y1="120" x2="298" y2="120"/>
+        <line x1="270" y1="150" x2="298" y2="150"/>
+      </g>
+    </svg>
+    <p class="contact-art-note">"Every message gets a real reply — usually the same day."</p>
+  </div>
+</div>
+
+<div class="wa-strip-wrap">
+  <div class="wa-strip">
+    <div>
+      <h3>Prefer To Chat Directly?</h3>
+      <p>Message us on WhatsApp for the fastest response — great for quick questions before you book.</p>
+    </div>
+    <a href="#" class="btn btn-whatsapp">💬 Chat on WhatsApp</a>
+  </div>
+</div>
+
+<div class="map-wrap">
+  <div class="map-frame">🗺️ Map embed: Roam Bengal Office, Gulshan, Dhaka</div>
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="logo-block">
+        <div class="logo-row">
+          <span class="logo-mark">
+            <svg viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="21" fill="url(#lg-grad2-contact)"/>
+              <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+              <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+              <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+              <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+              <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <defs>
+                <linearGradient id="lg-grad2-contact" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#22B57A"/><stop offset="1" stop-color="#0B6B47"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="lg1" style="color:#fff;">Roam</span><span class="lg2">Bengal</span>
+        </div>
+      </div>
+      <p>Small-group tours across Bangladesh, planned by the boatmen, tea-garden guides, and hill-trekkers who call these routes home since 2014.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Explore</h4>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="reviews.html">Reviews</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="about.html">About Us</a>
+      <a href="#">Guides</a>
+      <a href="#">Careers</a>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@roambengal.com">hello@roambengal.com</a>
+      <a href="#">WhatsApp: +880 1XXX-XXXXXX</a>
+      <a href="#">Dhaka, Bangladesh</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Roam Bengal. All rights reserved.</span>
+    <span>roambengal.com</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-float"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.6 14.3c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.1.2-.1.3-.3.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.7-.1.3.1 1.7.8 2 .9.3.2.5.2.6.4.1.2.1.9-.1 1.6Z"/></svg>Chat on WhatsApp</a>
+
+</body>
+</html>

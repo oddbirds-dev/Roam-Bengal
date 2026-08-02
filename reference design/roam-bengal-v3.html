@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roam Bengal — Explore The Soul of Bangladesh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Caveat:wght@600;700&family=Poppins:wght@400;500;600;700&family=Permanent+Marker&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1E5F3B;
+    --green-dark:#123D26;
+    --orange:#F0791E;
+    --gold:#F2B705;
+    --blue:#C4390E;
+    --purple:#F2B705;
+    --teal:#1E5F3B;
+    --ink:#20291F;
+    --paper:#FFFFFF;
+    --mint:#EAF4EC;
+    --muted:#6B7770;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Poppins', sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.5;
+  }
+  h1,h2,h3{font-family:'Playfair Display', serif; font-weight:700;}
+  .script{font-family:'Caveat', cursive;}
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 40px;}
+  section{position:relative;}
+  .eyebrow{
+    font-size:0.78rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--orange); text-align:center; display:block; margin-bottom:8px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; min-height:640px; color:#fff; overflow:hidden;
+    background:linear-gradient(160deg, #7A2408 0%, #C4390E 35%, #F0791E 65%, #F2B705 100%);
+  }
+  .hero-photo{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+  }
+  .hero-overlay{
+    position:absolute; inset:0; z-index:1;
+    background: linear-gradient(180deg, rgba(10,20,15,0.55) 0%, rgba(10,20,15,0.15) 45%, rgba(10,20,15,0.7) 100%);
+  }
+  header{position:relative; z-index:5;}
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 40px; max-width:1240px; margin:0 auto;
+  }
+  .logo-block{line-height:1;}
+  .logo-row{display:flex; align-items:center; gap:10px;}
+  .logo-mark{flex:none; width:38px; height:38px; display:block; filter:drop-shadow(0 3px 8px rgba(0,0,0,0.25));}
+  .logo-mark svg{width:100%; height:100%;}
+  .logo-block .lg1{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:#fff; letter-spacing:-0.01em;}
+  .logo-block .lg2{font-family:'Kalam',cursive; font-weight:700; font-size:1.6rem; color:var(--orange); margin-left:5px;}
+  .logo-block .tag{font-size:0.48rem; font-weight:700; letter-spacing:0.1em; color:rgba(255,255,255,0.75); margin-top:5px; margin-left:48px; white-space:nowrap;}
+  .navlinks{display:flex; gap:30px; font-size:0.9rem; font-weight:500;}
+  .navlinks a{position:relative; padding-bottom:6px; opacity:0.92;}
+  .navlinks a.active{color:#fff;}
+  .navlinks a.active::after{content:''; position:absolute; left:0; bottom:0; width:100%; height:2px; background:var(--orange);}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    padding:12px 24px; border-radius:30px; font-weight:600; font-size:0.88rem; cursor:pointer;
+    border:1.5px solid transparent; transition:all .2s ease;
+  }
+  .btn-green{background:var(--orange); color:#fff;}
+  .btn-green:hover{background:#D9600F;}
+  .btn-outline-light{border-color:rgba(255,255,255,0.6); color:#fff;}
+  .btn-outline-light:hover{background:rgba(255,255,255,0.15);}
+  .btn-orange{background:var(--orange); color:#fff;}
+  .btn-orange:hover{background:#d96a15;}
+
+  .hero-content{position:relative; z-index:4; max-width:1240px; margin:0 auto; padding:60px 40px 0;}
+  .hero-content h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(2.4rem,5.6vw,4.1rem); line-height:1.08; margin:2px 0 18px; text-shadow:0 4px 24px rgba(0,0,0,0.3); letter-spacing:0.01em;}
+  .hero-content .script{font-size:clamp(1.8rem,3.4vw,2.6rem); color:var(--gold); display:block; margin-bottom:-6px;}
+  .hero-content p{font-size:1.02rem; max-width:480px; opacity:0.92; margin-bottom:30px;}
+  .hero-ctas{display:flex; gap:14px; margin-bottom:56px;}
+
+  /* search bar */
+  .search-bar{
+    position:relative; z-index:6; max-width:1160px; margin:0 auto; transform:translateY(50%);
+    background:#fff; border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,0.18);
+    padding:22px 26px; display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr auto; gap:0;
+  }
+  .search-field{padding:0 22px; border-right:1px solid #ECECEC; display:flex; align-items:center; gap:12px;}
+  .search-field:first-child{padding-left:4px;}
+  .search-field svg{flex:none; width:20px; height:20px; color:var(--purple);}
+  .search-field:nth-child(2) svg{color:var(--orange);}
+  .search-field:nth-child(3) svg{color:var(--blue);}
+  .search-field:nth-child(4) svg{color:var(--teal);}
+  .search-field .sf-label{font-size:0.78rem; font-weight:600; color:var(--ink);}
+  .search-field .sf-sub{font-size:0.76rem; color:var(--muted); margin-top:1px;}
+  .search-btn{
+    background:linear-gradient(120deg,var(--orange),#D9450F); color:#fff; border:none; border-radius:12px;
+    padding:0 30px; font-weight:600; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+
+  /* ---------- GALLERY ---------- */
+  .gallery{padding:20px 40px 90px;}
+  .gallery-head{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:36px; flex-wrap:wrap;
+  }
+  .gallery-head h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.4vw,2.6rem); line-height:1.3; margin-bottom:14px;}
+  .g-line1{color:var(--green);}
+  .g-line2{color:var(--gold);}
+  .gallery-head p{font-size:0.92rem; color:var(--muted); max-width:520px; font-family:'Poppins',sans-serif;}
+  .gallery-head .g-bold{font-weight:700; color:var(--ink); margin-top:8px;}
+  .btn-green-dark{background:var(--green-dark); color:#fff; white-space:nowrap;}
+  .btn-green-dark:hover{background:#0B2818;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .gallery-photo{
+    aspect-ratio:1/1; border-radius:14px; position:relative; overflow:hidden;
+    display:flex; align-items:flex-end; transition:transform .3s ease;
+  }
+  .gallery-photo:hover{transform:translateY(-6px);}
+  .gallery-photo::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);}
+  .gp-tag{position:relative; z-index:2; color:#fff; font-size:0.78rem; font-weight:600; padding:14px;}
+
+  /* ---------- FEATURE STRIP ---------- */
+  .feature-strip{padding:60px 40px; background:linear-gradient(120deg,#FCEFD9,#F7E2C0);}
+  .feature-grid{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(6,1fr); gap:10px;
+  }
+  .feature-item{text-align:center;}
+  .feature-icon{
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    margin:0 auto 12px; color:#fff;
+  }
+  .feature-item h4{font-size:0.85rem; font-weight:600; margin-bottom:4px; font-family:'Poppins',sans-serif;}
+  .feature-item p{font-size:0.72rem; color:var(--muted);}
+  .fi1 .feature-icon{background:var(--orange);}
+  .fi2 .feature-icon{background:var(--orange);}
+  .fi3 .feature-icon{background:var(--orange);}
+  .fi4 .feature-icon{background:var(--orange);}
+  .fi5 .feature-icon{background:var(--orange);}
+  .fi6 .feature-icon{background:var(--orange);}
+
+  /* ---------- STORY / WHY CHOOSE US ---------- */
+  .story{padding:90px 40px; background:linear-gradient(120deg,#FDF0E4,#EAF4EC);}
+  .story-grid{display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;}
+  .story-copy h2{font-size:clamp(2rem,3.6vw,2.7rem); margin-bottom:18px; line-height:1.15; color:var(--ink);}
+  .story-accent{color:var(--orange);}
+  .story-copy > p{font-size:0.95rem; color:var(--muted); margin-bottom:30px; max-width:480px;}
+  .why-list{display:flex; flex-direction:column; gap:26px;}
+  .why-item{display:flex; gap:18px; align-items:flex-start;}
+  .why-icon{
+    flex:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .why-item h3{font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:4px; color:var(--ink);}
+  .why-item p{font-size:0.86rem; color:var(--muted); max-width:420px;}
+  .story-visual{position:relative;}
+  .story-photo-frame{
+    width:100%; aspect-ratio:4/4.6; border-radius:20px; overflow:hidden; position:relative;
+    box-shadow:0 20px 46px rgba(0,0,0,0.16);
+    background:linear-gradient(150deg,#22B57A,#F2B705 60%,#C4390E);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photo-placeholder-label{
+    position:absolute; z-index:1; color:#fff; font-size:0.85rem; font-weight:600; text-align:center;
+    padding:0 30px; opacity:0.9;
+  }
+  .story-photo-img{
+    position:relative; z-index:2; width:100%; height:100%; object-fit:cover;
+  }
+
+  /* ---------- DESTINATIONS ---------- */
+  .destinations{padding:80px 40px 30px; text-align:center;}
+  .destinations h2{font-size:clamp(1.9rem,3.4vw,2.5rem); margin-bottom:16px;}
+  .divider{width:70px; height:4px; background:linear-gradient(90deg,var(--orange),var(--gold)); margin:0 auto 44px; border-radius:2px;}
+  .dest-scroll{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:left;
+  }
+  .dest-card{
+    border-radius:14px; overflow:hidden; position:relative; aspect-ratio:3/3.7;
+    display:flex; flex-direction:column; justify-content:flex-end; color:#fff;
+    box-shadow:0 10px 24px rgba(0,0,0,0.10); transition:transform .3s ease;
+  }
+  .dest-card:hover{transform:translateY(-6px);}
+  .dest-card::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.72) 100%);}
+  .dest-card .dc-label{position:relative; z-index:2; padding:16px;}
+  .dest-card .dc-loc{font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:5px; margin-bottom:3px;}
+  .dest-card .dc-title{font-family:'Poppins',sans-serif; font-weight:600; font-size:0.72rem; opacity:0.9;}
+  .dest-card .dc-desc{font-size:0.68rem; opacity:0.85; margin-top:6px; line-height:1.4;}
+  .dest-card .dc-season{font-size:0.6rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; opacity:0.75; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.25);}
+  .dest-card:nth-child(1){background:linear-gradient(160deg,#22B57A,#0B6B47);}
+  .dest-card:nth-child(2){background:linear-gradient(160deg,#F0791E,#C43B0E);}
+  .dest-card:nth-child(3){background:linear-gradient(160deg,#F2B705,#B5810A);}
+  .dest-card:nth-child(4){background:linear-gradient(160deg,#C4390E,#7A2408);}
+  .dest-card:nth-child(5){background:linear-gradient(160deg,#D9450F,#7A2408);}
+
+  /* ---------- BLOG CARDS V2 ---------- */
+  .blog-scroll{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; text-align:center;}
+  .blog-card-v2{background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.08); padding-bottom:26px; transition:transform .25s ease;}
+  .blog-card-v2:hover{transform:translateY(-6px);}
+  .bc-photo-frame{
+    position:relative; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; margin-bottom:20px;
+    background:linear-gradient(160deg,#F0791E,#C43B0E);
+  }
+  .bc-photo-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .bc-photo-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 20px; opacity:0.9;}
+  .blog-card-v2 h3{font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--green); line-height:1.3; margin:0 22px 14px;}
+  .blog-card-v2 > p{font-size:0.85rem; color:var(--muted); line-height:1.6; margin:0 22px 20px;}
+  .bc-foot{display:flex; align-items:center; justify-content:space-between; margin:0 22px; padding-top:16px; border-top:1px dashed #E4E4E4;}
+  .bc-more{font-size:0.85rem; font-weight:600; color:var(--green); border-bottom:2px solid var(--green); padding-bottom:2px;}
+  .bc-date{font-size:0.76rem; color:var(--muted);}
+  .view-all-wrap{text-align:center; margin:44px 0 90px;}
+  .btn-line{
+    display:inline-flex; align-items:center; gap:8px; padding:12px 26px; border-radius:30px;
+    border:1.5px solid var(--green); color:var(--green); font-weight:600; font-size:0.86rem;
+  }
+  .btn-line:hover{background:var(--green); color:#fff;}
+
+  /* ---------- POPULAR TOURS ---------- */
+  .tours{padding:80px 40px 60px; background:linear-gradient(120deg,#EAF4EC,#FDF0E4); text-align:center;}
+  .tour-grid{
+    max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; text-align:left;
+  }
+  .tour-card{background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.08); transition:transform .25s ease; border:1px solid #E7E7E7;}
+  .tour-card:hover{transform:translateY(-6px);}
+  .tour-photo-frame{
+    position:relative; aspect-ratio:4/3.2; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#F0791E,#C43B0E);
+  }
+  .tour-photo-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .tour-photo-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 20px; opacity:0.9;}
+  .tour-ribbon{
+    position:absolute; top:16px; left:50%; transform:translateX(-50%); z-index:3;
+    background:var(--orange); color:#fff; font-size:0.78rem; font-weight:700; padding:7px 18px; border-radius:20px;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18); display:flex; align-items:center; gap:6px;
+  }
+  .tour-body-v2{padding:22px 22px 24px;}
+  .tour-body-v2 h4{font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--green); margin-bottom:8px;}
+  .tour-loc{font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:5px; margin-bottom:14px;}
+  .tour-body-v2 > p{font-size:0.85rem; color:var(--muted); line-height:1.6; margin-bottom:18px;}
+  .tour-stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; margin-bottom:20px;
+    padding:16px 0; border-top:1px dashed #E4E4E4; border-bottom:1px dashed #E4E4E4;
+  }
+  .tour-stats div{font-size:0.8rem; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .tour-footer{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .tf-price{font-size:0.76rem; color:var(--muted); line-height:1.3;}
+  .tf-price span{display:block; font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--ink); font-weight:700;}
+  .tf-btn{padding:11px 20px; font-size:0.8rem; border-radius:30px; white-space:nowrap; background:var(--orange) !important;}
+  .tf-btn:hover{background:#D96A15 !important;}
+
+  /* ---------- REVIEWS ---------- */
+  .reviews{padding:80px 40px; text-align:center; position:relative; overflow:hidden; background:linear-gradient(160deg,#0B2818,#123D26 55%,#0B2818);}
+  .reviews::before{
+    content:''; position:absolute; inset:0; opacity:0.35; pointer-events:none;
+    background:
+      radial-gradient(ellipse 420px 300px at 12% 15%, #22B57A, transparent 70%),
+      radial-gradient(ellipse 380px 320px at 90% 10%, #F2B705, transparent 70%),
+      radial-gradient(ellipse 400px 340px at 85% 90%, #C4390E, transparent 70%),
+      radial-gradient(ellipse 320px 300px at 8% 90%, #D9450F, transparent 70%);
+  }
+  .reviews-map{
+    position:absolute; inset:0; opacity:0.25; pointer-events:none;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.5) 1.6px, transparent 1.8px);
+    background-size:16px 16px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 20% 20%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 60% 50% at 80% 15%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 55% 60% at 75% 75%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 40% 40% at 10% 80%, black 40%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 20% 20%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 60% 50% at 80% 15%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 55% 60% at 75% 75%, black 40%, transparent 75%),
+                          radial-gradient(ellipse 40% 40% at 10% 80%, black 40%, transparent 75%);
+  }
+  .reviews-inner{position:relative; z-index:2; max-width:1160px; margin:0 auto;}
+  .reviews-h2{font-size:clamp(1.9rem,3.6vw,2.7rem); line-height:1.25; margin-bottom:34px; color:#fff;}
+  .rev-accent{color:var(--gold);}
+  .platform-row{display:flex; justify-content:center; gap:16px; margin-bottom:50px; flex-wrap:wrap;}
+  .platform-badge{
+    background:#fff; border-radius:12px; padding:16px 26px; box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    text-align:left; min-width:190px;
+  }
+  .pb-top{font-weight:700; font-size:1rem; display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .pb-icon{font-size:1.1rem;}
+  .pb-bottom{font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:6px;}
+  .pb-dots{color:#00A870; letter-spacing:1px; font-size:0.7rem;}
+  .pb-star{color:var(--gold);}
+  .pb-square{color:#00B67A; font-size:0.7rem;}
+  .review-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; text-align:left;}
+  .review-card{background:transparent; padding:16px 20px; text-align:center;}
+  .review-card p{font-size:0.98rem; color:#F2F5F2; margin-bottom:18px; line-height:1.6;}
+  .rc-stars-center{color:var(--gold); font-size:0.95rem; margin-bottom:16px;}
+  .rc-who-center{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .rc-avatar{width:52px; height:52px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display',serif; font-size:1.1rem;}
+  .rc-name{font-size:0.9rem; font-weight:700; color:#fff;}
+  .rc-loc{font-size:0.76rem; color:rgba(255,255,255,0.6);}
+  .carousel-dots{display:flex; justify-content:center; gap:8px; margin:36px 0 26px;}
+  .cd{width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); display:inline-block;}
+  .cd.active{background:var(--gold); width:22px; border-radius:5px;}
+  .btn-blue{background:#3EA8E0; color:#fff;}
+  .btn-blue:hover{background:#2384B8;}
+
+  /* ---------- FAITH / WHY TRAVELLERS CHOOSE US ---------- */
+  .faith{padding:100px 40px 90px;}
+  .faith-grid{display:grid; grid-template-columns:0.85fr 1.15fr; gap:70px; align-items:center;}
+  .faith-visual{position:relative; min-height:440px;}
+  .faith-blob{
+    position:absolute; top:-20px; left:-30px; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(34,181,122,0.18), transparent 70%);
+  }
+  .faith-frame{
+    position:absolute; border-radius:22px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,0.14);
+    background:linear-gradient(150deg,#3E7A6E,#123D30); display:flex; align-items:center; justify-content:center;
+  }
+  .faith-frame img{width:100%; height:100%; object-fit:cover; position:relative; z-index:2;}
+  .faith-frame .photo-placeholder-label{position:absolute; z-index:1; color:#fff; font-size:0.72rem; font-weight:600; text-align:center; padding:0 16px; opacity:0.9;}
+  .faith-frame-a{width:78%; aspect-ratio:4/4.6; top:0; left:0; transform:rotate(-3deg); z-index:1;}
+  .faith-frame-b{width:60%; aspect-ratio:4/4.6; bottom:-30px; right:0; transform:rotate(3deg); z-index:2; background:linear-gradient(150deg,#F0791E,#8C3D0C);}
+  .faith-pin{
+    position:absolute; top:14px; right:-6px; z-index:3; background:#fff; color:var(--ink);
+    font-size:0.72rem; font-weight:700; padding:6px 12px; border-radius:20px; box-shadow:0 6px 14px rgba(0,0,0,0.15);
+  }
+  .faith-h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.2vw,2.5rem); line-height:1.3; color:var(--green); margin:8px 0 22px;}
+  .faith-accent{color:var(--orange);}
+  .faith-list{list-style:none; display:flex; flex-direction:column; gap:12px; margin-bottom:30px;}
+  .faith-list li{
+    position:relative; padding-left:26px; font-size:0.92rem; color:var(--ink); line-height:1.5;
+  }
+  .faith-list li::before{
+    content:'✓'; position:absolute; left:0; top:1px; color:var(--green); font-weight:700;
+  }
+  .faith-callout{display:flex; gap:12px; margin-bottom:18px; align-items:flex-start;}
+  .fc-mark{flex:none; color:var(--gold); font-size:1.1rem; font-weight:700; margin-top:2px;}
+  .faith-callout p{font-size:0.88rem; color:var(--muted); line-height:1.6;}
+  .faith-callout p strong{color:var(--ink);}
+
+  /* ---------- HIGHLIGHT TILES ---------- */
+  .highlights{display:grid; grid-template-columns:repeat(4,1fr); margin-top:20px;}
+  .h-tile{
+    min-height:210px; padding:28px; color:#fff; display:flex; flex-direction:column; justify-content:flex-end;
+    position:relative;
+  }
+  .h-tile::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.45));}
+  .h-tile .ht-eyebrow{position:relative; z-index:2; font-size:0.7rem; opacity:0.85; margin-bottom:6px;}
+  .h-tile h3{position:relative; z-index:2; font-family:'Poppins',sans-serif; font-size:1.15rem; font-weight:600; line-height:1.25;}
+  .h-tile:nth-child(1){background:linear-gradient(160deg,#22B57A,#0B6B47);}
+  .h-tile:nth-child(2){background:linear-gradient(160deg,#C4390E,#5C1C05);}
+  .h-tile:nth-child(3){background:linear-gradient(160deg,#F0791E,#C43B0E);}
+  .h-tile:nth-child(4){background:linear-gradient(160deg,#F2B705,#B5810A);}
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{padding:0 40px 90px;}
+  .nl-inner{
+    background:var(--mint); border-radius:18px; padding:44px 50px;
+    display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+  }
+  .nl-inner h3{font-size:1.4rem; margin-bottom:6px;}
+  .nl-inner p{font-size:0.86rem; color:var(--muted); max-width:380px;}
+  .nl-form{display:flex; gap:10px; flex-wrap:wrap;}
+  .nl-form input{
+    padding:13px 18px; border-radius:30px; border:1.5px solid #D8E5DB; min-width:240px; font-family:'Poppins',sans-serif; font-size:0.88rem;
+  }
+  .nl-form input:focus{outline:none; border-color:var(--green);}
+
+  /* ---------- DREAM CTA (DHAKA) ---------- */
+  .dream-cta{padding:70px 40px; background:linear-gradient(120deg,#EAF4EC,#FDF0E4);}
+  .dream-grid{display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center;}
+  .dream-copy h2{font-family:'Kalam',cursive; font-weight:700; font-size:clamp(1.9rem,3.4vw,2.5rem); line-height:1.3; margin-bottom:22px;}
+  .dream-copy p{font-size:0.95rem; color:var(--ink); margin-bottom:18px; max-width:480px; line-height:1.6;}
+  .dream-copy p strong{color:var(--ink);}
+  .dream-art svg{width:100%; height:auto;}
+  .dhaka-text{
+    font-family:'Caveat',cursive; font-weight:700; font-size:52px; fill:#E63238;
+  }
+
+  /* ---------- WHATSAPP FLOAT ---------- */
+  .wa-float{
+    position:fixed; right:22px; bottom:22px; z-index:60; display:flex; align-items:center; gap:10px;
+    background:#25D366; color:#fff; padding:12px 18px 12px 14px; border-radius:40px;
+    font-size:0.86rem; font-weight:600; box-shadow:0 10px 24px rgba(0,0,0,0.2);
+  }
+  .wa-float:hover{background:#1FBE5A;}
+  .wa-float svg{width:22px; height:22px;}
+
+  /* ---------- CTA + FOOTER ---------- */
+  .cta-banner{
+    margin:80px 40px; border-radius:20px; background:linear-gradient(120deg,#F2B705,#D9450F 55%,#F0791E);
+    color:#fff; padding:60px 50px; text-align:center;
+  }
+  .cta-banner h2{color:#fff; font-size:clamp(1.7rem,3vw,2.3rem); margin-bottom:12px;}
+  .cta-banner p{opacity:0.85; margin-bottom:26px;}
+
+  footer{background:linear-gradient(160deg,#123D26,#B5810A); color:#fff; padding:56px 40px 26px;}
+  .foot-grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px;}
+  .foot-brand p{font-size:0.85rem; opacity:0.7; margin-top:14px; max-width:260px;}
+  .foot-col h4{font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; color:var(--gold);}
+  .foot-col a{display:block; font-size:0.87rem; margin-bottom:10px; opacity:0.85;}
+  .foot-col a:hover{opacity:1;}
+  .foot-bottom{max-width:1240px; margin:0 auto; padding-top:22px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; font-size:0.78rem; opacity:0.6; flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:980px){
+    .search-bar{grid-template-columns:1fr 1fr; gap:14px; transform:translateY(20%);}
+    .search-field{border-right:none; padding:8px 0;}
+    .feature-grid{grid-template-columns:repeat(3,1fr); gap:24px;}
+    .dest-scroll{grid-template-columns:1fr;}
+    .blog-scroll{grid-template-columns:1fr;}
+    .tour-grid{grid-template-columns:1fr;}
+    .highlights{grid-template-columns:repeat(2,1fr);}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .navlinks{display:none;}
+    .feature-strip{padding-top:70px;}
+    .story-grid{grid-template-columns:1fr; gap:40px;}
+    .story-visual{order:-1;}
+    .review-grid{grid-template-columns:1fr;}
+    .nl-inner{flex-direction:column; align-items:flex-start;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr);}
+    .dream-grid{grid-template-columns:1fr;}
+    .faith-grid{grid-template-columns:1fr; gap:40px;}
+    .faith-visual{min-height:340px; max-width:340px; margin:0 auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <img class="hero-photo" src="images/hero-boat.png" alt="Fishermen casting a net from a traditional boat on a Bangladesh river at sunset" onerror="this.style.display='none'">
+  <div class="hero-overlay"></div>
+  <header>
+    <nav>
+      <div class="logo-block">
+        <div class="logo-row">
+          <span class="logo-mark">
+            <svg viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="21" fill="url(#lg-grad)"/>
+              <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+              <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+              <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+              <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+              <defs>
+                <linearGradient id="lg-grad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#22B57A"/>
+                  <stop offset="1" stop-color="#0B6B47"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <div><span class="lg1">Roam</span><span class="lg2">Bengal</span></div>
+        </div>
+        <div class="tag">EXPLORE THE HEART OF BANGLADESH</div>
+      </div>
+      <div class="navlinks">
+        <a href="#" class="active">Home</a>
+        <a href="tours.html">Tours</a>
+        <a href="blog.html">Blog</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-right">
+        <a href="#packages" class="btn btn-green">Plan Your Trip</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero-content">
+    <span class="script">Explore</span>
+    <h1>The Soul of Bangladesh</h1>
+    <p>From the world's largest mangrove forest to endless tea gardens and rich cultural heritage.</p>
+    <div class="hero-ctas">
+      <a href="#packages" class="btn btn-green">Explore Tours</a>
+      <a href="#" class="btn btn-outline-light">▷ Watch Video</a>
+    </div>
+  </div>
+</div>
+
+<section class="feature-strip">
+  <div class="feature-grid">
+    <div class="feature-item fi1">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3Z"/></svg></div>
+      <h4>Handpicked Tours</h4><p>Curated authentic experiences</p>
+    </div>
+    <div class="feature-item fi2">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.8-4.4 5.2-6 7-6s5.2 1.6 7 6"/></svg></div>
+      <h4>Local Experts</h4><p>Travel with passionate guides</p>
+    </div>
+    <div class="feature-item fi3">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3Z"/></svg></div>
+      <h4>Safe &amp; Trusted</h4><p>Vetted guides and transport for international guests</p>
+    </div>
+    <div class="feature-item fi4">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 14h4"/></svg></div>
+      <h4>Visa Assistance</h4><p>We guide you through Bangladesh entry requirements</p>
+    </div>
+    <div class="feature-item fi5">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 15v-3a8 8 0 1 1 16 0v3"/><path d="M4 15a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2Zm16 0a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z"/></svg></div>
+      <h4>24/7 Support</h4><p>English-speaking support, wherever you are</p>
+    </div>
+    <div class="feature-item fi6">
+      <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 12l4-8h10l4 8-9 9-9-9Z"/><path d="M3 12h18"/></svg></div>
+      <h4>Airport Pickup</h4><p>Meet-and-greet from Dhaka or Cox's Bazar airport</p>
+    </div>
+  </div>
+</section>
+
+<section class="tours" id="packages">
+  <span class="eyebrow">Popular Tours</span>
+  <h2>Handpicked Experiences for You</h2>
+  <div class="divider"></div>
+  <div class="tour-grid">
+
+    <div class="tour-card">
+      <div class="tour-photo-frame">
+        <span class="tour-ribbon">👑 Featured</span>
+        <span class="photo-placeholder-label">📷 images/tour-sundarbans.jpg</span>
+        <img src="images/tour-sundarbans.jpg" alt="Sundarbans wildlife tour boat trip" onerror="this.style.display='none'">
+      </div>
+      <div class="tour-body-v2">
+        <h4>Sundarbans Wildlife Tour</h4>
+        <div class="tour-loc">📍 Khulna</div>
+        <p>Track the Royal Bengal tiger by boat through the world's largest mangrove forest. Overnight on the water, birdwatching at dawn, and village stops along tidal channels.</p>
+        <div class="tour-stats">
+          <div>🕐 Days: 4</div>
+          <div>🚶 Activities: 6+</div>
+          <div>👥 Group: 8</div>
+          <div>📍 Stops: 5+</div>
+        </div>
+        <div class="tour-footer">
+          <div class="tf-price">From<br><span>$175</span></div>
+          <a href="package-sundarbans.html" class="btn btn-green-dark tf-btn">View Details →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="tour-card">
+      <div class="tour-photo-frame" style="background:linear-gradient(160deg,#22B57A,#0B6B47);">
+        <span class="photo-placeholder-label">📷 images/tour-sreemangal.jpg</span>
+        <img src="images/tour-sreemangal.jpg" alt="Sreemangal tea garden tour" onerror="this.style.display='none'">
+      </div>
+      <div class="tour-body-v2">
+        <h4>Sreemangal Nature Escape</h4>
+        <div class="tour-loc">📍 Sylhet</div>
+        <p>Walk between seven-layer tea gardens, trek Lawachara's rainforest trails, and spend a night in a local homestay with fresh-brewed tea at every stop.</p>
+        <div class="tour-stats">
+          <div>🕐 Days: 3</div>
+          <div>🚶 Activities: 5+</div>
+          <div>👥 Group: 10</div>
+          <div>📍 Stops: 4+</div>
+        </div>
+        <div class="tour-footer">
+          <div class="tf-price">From<br><span>$115</span></div>
+          <a href="#" class="btn btn-green-dark tf-btn">View Details →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="tour-card">
+      <div class="tour-photo-frame" style="background:linear-gradient(160deg,#8C6A3D,#5A3E1B);">
+        <span class="photo-placeholder-label">📷 images/tour-bagerhat.jpg</span>
+        <img src="images/tour-bagerhat.jpg" alt="Bagerhat heritage mosque tour" onerror="this.style.display='none'">
+      </div>
+      <div class="tour-body-v2">
+        <h4>Heritage of Bagerhat</h4>
+        <div class="tour-loc">📍 Bagerhat</div>
+        <p>Explore the 15th-century Shat Gombuj Mosque and the UNESCO-listed ruins left by Khan Jahan Ali, with a guided walk through terracotta craft workshops.</p>
+        <div class="tour-stats">
+          <div>🕐 Days: 3</div>
+          <div>🚶 Activities: 4+</div>
+          <div>👥 Group: 10</div>
+          <div>📍 Stops: 6+</div>
+        </div>
+        <div class="tour-footer">
+          <div class="tf-price">From<br><span>$105</span></div>
+          <a href="#" class="btn btn-green-dark tf-btn">View Details →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="view-all-wrap"><a href="tours.html" class="btn-line">View All Tours →</a></div>
+</section>
+
+<section class="gallery">
+  <div class="wrap gallery-head">
+    <div>
+      <h2><span class="g-line1">Best Tourist's Shared</span><br><span class="g-line2">Beautiful Photos</span></h2>
+      <p>If you're looking for one of the best holiday experiences of your life, we're excited to make it happen — filled with fun, authenticity, and ease.</p>
+      <p class="g-bold">Private Tours. Fair Prices. Real Experiences.</p>
+    </div>
+    <a href="#" class="btn btn-green-dark">View Full Gallery</a>
+  </div>
+  <div class="wrap gallery-grid">
+    <div class="gallery-photo" style="background:linear-gradient(160deg,#3E7A6E,#123D30);">
+      <div class="gp-tag">Sundarbans River</div>
+    </div>
+    <div class="gallery-photo" style="background:linear-gradient(160deg,#C4390E,#7A2408);">
+      <div class="gp-tag">Mangrove Cruise</div>
+    </div>
+    <div class="gallery-photo" style="background:linear-gradient(160deg,#8C6A3D,#5A3E1B);">
+      <div class="gp-tag">Bagerhat Mosque</div>
+    </div>
+    <div class="gallery-photo" style="background:linear-gradient(160deg,#F0791E,#C43B0E);">
+      <div class="gp-tag">Barisal Boats</div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="faith">
+  <div class="wrap faith-grid">
+    <div class="faith-visual">
+      <div class="faith-blob"></div>
+      <div class="faith-frame faith-frame-a">
+        <span class="photo-placeholder-label">📷 images/wildlife-1.jpg</span>
+        <img src="images/wildlife-1.jpg" alt="Bird native to the Sundarbans wetlands" onerror="this.style.display='none'">
+      </div>
+      <div class="faith-frame faith-frame-b">
+        <span class="photo-placeholder-label">📷 images/wildlife-2.jpg</span>
+        <img src="images/wildlife-2.jpg" alt="Royal Bengal tiger in the Sundarbans" onerror="this.style.display='none'">
+      </div>
+      <div class="faith-pin">📍 Sundarbans</div>
+    </div>
+
+    <div class="faith-copy">
+      <span class="eyebrow" style="text-align:left;">The Roam Bengal Difference</span>
+      <h2 class="faith-h2">Why Travellers Keep Faith<br>In <span class="faith-accent">Roam Bengal</span></h2>
+
+      <ul class="faith-list">
+        <li>Fully private, customizable itineraries — never a fixed group tour</li>
+        <li>Vetted 4★ / 5★ stays and homestays with genuinely upscale comfort</li>
+        <li>Guides who grew up on the exact route you're travelling</li>
+        <li>Clear payment, cancellation, and refund terms — no hidden clauses</li>
+        <li>Book direct and save 15–30% versus third-party commission markups</li>
+      </ul>
+
+      <div class="faith-callout">
+        <span class="fc-mark">→</span>
+        <p><strong>Roam Bengal vs. Local Operators —</strong> every tour is private and fully flexible by default. We design each itinerary to stay budget-friendly without cutting corners on quality, and our prices cover up to two guests at no extra cost.</p>
+      </div>
+      <div class="faith-callout">
+        <span class="fc-mark">→</span>
+        <p><strong>Booking Platforms vs. Roam Bengal —</strong> sites like TripAdvisor, Viator, Booking.com, GetYourGuide, and Klook add commissions of up to 30% on top of the local rate. Booking directly with us skips that markup entirely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="destinations" id="blog">
+  <span class="eyebrow">From The Journal</span>
+  <h2>Stories &amp; Travel Notes</h2>
+  <div class="divider"></div>
+  <div class="blog-scroll">
+    <div class="blog-card-v2">
+      <div class="bc-photo-frame">
+        <span class="photo-placeholder-label">📷 images/blog-sundarbans.jpg</span>
+        <img src="images/blog-sundarbans.jpg" alt="Sundarbans mangrove river at sunrise" onerror="this.style.display='none'">
+      </div>
+      <h3>Best Time to Visit the Sundarbans</h3>
+      <p>A season-by-season breakdown for tiger sightings, calm water, and fewer crowds on your mangrove expedition.</p>
+      <div class="bc-foot"><a href="#" class="bc-more">Read More</a><span class="bc-date">📅 5 min read</span></div>
+    </div>
+    <div class="blog-card-v2">
+      <div class="bc-photo-frame" style="background:linear-gradient(160deg,#22B57A,#0B6B47);">
+        <span class="photo-placeholder-label">📷 images/blog-sreemangal.jpg</span>
+        <img src="images/blog-sreemangal.jpg" alt="Tea garden workers in Sreemangal" onerror="this.style.display='none'">
+      </div>
+      <h3>Tea Pickers of Sreemangal</h3>
+      <p>Meeting the families who've worked these seven-layer tea gardens for generations, cup by cup.</p>
+      <div class="bc-foot"><a href="#" class="bc-more">Read More</a><span class="bc-date">📅 4 min read</span></div>
+    </div>
+    <div class="blog-card-v2">
+      <div class="bc-photo-frame" style="background:linear-gradient(160deg,#C4390E,#7A2408);">
+        <span class="photo-placeholder-label">📷 images/blog-visa.jpg</span>
+        <img src="images/blog-visa.jpg" alt="Passport and travel documents for Bangladesh visa" onerror="this.style.display='none'">
+      </div>
+      <h3>Visa Tips for First-Time Visitors</h3>
+      <p>Everything foreign travellers need to know before arriving in Bangladesh — documents, entry points, and timing.</p>
+      <div class="bc-foot"><a href="#" class="bc-more">Read More</a><span class="bc-date">📅 6 min read</span></div>
+    </div>
+  </div>
+  <div class="view-all-wrap"><a href="#" class="btn-line">View All Articles →</a></div>
+</section>
+
+<section class="reviews" id="reviews">
+  <div class="reviews-map"></div>
+  <div class="reviews-inner">
+    <h2 class="reviews-h2">Don't Take Our Word For It.<br><span class="rev-accent">Customers</span> Say It Best</h2>
+
+    <div class="platform-row">
+      <div class="platform-badge">
+        <div class="pb-top"><span class="pb-icon" style="color:#34E0A1;">◎</span> Tripadvisor</div>
+        <div class="pb-bottom"><span class="pb-dots">●●●●●</span> Reviews 5/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top"><span class="pb-icon" style="color:#F2B705;">★</span> Google</div>
+        <div class="pb-bottom"><span class="pb-star">★</span> Reviews 5/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top"><span class="pb-icon" style="color:#00B67A;">★</span> Trustpilot</div>
+        <div class="pb-bottom"><span class="pb-square">■</span> Reviews 5/5</div>
+      </div>
+      <div class="platform-badge">
+        <div class="pb-top"><span class="pb-icon" style="color:#1877F2;">f</span> Facebook</div>
+        <div class="pb-bottom"><span class="pb-star" style="color:#D9450F;">★</span> Reviews 5/5</div>
+      </div>
+    </div>
+
+    <div class="review-grid">
+      <div class="review-card">
+        <p>"Our Sundarbans trip was seamless thanks to Roam Bengal. Fun activities and such personal touches!"</p>
+        <div class="rc-stars-center">★★★★☆</div>
+        <div class="rc-who-center"><div class="rc-avatar" style="background:linear-gradient(150deg,#22B57A,#0B6B47);">S</div><div><div class="rc-name">Sarah Mitchell</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+      <div class="review-card">
+        <p>"The Sylhet tea trail was unhurried and beautifully planned. Small touches everywhere — airport pickup made it stress-free."</p>
+        <div class="rc-stars-center">★★★★☆</div>
+        <div class="rc-who-center"><div class="rc-avatar" style="background:linear-gradient(150deg,#C4390E,#5C1C05);">L</div><div><div class="rc-name">Lars Andersen</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+      <div class="review-card">
+        <p>"Anniversary in Cox's Bazar felt magical with Roam Bengal. Loved the sunrise walk and the little dinner surprise!"</p>
+        <div class="rc-stars-center">★★★★☆</div>
+        <div class="rc-who-center"><div class="rc-avatar" style="background:linear-gradient(150deg,#D9450F,#7A2408);">E</div><div><div class="rc-name">Emma Rodriguez</div><div class="rc-loc">Guest Review</div></div></div>
+      </div>
+    </div>
+
+    <div class="carousel-dots"><span class="cd active"></span><span class="cd"></span><span class="cd"></span></div>
+    <div class="view-all-wrap"><a href="#" class="btn btn-blue">View All Testimonials</a></div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="wrap story-grid">
+    <div class="story-copy">
+      <h2>Why You Choose <span class="story-accent">Our Company</span></h2>
+      <p>From our handpicked destinations to our expert guides and personalized service, discover why travellers choose us for their dream Bangladesh vacation.</p>
+      <div class="why-list">
+        <div class="why-item">
+          <span class="why-icon" style="background:#DCEFE0; color:#22B57A;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9Z"/></svg></span>
+          <div><h3>Handpicked Destinations</h3><p>Our strict screening process means you're only seeing the best quality routes across Bangladesh.</p></div>
+        </div>
+        <div class="why-item">
+          <span class="why-icon" style="background:#FCEBD8; color:#F0791E;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg></span>
+          <div><h3>Best Price Guaranteed</h3><p>Our best price guarantee means you can be sure you're booking at the fairest local rate.</p></div>
+        </div>
+        <div class="why-item">
+          <span class="why-icon" style="background:#DCEFE0; color:#1E5F3B;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11Z"/></svg></span>
+          <div><h3>Sustainable by Design</h3><p>A share of every booking goes back into the villages and forests you pass through.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="story-visual">
+      <div class="story-photo-frame">
+        <span class="photo-placeholder-label">📷 Add photo: images/why-choose-us.jpg</span>
+        <img class="story-photo-img" src="images/why-choose-us.jpg" alt="Traveller hiking a forest trail in Bangladesh" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dream-cta" id="contact">
+  <div class="wrap dream-grid">
+    <div class="dream-copy">
+      <h2><span class="g-line1">Ready To Explore? Let's Chat</span><br>About <span class="g-line2">Your Dream Trip</span></h2>
+      <p><strong>Turn Your Travel Ideas into Reality</strong> — with Roam Bengal as your local travel companion, your next adventure is just a message away. Let your wanderlust soar as we craft unforgettable experiences tailored just for you.</p>
+      <p><strong>Bangladesh's dedicated private tour provider</strong> — with us, every moment is worth your time, every journey is worth your money.</p>
+      <a href="#contact" class="btn btn-green-dark">Plan Your Vacation</a>
+    </div>
+    <div class="dream-art">
+      <svg viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="120" cy="140" rx="110" ry="80" fill="#22B57A" opacity="0.18"/>
+        <ellipse cx="330" cy="100" rx="100" ry="90" fill="#F2B705" opacity="0.20"/>
+        <ellipse cx="360" cy="260" rx="120" ry="90" fill="#C4390E" opacity="0.16"/>
+        <ellipse cx="150" cy="280" rx="90" ry="70" fill="#D9450F" opacity="0.14"/>
+
+        <!-- domed building -->
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="150" y="150" width="110" height="90"/>
+          <circle cx="205" cy="140" r="34"/>
+          <rect x="195" y="95" width="20" height="30"/>
+          <circle cx="205" cy="90" r="6"/>
+          <rect x="160" y="170" width="14" height="70"/>
+          <rect x="236" y="170" width="14" height="70"/>
+          <rect x="192" y="190" width="26" height="50"/>
+        </g>
+
+        <!-- tower -->
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="270" y="60" width="28" height="180"/>
+          <polygon points="270,60 284,20 298,60"/>
+          <line x1="270" y1="90" x2="298" y2="90"/>
+          <line x1="270" y1="120" x2="298" y2="120"/>
+          <line x1="270" y1="150" x2="298" y2="150"/>
+        </g>
+
+        <!-- skyscraper -->
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="320,240 320,90 345,60 345,240"/>
+          <line x1="320" y1="120" x2="345" y2="120"/>
+          <line x1="320" y1="160" x2="345" y2="160"/>
+          <line x1="320" y1="200" x2="345" y2="200"/>
+        </g>
+
+        <!-- bridge -->
+        <g stroke="#1B1B1B" stroke-width="1.6" fill="none" stroke-linecap="round">
+          <line x1="330" y1="330" x2="330" y2="270"/>
+          <line x1="300" y1="300" x2="330" y2="280"/>
+          <line x1="360" y1="300" x2="330" y2="280"/>
+          <line x1="280" y1="320" x2="400" y2="320"/>
+        </g>
+
+        <!-- rickshaw 1 -->
+        <g transform="translate(48,255)">
+          <path d="M0 55 Q6 20 40 18 Q64 18 64 40 L64 55" fill="#1E5F3B" opacity="0.9"/>
+          <path d="M4 46 Q30 30 60 46" fill="#F0791E" opacity="0.85"/>
+          <circle cx="14" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <circle cx="60" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="30" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="70" stroke="#1B1B1B" stroke-width="2.2"/>
+        </g>
+
+        <!-- rickshaw 2 -->
+        <g transform="translate(360,130) scale(0.85)">
+          <path d="M0 55 Q6 20 40 18 Q64 18 64 40 L64 55" fill="#D9450F" opacity="0.9"/>
+          <path d="M4 46 Q30 30 60 46" fill="#F2B705" opacity="0.85"/>
+          <circle cx="14" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <circle cx="60" cy="70" r="14" fill="none" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="30" stroke="#1B1B1B" stroke-width="2.2"/>
+          <line x1="64" y1="55" x2="90" y2="70" stroke="#1B1B1B" stroke-width="2.2"/>
+        </g>
+
+        <text x="290" y="365" class="dhaka-text" transform="rotate(-4 290 365)">DHAKA</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="logo-block">
+        <div class="logo-row">
+          <span class="logo-mark">
+            <svg viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="21" fill="url(#lg-grad2)"/>
+              <circle cx="27" cy="14" r="5.2" fill="#F0791E"/>
+              <path d="M8 24c3-8 8-12 14-13" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+              <path d="M9 28c3 1.8 6 1.8 8.5 0s5.5-1.8 8-0 5.5 1.8 8 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M13 32l1.5-6h13l1.5 6c-3 1.6-13 1.6-16 0Z" fill="#123D26"/>
+              <line x1="21.5" y1="26" x2="21.5" y2="19" stroke="#123D26" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M21.5 19c3 0.5 4.5 2 5 4.5" stroke="#123D26" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+              <defs>
+                <linearGradient id="lg-grad2" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#22B57A"/>
+                  <stop offset="1" stop-color="#0B6B47"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="lg1" style="color:#fff;">Roam</span><span class="lg2">Bengal</span>
+        </div>
+      </div>
+      <p>Small-group tours across Bangladesh, planned by the boatmen, tea-garden guides, and hill-trekkers who call these routes home since 2014.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Explore</h4>
+      <a href="tours.html">Tours</a>
+      <a href="blog.html">Blog</a>
+      <a href="#reviews">Reviews</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="about.html">About Us</a>
+      <a href="#">Guides</a>
+      <a href="#">Careers</a>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="#">hello@roambengal.com</a>
+      <a href="#">WhatsApp: +880 1XXX-XXXXXX</a>
+      <a href="#">Dhaka, Bangladesh</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Roam Bengal. All rights reserved.</span>
+    <span>roambengal.com</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-float"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.6 14.3c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.4 0 .6-.1.2-.1.3-.3.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.7-.1.3.1 1.7.8 2 .9.3.2.5.2.6.4.1.2.1.9-.1 1.6Z"/></svg>Chat on WhatsApp</a>
+
+</body>
+</html>
