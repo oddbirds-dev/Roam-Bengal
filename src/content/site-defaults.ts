@@ -238,7 +238,10 @@ export const siteDefaults = {
   },
 
   contact: {
+    hero_eyebrow: "Get In Touch",
     banner_title: "Let's Plan Your Bangladesh Trip",
+    hero_intro:
+      "Questions about a tour, a custom itinerary, or just not sure where to start? Send us a message — a real guide replies within 24 hours, not a chatbot.",
     form_heading: "Send Us A Message",
     form_intro:
       "Tell us a bit about the trip you're picturing — dates, group size, must-sees — and we'll come back with a plan.",

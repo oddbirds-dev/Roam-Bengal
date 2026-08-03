@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { ContactScene } from "@/components/art/dhaka-scene";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTours } from "@/lib/site-content.functions";
 import { submitInquiry } from "@/lib/capture.functions";
@@ -26,6 +27,9 @@ export const Route = createFileRoute("/contact")({
   }),
   component: Contact,
 });
+
+const WA_STRIP_BG = "linear-gradient(120deg,#E9FBF0,#FDF0E4)";
+const MAP_BG = "linear-gradient(155deg,#DCE9DF,#EAF4EC 60%,#F5EEE0)";
 
 function Contact() {
   const tours = Route.useLoaderData();
@@ -61,38 +65,42 @@ function Contact() {
 
   return (
     <>
-      <div className="bg-green-dark">
-        <SiteHeader />
-        <div className="wrap py-16 text-center">
-          <h1 className="font-display text-[clamp(1.9rem,4.6vw,3rem)] leading-tight text-white">
-            {contact.banner_title}
-          </h1>
-        </div>
-      </div>
+      <SiteHeader variant="solid" />
 
       <main id="main">
-        <section className="wrap grid gap-6 py-12 sm:grid-cols-3">
-          <ContactCard icon="📞" title="Call or WhatsApp" body={contact.phone} href={whatsapp.link} />
-          <ContactCard
-            icon="✉️"
-            title="Email"
-            body={contact.email}
-            href={`mailto:${contact.email}`}
-          />
-          <ContactCard icon="🕐" title={contact.office_hours_label} body={contact.office_hours} />
-        </section>
+        {/* Hero */}
+        <div className="shell mx-auto max-w-[760px] pt-16 pb-5 text-center">
+          <span className="mb-4 inline-block text-[0.78rem] font-bold tracking-[0.1em] text-orange uppercase">
+            {contact.hero_eyebrow}
+          </span>
+          <h1 className="mb-4 font-display text-[clamp(2rem,4.2vw,2.8rem)] leading-[1.2] font-bold">
+            {contact.banner_title}
+          </h1>
+          <p className="text-[1rem] leading-[1.7] text-muted">{contact.hero_intro}</p>
+        </div>
 
-        <section className="wrap grid gap-12 pb-16 lg:grid-cols-[1.2fr_1fr]">
-          <div className="rounded-2xl border border-rule bg-cream p-8">
-            <h2 className="font-display text-[1.5rem] text-green">{contact.form_heading}</h2>
-            <p className="mt-2 text-[0.9rem] leading-7 text-muted">{contact.form_intro}</p>
+        {/* Info cards */}
+        <div className="mx-auto grid max-w-[1160px] grid-cols-1 gap-5 px-5 pt-[46px] pb-2.5 min-[640px]:grid-cols-2 min-[640px]:px-10 min-[980px]:grid-cols-4">
+          <InfoCard icon="📧" title="Email Us" link={contact.email} href={`mailto:${contact.email}`} />
+          <InfoCard icon="💬" title="WhatsApp" link={contact.phone} href={whatsapp.link} />
+          <InfoCard icon="📍" title="Our Office" body={contact.address} />
+          <InfoCard icon="🕒" title={contact.office_hours_label} body={contact.office_hours} />
+        </div>
+
+        {/* Form + art */}
+        <div className="mx-auto grid max-w-[1160px] items-center gap-10 px-5 pt-14 pb-[90px] min-[640px]:px-10 min-[980px]:grid-cols-[1.1fr_1fr] min-[980px]:gap-[60px]">
+          <div>
+            <h2 className="mb-2.5 font-display text-[1.7rem] font-bold">
+              {contact.form_heading}
+            </h2>
+            <p className="mb-7 text-[0.92rem] text-muted">{contact.form_intro}</p>
 
             {state === "done" ? (
-              <div className="mt-7 rounded-xl border border-green-bright/40 bg-mint p-7 text-center">
+              <div className="rounded-2xl border border-green-bright/40 bg-mint p-7 text-center">
                 <div className="text-[2rem]" aria-hidden="true">
                   ✅
                 </div>
-                <h3 className="mt-2 font-display text-[1.2rem] text-green">
+                <h3 className="mt-2 font-display text-[1.2rem] font-bold text-green">
                   Message received.
                 </h3>
                 <p className="mt-2 text-[0.9rem] leading-7 text-muted">
@@ -109,8 +117,8 @@ function Contact() {
                 </div>
               </div>
             ) : (
-              <form className="mt-7" onSubmit={onSubmit}>
-                <div className="grid gap-5 sm:grid-cols-2">
+              <form onSubmit={onSubmit}>
+                <div className="grid grid-cols-1 gap-4 min-[640px]:grid-cols-2">
                   <Field label="Full Name" name="name" required placeholder="Your name" />
                   <Field
                     label="Email Address"
@@ -131,18 +139,15 @@ function Contact() {
                     placeholder="Where are you travelling from?"
                   />
 
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="tour_slug"
-                      className="mb-1.5 block text-[0.82rem] font-semibold text-ink"
-                    >
+                  <div className="mb-4">
+                    <label htmlFor="tour_slug" className={LABEL}>
                       Interested Tour
                     </label>
                     <select
                       id="tour_slug"
                       name="tour_slug"
                       defaultValue={preselected ?? ""}
-                      className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-4 py-3 text-[0.88rem] outline-none focus:border-green"
+                      className={CONTROL}
                     >
                       <option value="">Not sure yet — help me choose</option>
                       {tours.map((t) => (
@@ -153,11 +158,8 @@ function Contact() {
                     </select>
                   </div>
 
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="message"
-                      className="mb-1.5 block text-[0.82rem] font-semibold text-ink"
-                    >
+                  <div className="mb-4 col-span-full">
+                    <label htmlFor="message" className={LABEL}>
                       Your Message <span className="text-rust">*</span>
                     </label>
                     <textarea
@@ -166,53 +168,59 @@ function Contact() {
                       rows={5}
                       required
                       placeholder="Tell us your travel dates, group size, and anything else we should know"
-                      className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-4 py-3 text-[0.88rem] outline-none focus:border-green"
+                      className={`${CONTROL} resize-y`}
                     />
                   </div>
                 </div>
 
                 {state === "error" ? (
-                  <p role="alert" className="mt-4 text-[0.84rem] text-rust">
+                  <p role="alert" className="mb-3 text-[0.84rem] text-rust">
                     {error}
                   </p>
                 ) : null}
 
-                <div className="mt-6">
-                  <Button type="submit" variant="green-dark" disabled={state === "sending"}>
-                    {state === "sending" ? "Sending…" : contact.form_cta}
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  variant="green-dark"
+                  disabled={state === "sending"}
+                  className="mt-1.5 w-full py-3.5"
+                >
+                  {state === "sending" ? "Sending…" : contact.form_cta}
+                </Button>
               </form>
             )}
           </div>
 
-          <div className="flex flex-col justify-center rounded-2xl bg-mint p-8 text-center">
-            <div className="text-[3rem]" aria-hidden="true">
-              🛺
-            </div>
-            <p className="mt-4 font-script text-[1.5rem] leading-snug text-green-dark">
+          <div className="order-first mx-auto w-full max-w-[340px] min-[980px]:order-none min-[980px]:max-w-none">
+            <ContactScene className="h-auto w-full" />
+            <p className="mt-3.5 text-center font-script text-[1.3rem] font-bold text-green-dark">
               “{contact.art_note}”
             </p>
           </div>
-        </section>
+        </div>
 
-        <section className="bg-cream py-14">
-          <div className="wrap flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-green-dark p-8 text-white">
+        {/* WhatsApp strip */}
+        <div className="px-5 pb-[90px] min-[640px]:px-10">
+          <div
+            className="mx-auto flex max-w-[1160px] flex-col flex-wrap items-start justify-between gap-6 rounded-[20px] px-7 py-9 min-[980px]:flex-row min-[980px]:items-center min-[980px]:px-[46px]"
+            style={{ background: WA_STRIP_BG }}
+          >
             <div>
-              <h3 className="font-display text-[1.4rem]">{whatsapp.strip_heading}</h3>
-              <p className="mt-2 max-w-lg text-[0.88rem] leading-6 text-white/75">
-                {whatsapp.strip_body}
-              </p>
+              <h3 className="mb-1.5 font-display text-[1.2rem] font-bold">
+                {whatsapp.strip_heading}
+              </h3>
+              <p className="text-[0.86rem] text-muted">{whatsapp.strip_body}</p>
             </div>
             <ButtonLink to={whatsapp.link} variant="whatsapp">
               {whatsapp.strip_cta}
             </ButtonLink>
           </div>
-        </section>
+        </div>
 
-        <section className="wrap pb-16">
+        {/* Map */}
+        <div className="mx-auto mb-[90px] max-w-[1160px] px-5 min-[640px]:px-10">
           {contact.map_embed ? (
-            <div className="aspect-[21/9] overflow-hidden rounded-2xl border border-rule">
+            <div className="aspect-[21/7] overflow-hidden rounded-[18px] border border-rule">
               <iframe
                 src={contact.map_embed}
                 title={contact.map_label}
@@ -222,11 +230,14 @@ function Contact() {
               />
             </div>
           ) : (
-            <div className="flex aspect-[21/9] items-center justify-center rounded-2xl border border-dashed border-rule text-[0.9rem] text-muted">
+            <div
+              className="flex aspect-[21/7] items-center justify-center rounded-[18px] border border-rule px-6 text-center text-[0.88rem] font-semibold text-muted"
+              style={{ background: MAP_BG }}
+            >
               🗺️ {contact.map_label}
             </div>
           )}
-        </section>
+        </div>
       </main>
 
       <SiteFooter />
@@ -235,34 +246,44 @@ function Contact() {
   );
 }
 
-function ContactCard({
+const LABEL = "mb-1.5 block text-[0.82rem] font-semibold text-ink";
+const CONTROL =
+  "w-full rounded-[10px] border-[1.5px] border-rule bg-paper px-3.5 py-3 " +
+  "font-body text-[0.9rem] text-ink outline-none focus:border-green";
+
+/** `.info-card` — cream tile with an emoji, a heading, and either a link or plain text. */
+function InfoCard({
   icon,
   title,
   body,
+  link,
   href,
 }: {
   icon: string;
   title: string;
-  body: string;
+  body?: string;
+  link?: string;
   href?: string;
 }) {
-  const inner = (
-    <>
-      <div className="text-[1.6rem]" aria-hidden="true">
+  return (
+    <div className="rounded-2xl border border-rule bg-cream px-[22px] py-7 text-center transition-transform duration-200 hover:-translate-y-1">
+      <div className="mb-3.5 text-[1.6rem]" aria-hidden="true">
         {icon}
       </div>
-      <h4 className="mt-2 font-display text-[1rem] font-bold text-green-dark">{title}</h4>
-      <p className="mt-1 text-[0.86rem] text-muted">{body}</p>
-    </>
-  );
-  const className =
-    "rounded-2xl border border-rule bg-paper p-6 text-center transition-colors hover:border-green";
-  return href ? (
-    <a href={href} className={className} target="_blank" rel="noreferrer noopener">
-      {inner}
-    </a>
-  ) : (
-    <div className={className}>{inner}</div>
+      <h4 className="mb-1.5 text-[0.98rem] font-bold">{title}</h4>
+      {body ? <p className="text-[0.84rem] leading-[1.5] text-muted">{body}</p> : null}
+      {link && href ? (
+        <a
+          href={href}
+          className="mt-1 block text-[0.84rem] font-semibold text-green-dark hover:text-orange"
+          {...(href.startsWith("http")
+            ? { target: "_blank", rel: "noreferrer noopener" }
+            : {})}
+        >
+          {link}
+        </a>
+      ) : null}
+    </div>
   );
 }
 
@@ -280,8 +301,8 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <div>
-      <label htmlFor={name} className="mb-1.5 block text-[0.82rem] font-semibold text-ink">
+    <div className="mb-4">
+      <label htmlFor={name} className={LABEL}>
         {label} {required ? <span className="text-rust">*</span> : null}
       </label>
       <input
@@ -290,7 +311,7 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-4 py-3 text-[0.88rem] outline-none focus:border-green"
+        className={CONTROL}
       />
     </div>
   );

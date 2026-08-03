@@ -87,6 +87,57 @@ export function DhakaScene({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * The contact page's quieter cut of the same scene: colour blobs, the domed mosque
+ * and the minaret only — no skyscraper, bridge, rickshaws, or wordmark.
+ */
+export function ContactScene({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 460 380"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      role="img"
+      aria-label="Illustration of a domed mosque and minaret in Dhaka"
+    >
+      <ellipse cx="120" cy="140" rx="110" ry="80" fill="#22B57A" opacity="0.18" />
+      <ellipse cx="330" cy="100" rx="100" ry="90" fill="#F2B705" opacity="0.20" />
+      <ellipse cx="360" cy="260" rx="120" ry="90" fill="#C4390E" opacity="0.16" />
+      <ellipse cx="150" cy="280" rx="90" ry="70" fill="#D9450F" opacity="0.14" />
+
+      <g
+        stroke="#1B1B1B"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="150" y="150" width="110" height="90" />
+        <circle cx="205" cy="140" r="34" />
+        <rect x="195" y="95" width="20" height="30" />
+        <circle cx="205" cy="90" r="6" />
+        <rect x="160" y="170" width="14" height="70" />
+        <rect x="236" y="170" width="14" height="70" />
+        <rect x="192" y="190" width="26" height="50" />
+      </g>
+
+      <g
+        stroke="#1B1B1B"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="270" y="60" width="28" height="180" />
+        <polygon points="270,60 284,20 298,60" />
+        <line x1="270" y1="90" x2="298" y2="90" />
+        <line x1="270" y1="120" x2="298" y2="120" />
+        <line x1="270" y1="150" x2="298" y2="150" />
+      </g>
+    </svg>
+  );
+}
+
 function Rickshaw({
   transform,
   hood,

@@ -529,7 +529,14 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
       {
         title: "Page wording",
         fields: [
+          { kind: "text", key: "hero_eyebrow", label: "Small label above the title" },
           { kind: "text", key: "banner_title", label: "Banner title" },
+          {
+            kind: "textarea",
+            key: "hero_intro",
+            label: "Paragraph under the title",
+            rows: 3,
+          },
           { kind: "text", key: "form_heading", label: "Heading above the form" },
           { kind: "textarea", key: "form_intro", label: "Paragraph above the form", rows: 3 },
           { kind: "text", key: "form_cta", label: "Send button text" },
