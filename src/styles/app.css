@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* Self-hosted fonts. Five families over the Google CDN was the single biggest LCP
+   risk in the reference designs (PRD §5). */
+/* latin subsets only — the full packages also ship devanagari and cyrillic, which
+   roughly triples the font payload for an English-only site. */
+@import "@fontsource/playfair-display/latin-600.css";
+@import "@fontsource/playfair-display/latin-700.css";
+@import "@fontsource/playfair-display/latin-900.css";
+@import "@fontsource/playfair-display/latin-600-italic.css";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/caveat/latin-600.css";
+@import "@fontsource/caveat/latin-700.css";
+@import "@fontsource/permanent-marker/latin-400.css";
+@import "@fontsource/kalam/latin-700.css";
+
+/* Design tokens, lifted verbatim from reference design/*.html :root blocks.
+   `--blue` is a misnomer inherited from the source CSS: it is a burnt red. */
+@theme {
+  --color-green: #1e5f3b;
+  --color-green-dark: #123d26;
+  --color-green-bright: #22b57a;
+  --color-green-deep: #0b6b47;
+  --color-orange: #f0791e;
+  --color-gold: #f2b705;
+  --color-rust: #c4390e;
+  --color-rust-dark: #7a2408;
+  --color-ink: #20291f;
+  --color-paper: #ffffff;
+  --color-mint: #eaf4ec;
+  --color-cream: #fbf7f0;
+  --color-muted: #6b7770;
+  --color-rule: #e7e1d3;
+  --color-brown: #8c6a3d;
+  --color-brown-dark: #5a3e1b;
+  --color-teal: #3e7a6e;
+  --color-teal-dark: #123d30;
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Poppins", sans-serif;
+  --font-script: "Caveat", cursive;
+  --font-marker: "Permanent Marker", cursive;
+  --font-kalam: "Kalam", cursive;
+
+  /* The reference designs use a single 980px breakpoint (plus 640px on contact). */
+  --breakpoint-nav: 980px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  /* Visible focus for keyboard users — the reference CSS had none (PRD Phase 8). */
+  :focus-visible {
+    outline: 3px solid var(--color-orange);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility wrap {
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 40px;
+
+  @media (max-width: 640px) {
+    padding-inline: 20px;
+  }
+}
+
+/* Screen-reader-only, for skip links and icon-button labels. */
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+
+  &:focus {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    width: auto;
+    height: auto;
+    padding: 12px 20px;
+    clip: auto;
+    background: var(--color-green-dark);
+    color: #fff;
+    border-radius: 30px;
+  }
+}
