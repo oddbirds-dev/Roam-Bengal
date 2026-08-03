@@ -46,24 +46,6 @@ export const siteDefaults = {
         ] as NavLink[],
       },
       {
-        title: "Travel Essential",
-        links: [
-          { label: "Bangladesh Visa Info", to: "/visa-information" },
-          { label: "Embassy Directory", to: "/embassy-directory" },
-          { label: "Custom Tour Booking", to: "/contact" },
-          { label: "Travel FAQs", to: "/travel-faqs" },
-        ] as NavLink[],
-      },
-      {
-        title: "Guest Support",
-        links: [
-          { label: "Refund Policy", to: "/policies/refund" },
-          { label: "Payment Policy", to: "/policies/payment" },
-          { label: "Cancellation Policy", to: "/policies/cancellation" },
-          { label: "Responsible Travel", to: "/responsible-travel" },
-        ] as NavLink[],
-      },
-      {
         title: "Company",
         links: [
           { label: "About Us", to: "/about" },

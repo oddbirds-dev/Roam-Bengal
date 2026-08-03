@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { LogoMark } from "@/components/art/logo-mark";
 import { isExternal } from "@/components/ui/button";
@@ -8,10 +9,13 @@ export function SiteFooter() {
 
   return (
     <footer
-      className="pt-14 pb-6 text-white"
+      className="shell pt-14 pb-[26px] text-white"
       style={{ background: "linear-gradient(160deg,#123D26,#B5810A)" }}
     >
-      <div className="wrap mb-10 grid grid-cols-2 gap-8 nav:grid-cols-[1.3fr_repeat(5,0.9fr)]">
+      <div
+        className="wide foot-grid mb-10"
+        style={{ "--foot-cols": footer.columns.length } as CSSProperties}
+      >
         <div className="col-span-2 nav:col-span-1">
           <span className="flex items-center gap-2.5 leading-none">
             <LogoMark className="h-[38px] w-[38px] shrink-0" />
@@ -54,7 +58,7 @@ export function SiteFooter() {
         ))}
       </div>
 
-      <div className="wrap flex flex-wrap justify-between gap-2.5 border-t border-white/15 pt-[22px] text-[0.78rem] opacity-60">
+      <div className="wide flex flex-wrap justify-between gap-2.5 border-t border-white/15 pt-[22px] text-[0.78rem] opacity-60">
         <span>{footer.copyright}</span>
         <span>{footer.site_label}</span>
       </div>

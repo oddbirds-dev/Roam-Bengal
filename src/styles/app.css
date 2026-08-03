@@ -135,6 +135,18 @@
   margin-inline: auto;
 }
 
+/* `.foot-grid`: a wide brand column plus one equal column per link group. The count is
+   editable in the admin panel, so it comes in as `--foot-cols` rather than hardcoded. */
+@utility foot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px;
+
+  @media (min-width: 980px) {
+    grid-template-columns: 1.4fr repeat(var(--foot-cols, 4), minmax(0, 1fr));
+  }
+}
+
 /* Screen-reader-only, for skip links and icon-button labels. */
 @utility sr-only-focusable {
   position: absolute;
