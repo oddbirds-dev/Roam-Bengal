@@ -264,10 +264,17 @@ export function StringListField({
 export interface RepeaterColumn<T> {
   key: keyof T & string;
   label: string;
-  type?: "text" | "textarea" | "number";
+  type?: "text" | "textarea" | "number" | "select" | "color";
   placeholder?: string;
+  /** Choices for `type: "select"`. */
+  options?: readonly { value: string; label: string }[];
   /** Grid width in a 12-column row. Defaults to full width. */
   span?: number;
+  /**
+   * Custom control for this cell. Used for image pickers: the uploader lives in
+   * image-upload.tsx, which imports from this file, so it cannot be imported back here.
+   */
+  render?: (value: unknown, onChange: (v: unknown) => void) => ReactNode;
 }
 
 /** Array of objects — itinerary days, add-ons, offer cards, FAQs. */
@@ -316,7 +323,9 @@ export function RepeaterField<T extends Record<string, unknown>>({
                   <span className="mb-1 block text-[0.72rem] font-medium text-muted">
                     {col.label}
                   </span>
-                  {col.type === "textarea" ? (
+                  {col.render ? (
+                    col.render(row[col.key], (v) => setField(i, col.key, v))
+                  ) : col.type === "textarea" ? (
                     <textarea
                       rows={3}
                       value={String(row[col.key] ?? "")}
@@ -324,6 +333,37 @@ export function RepeaterField<T extends Record<string, unknown>>({
                       onChange={(e) => setField(i, col.key, e.target.value)}
                       className={inputBase}
                     />
+                  ) : col.type === "select" ? (
+                    <select
+                      value={String(row[col.key] ?? "")}
+                      onChange={(e) => setField(i, col.key, e.target.value)}
+                      className={inputBase}
+                    >
+                      {(col.options ?? []).map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : col.type === "color" ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={/^#[0-9a-f]{6}$/i.test(String(row[col.key] ?? ""))
+                          ? String(row[col.key])
+                          : "#000000"}
+                        onChange={(e) => setField(i, col.key, e.target.value)}
+                        aria-label={col.label}
+                        className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border-[1.5px] border-rule bg-paper p-1"
+                      />
+                      <input
+                        type="text"
+                        value={String(row[col.key] ?? "")}
+                        placeholder="#1E5F3B"
+                        onChange={(e) => setField(i, col.key, e.target.value)}
+                        className={`${inputBase} font-mono text-[0.8rem]`}
+                      />
+                    </div>
                   ) : (
                     <input
                       type={col.type === "number" ? "number" : "text"}
@@ -345,6 +385,120 @@ export function RepeaterField<T extends Record<string, unknown>>({
           </div>
         ))}
         <AddButton onClick={() => onChange([...values, blank()])} label={`Add ${singular(label)}`} />
+      </div>
+    </div>
+  );
+}
+
+export interface LinkRow {
+  label: string;
+  to: string;
+}
+
+/**
+ * Array of { label, to } — nav menus and footer links.
+ *
+ * Kept deliberately flat rather than reusing RepeaterField: a nav has five rows and a
+ * footer column has four, and a bordered card per link buries the list in chrome.
+ */
+export function LinkListField({
+  label,
+  values,
+  onChange,
+  hint,
+  addLabel = "link",
+}: {
+  label: string;
+  values: LinkRow[];
+  onChange: (v: LinkRow[]) => void;
+  hint?: string;
+  addLabel?: string;
+}) {
+  const set = (i: number, patch: Partial<LinkRow>) =>
+    onChange(values.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
+
+  return (
+    <div>
+      <Label hint={hint}>{label}</Label>
+      <div className="flex flex-col gap-2">
+        {values.map((row, i) => (
+          <div key={i} className="flex flex-wrap items-start gap-2">
+            <input
+              type="text"
+              value={row.label}
+              placeholder="Text people see"
+              onChange={(e) => set(i, { label: e.target.value })}
+              className={`${inputBase} min-w-[150px] flex-[2]`}
+            />
+            <input
+              type="text"
+              value={row.to}
+              placeholder="/tours"
+              onChange={(e) => set(i, { to: e.target.value })}
+              className={`${inputBase} min-w-[150px] flex-[2] font-mono text-[0.8rem]`}
+            />
+            <RowControls
+              onUp={i > 0 ? () => onChange(reorder(values, i, -1)) : undefined}
+              onDown={i < values.length - 1 ? () => onChange(reorder(values, i, 1)) : undefined}
+              onRemove={() => onChange(values.filter((_, idx) => idx !== i))}
+            />
+          </div>
+        ))}
+        <AddButton
+          onClick={() => onChange([...values, { label: "", to: "" }])}
+          label={`Add ${addLabel}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Array of { title, links[] } — the footer's link columns. */
+export function LinkGroupField({
+  label,
+  values,
+  onChange,
+  hint,
+}: {
+  label: string;
+  values: { title: string; links: LinkRow[] }[];
+  onChange: (v: { title: string; links: LinkRow[] }[]) => void;
+  hint?: string;
+}) {
+  const setGroup = (i: number, patch: Partial<{ title: string; links: LinkRow[] }>) =>
+    onChange(values.map((g, idx) => (idx === i ? { ...g, ...patch } : g)));
+
+  return (
+    <div>
+      <Label hint={hint}>{label}</Label>
+      <div className="flex flex-col gap-3">
+        {values.map((group, i) => (
+          <div key={i} className="rounded-xl border border-rule bg-cream p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <input
+                type="text"
+                value={group.title}
+                placeholder="Column heading, e.g. Explore"
+                onChange={(e) => setGroup(i, { title: e.target.value })}
+                className={`${inputBase} font-semibold`}
+              />
+              <RowControls
+                onUp={i > 0 ? () => onChange(reorder(values, i, -1)) : undefined}
+                onDown={i < values.length - 1 ? () => onChange(reorder(values, i, 1)) : undefined}
+                onRemove={() => onChange(values.filter((_, idx) => idx !== i))}
+              />
+            </div>
+            <LinkListField
+              label="Links in this column"
+              values={group.links}
+              onChange={(links) => setGroup(i, { links })}
+            />
+          </div>
+        ))}
+        <AddButton
+          onClick={() => onChange([...values, { title: "", links: [] }])}
+          label="Add column"
+        />
       </div>
     </div>
   );

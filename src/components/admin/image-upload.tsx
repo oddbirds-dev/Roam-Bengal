@@ -30,7 +30,8 @@ export function ImageField({
   onChange,
   hint,
 }: {
-  label: string;
+  /** Omitted inside a repeater cell, which prints its own column heading. */
+  label?: string;
   value: string;
   onChange: (url: string) => void;
   hint?: string;
@@ -53,7 +54,7 @@ export function ImageField({
 
   return (
     <div>
-      <Label hint={hint}>{label}</Label>
+      {label || hint ? <Label hint={hint}>{label}</Label> : null}
       <div className="flex flex-wrap items-start gap-4">
         <div className="h-24 w-32 shrink-0 overflow-hidden rounded-xl border border-rule bg-cream">
           {value ? (

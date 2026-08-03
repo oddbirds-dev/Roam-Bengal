@@ -156,8 +156,16 @@ const escalate = await asPlain.from("user_roles").insert({ user_id: plainUserId,
 const stillPlain = (await asPlain.from("user_roles").select("*")).data?.length ?? 0;
 r("non-admin cannot grant themselves admin (RLS)", Boolean(escalate.error) && stillPlain === 0, escalate.error?.code ?? "no error");
 
-const adminRoles = await asAdmin.from("user_roles").select("role");
-r("admin can read their own role (RLS)", (adminRoles.data?.length ?? 0) === 1);
+// The "users read own roles" policy is `auth.uid() = user_id OR has_role(admin)`, so an
+// admin legitimately sees every role row — not just their own. Assert on their own row
+// being present rather than on a total count, which changes as real admins are added.
+const adminUserId = (await asAdmin.auth.getUser()).data.user.id;
+const adminRoles = await asAdmin.from("user_roles").select("user_id, role");
+r(
+  "admin can read their own role (RLS)",
+  (adminRoles.data ?? []).some((row) => row.user_id === adminUserId && row.role === "admin"),
+  `${adminRoles.data?.length ?? 0} role row(s) visible`,
+);
 
 console.log(failures === 0 ? "\nAll auth checks passed." : `\n${failures} check(s) FAILED.`);
 process.exit(failures === 0 ? 0 : 1);

@@ -1,0 +1,886 @@
+import type { ReactNode } from "react";
+import { Card } from "@/components/admin/admin-ui";
+import {
+  GroupedListField,
+  LinkGroupField,
+  LinkListField,
+  RepeaterField,
+  SelectField,
+  StringListField,
+  TextArea,
+  TextField,
+  type LinkRow,
+  type RepeaterColumn,
+} from "@/components/admin/fields";
+import { ImageField } from "@/components/admin/image-upload";
+
+/**
+ * Plain-language forms for `site_settings`.
+ *
+ * Each key's stored value is free-form JSON, so the shape lives here as a declaration
+ * rather than in the database: a list of sections, each a list of labelled fields. The
+ * renderer below turns that into the same inputs the tour and post editors use, so
+ * nobody has to type JSON to change site copy.
+ *
+ * Two rules hold the whole thing together:
+ *   1. Anything not described here is preserved untouched on save (see `mergeSetting`),
+ *      so a key added to the database later cannot be silently dropped by this form.
+ *   2. Every field falls back to its shipped default in src/content/site-defaults.ts,
+ *      so a section that has never been saved still opens pre-filled with the live copy.
+ */
+
+// ---------------------------------------------------------------------------
+// Schema types
+// ---------------------------------------------------------------------------
+
+export type SettingsField =
+  | { kind: "text"; key: string; label: string; hint?: string; placeholder?: string }
+  | { kind: "textarea"; key: string; label: string; hint?: string; rows?: number }
+  | { kind: "image"; key: string; label: string; hint?: string }
+  | {
+      kind: "select";
+      key: string;
+      label: string;
+      hint?: string;
+      options: readonly { value: string; label: string }[];
+    }
+  | {
+      kind: "list";
+      key: string;
+      label: string;
+      hint?: string;
+      multiline?: boolean;
+      placeholder?: string;
+    }
+  | { kind: "links"; key: string; label: string; hint?: string; addLabel?: string }
+  | { kind: "linkGroups"; key: string; label: string; hint?: string }
+  | { kind: "groups"; key: string; label: string; hint?: string }
+  | {
+      kind: "rows";
+      key: string;
+      label: string;
+      hint?: string;
+      columns: RepeaterColumn<Record<string, unknown>>[];
+      blank: Record<string, unknown>;
+      /** Row heading, e.g. "Photo 1". */
+      title?: (row: Record<string, unknown>, index: number) => string;
+    };
+
+export interface SettingsSection {
+  title: string;
+  description?: string;
+  fields: SettingsField[];
+}
+
+export interface SettingsSchema {
+  /** Friendly name shown instead of the raw key. */
+  title: string;
+  /** What a non-technical editor needs to know about this section. */
+  description: string;
+  /** Public page this content appears on, for the "where does this show?" line. */
+  where: string;
+  sections: SettingsSection[];
+}
+
+// ---------------------------------------------------------------------------
+// Reusable column sets
+// ---------------------------------------------------------------------------
+
+/** Icon choices are fixed by the drawings in src/components/art/icons.tsx. */
+const FEATURE_ICONS = [
+  { value: "box", label: "Package" },
+  { value: "user", label: "Person" },
+  { value: "shield", label: "Shield" },
+  { value: "card", label: "Payment card" },
+  { value: "headset", label: "Headset" },
+  { value: "route", label: "Route map" },
+] as const;
+
+const WHY_ICONS = [
+  { value: "globe", label: "Globe (green)" },
+  { value: "coin", label: "Coin (orange)" },
+  { value: "shield", label: "Shield (dark green)" },
+] as const;
+
+/** Image cell for repeaters — see the `render` note on RepeaterColumn. */
+const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode => (
+  <ImageField label="" value={typeof value === "string" ? value : ""} onChange={onChange} />
+);
+
+// ---------------------------------------------------------------------------
+// The schema, one entry per site_settings key
+// ---------------------------------------------------------------------------
+
+export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
+  header: {
+    title: "Header & menu",
+    description: "Your logo, the menu across the top, and the button beside it.",
+    where: "Top of every page",
+    sections: [
+      {
+        title: "Logo",
+        fields: [
+          {
+            kind: "image",
+            key: "logo_url",
+            label: "Logo image",
+            hint: "Leave empty to show the written name instead of a picture.",
+          },
+          {
+            kind: "text",
+            key: "logo_alt",
+            label: "Logo description",
+            hint: "Read aloud by screen readers and shown if the image fails to load.",
+          },
+          { kind: "text", key: "wordmark_1", label: "Name — first word" },
+          { kind: "text", key: "wordmark_2", label: "Name — second word" },
+          {
+            kind: "text",
+            key: "tagline",
+            label: "Small line under the name",
+            placeholder: "EXPLORE THE HEART OF BANGLADESH",
+          },
+        ],
+      },
+      {
+        title: "Menu & button",
+        fields: [
+          {
+            kind: "links",
+            key: "nav",
+            label: "Menu items",
+            hint: "Left box is what people read, right box is the page it opens (start with /).",
+            addLabel: "menu item",
+          },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to", placeholder: "/contact" },
+        ],
+      },
+    ],
+  },
+
+  footer: {
+    title: "Footer",
+    description: "The dark band at the bottom of every page.",
+    where: "Bottom of every page",
+    sections: [
+      {
+        title: "Intro",
+        fields: [
+          {
+            kind: "textarea",
+            key: "intro",
+            label: "Short paragraph about the company",
+            rows: 3,
+          },
+        ],
+      },
+      {
+        title: "Link columns",
+        description: "Each column has a heading and its own list of links.",
+        fields: [{ kind: "linkGroups", key: "columns", label: "Columns" }],
+      },
+      {
+        title: "Fine print",
+        fields: [
+          { kind: "text", key: "copyright", label: "Copyright line" },
+          { kind: "text", key: "site_label", label: "Website name shown in the footer" },
+        ],
+      },
+    ],
+  },
+
+  hero: {
+    title: "Homepage banner",
+    description: "The large photo and headline visitors see first.",
+    where: "Top of the homepage",
+    sections: [
+      {
+        title: "Background",
+        fields: [
+          { kind: "image", key: "background_url", label: "Background photo" },
+          {
+            kind: "text",
+            key: "background_alt",
+            label: "Photo description",
+            hint: "Describe the photo for people using screen readers.",
+          },
+        ],
+      },
+      {
+        title: "Wording",
+        fields: [
+          {
+            kind: "text",
+            key: "script",
+            label: "Handwritten word above the headline",
+            placeholder: "Explore",
+          },
+          { kind: "text", key: "headline", label: "Headline" },
+          { kind: "textarea", key: "subtext", label: "Sentence under the headline", rows: 2 },
+        ],
+      },
+      {
+        title: "Buttons",
+        fields: [
+          { kind: "text", key: "primary_label", label: "Main button text" },
+          { kind: "text", key: "primary_link", label: "Main button goes to", placeholder: "/tours" },
+          { kind: "text", key: "secondary_label", label: "Second button text" },
+          {
+            kind: "text",
+            key: "secondary_link",
+            label: "Second button goes to",
+            hint: "Leave empty to hide the second button.",
+          },
+        ],
+      },
+    ],
+  },
+
+  homepage: {
+    title: "Homepage sections",
+    description: "Every block on the homepage below the banner.",
+    where: "Homepage",
+    sections: [
+      {
+        title: "Feature strip",
+        description: "The row of small icons and promises under the banner.",
+        fields: [
+          {
+            kind: "rows",
+            key: "features",
+            label: "Features",
+            columns: [
+              { key: "icon", label: "Icon", type: "select", options: FEATURE_ICONS, span: 4 },
+              { key: "title", label: "Title", span: 8 },
+              { key: "text", label: "One-line description" },
+            ],
+            blank: { icon: "box", title: "", text: "" },
+          },
+        ],
+      },
+      {
+        title: "Popular tours",
+        fields: [
+          { kind: "text", key: "popular_kicker", label: "Small label above the heading" },
+          { kind: "text", key: "popular_heading", label: "Heading" },
+        ],
+      },
+      {
+        title: "Why travellers keep faith",
+        fields: [
+          { kind: "text", key: "faith_kicker", label: "Small label above the heading" },
+          { kind: "text", key: "faith_heading_1", label: "Heading — first line" },
+          { kind: "text", key: "faith_heading_2", label: "Heading — second line" },
+          {
+            kind: "text",
+            key: "faith_pin",
+            label: "Location tag on the photo",
+            placeholder: "📍 Sundarbans",
+          },
+          {
+            kind: "list",
+            key: "faith_list",
+            label: "Tick-list points",
+            hint: "One reason per line.",
+          },
+          {
+            kind: "rows",
+            key: "faith_callouts",
+            label: "Comparison notes",
+            columns: [
+              {
+                key: "lead",
+                label: "Bold opening",
+                placeholder: "Roam Bengal vs. Local Operators —",
+              },
+              { key: "text", label: "Rest of the sentence", type: "textarea" },
+            ],
+            blank: { lead: "", text: "" },
+          },
+        ],
+      },
+      {
+        title: "From the journal",
+        fields: [
+          { kind: "text", key: "journal_kicker", label: "Small label above the heading" },
+          { kind: "text", key: "journal_heading", label: "Heading" },
+        ],
+      },
+      {
+        title: "Reviews block",
+        fields: [
+          { kind: "text", key: "reviews_heading_1", label: "Heading — first line" },
+          { kind: "text", key: "reviews_heading_2", label: "Heading — second line" },
+          { kind: "text", key: "reviews_cta_label", label: "Button text" },
+          { kind: "text", key: "reviews_cta_link", label: "Button goes to" },
+        ],
+      },
+      {
+        title: "Why choose our company",
+        fields: [
+          { kind: "text", key: "why_heading", label: "Heading" },
+          { kind: "textarea", key: "why_intro", label: "Paragraph under the heading", rows: 3 },
+          {
+            kind: "rows",
+            key: "why_items",
+            label: "Reasons",
+            columns: [
+              { key: "icon", label: "Icon", type: "select", options: WHY_ICONS, span: 4 },
+              { key: "title", label: "Title", span: 8 },
+              { key: "text", label: "Description", type: "textarea" },
+            ],
+            blank: { icon: "globe", title: "", text: "" },
+          },
+        ],
+      },
+      {
+        title: "Closing invitation",
+        fields: [
+          { kind: "text", key: "cta_heading_1", label: "Heading — first line" },
+          { kind: "text", key: "cta_heading_2", label: "Heading — second line" },
+          {
+            kind: "list",
+            key: "cta_paragraphs",
+            label: "Paragraphs",
+            multiline: true,
+            hint: "Each box is one paragraph.",
+          },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to" },
+        ],
+      },
+    ],
+  },
+
+  gallery: {
+    title: "Photo gallery block",
+    description: "The photo strip and its wording.",
+    where: "Homepage",
+    sections: [
+      {
+        title: "Wording",
+        fields: [
+          { kind: "text", key: "heading_1", label: "Heading — first line" },
+          { kind: "text", key: "heading_2", label: "Heading — second line" },
+          { kind: "textarea", key: "blurb", label: "Paragraph", rows: 3 },
+          { kind: "text", key: "bold", label: "Bold line under the paragraph" },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to" },
+        ],
+      },
+      {
+        title: "Photos",
+        fields: [
+          {
+            kind: "rows",
+            key: "photos",
+            label: "Photos",
+            title: (_row, i) => `Photo ${i + 1}`,
+            columns: [
+              { key: "tag", label: "Caption", placeholder: "Sundarbans River" },
+              { key: "image_url", label: "Photo", render: imageCell },
+            ],
+            blank: { tag: "", image_url: "" },
+          },
+        ],
+      },
+    ],
+  },
+
+  reviews: {
+    title: "Reviews page",
+    description: "Star scores, review platforms, and the page wording.",
+    where: "/reviews",
+    sections: [
+      {
+        title: "Overall score",
+        fields: [
+          { kind: "text", key: "score", label: "Your score", placeholder: "4.9" },
+          { kind: "text", key: "score_out_of", label: "Out of", placeholder: "5" },
+          {
+            kind: "text",
+            key: "count_label",
+            label: "Line under the score",
+            placeholder: "Based on 340+ verified reviews",
+          },
+        ],
+      },
+      {
+        title: "Page wording",
+        fields: [
+          { kind: "text", key: "heading_1", label: "Heading — first line" },
+          { kind: "text", key: "heading_2", label: "Heading — second line" },
+          { kind: "textarea", key: "subtext", label: "Paragraph under the heading", rows: 2 },
+        ],
+      },
+      {
+        title: "Review platforms",
+        description: "The scores shown for each site you are reviewed on.",
+        fields: [
+          {
+            kind: "rows",
+            key: "platforms",
+            label: "Platforms",
+            columns: [
+              { key: "name", label: "Platform name", span: 6 },
+              { key: "score", label: "Score", span: 6 },
+              { key: "colour", label: "Brand colour", type: "color", span: 8 },
+              { key: "icon", label: "Symbol", placeholder: "★", span: 4 },
+            ],
+            blank: { name: "", score: "", colour: "#1E5F3B", icon: "★" },
+          },
+        ],
+      },
+      {
+        title: "Leave-a-review invitation",
+        fields: [
+          { kind: "text", key: "cta_heading", label: "Heading" },
+          { kind: "textarea", key: "cta_body", label: "Paragraph", rows: 2 },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to" },
+        ],
+      },
+    ],
+  },
+
+  tours_page: {
+    title: "Tours page",
+    description: "The banner and introduction above the tour list.",
+    where: "/tours",
+    sections: [
+      {
+        title: "Banner",
+        fields: [{ kind: "text", key: "banner_title", label: "Banner title" }],
+      },
+      {
+        title: "Introduction",
+        fields: [
+          { kind: "text", key: "intro_heading_1", label: "Heading — first line" },
+          { kind: "text", key: "intro_heading_2", label: "Heading — second line" },
+          {
+            kind: "list",
+            key: "intro_paragraphs",
+            label: "Paragraphs",
+            multiline: true,
+            hint: "Each box is one paragraph.",
+          },
+          { kind: "text", key: "intro_bold", label: "Bold closing line" },
+        ],
+      },
+    ],
+  },
+
+  blog_page: {
+    title: "Blog page",
+    description: "Headings on the blog index and the newsletter box.",
+    where: "/blog",
+    sections: [
+      {
+        title: "Masthead",
+        fields: [
+          {
+            kind: "text",
+            key: "volume_label",
+            label: "Small label at the top",
+            placeholder: "The Roam Bengal Journal — Vol. 04",
+          },
+          { kind: "text", key: "heading", label: "Heading" },
+          { kind: "textarea", key: "subtext", label: "Paragraph under the heading", rows: 2 },
+        ],
+      },
+      {
+        title: "Section labels",
+        fields: [
+          { kind: "text", key: "featured_eyebrow", label: "Label on the featured post" },
+          { kind: "text", key: "latest_heading", label: "Heading above the post list" },
+        ],
+      },
+      {
+        title: "Newsletter box",
+        fields: [
+          { kind: "text", key: "newsletter_heading", label: "Heading" },
+          { kind: "textarea", key: "newsletter_body", label: "Paragraph", rows: 2 },
+          { kind: "text", key: "newsletter_cta", label: "Button text" },
+        ],
+      },
+    ],
+  },
+
+  contact: {
+    title: "Contact page",
+    description: "Your contact details and the wording around the enquiry form.",
+    where: "/contact",
+    sections: [
+      {
+        title: "Page wording",
+        fields: [
+          { kind: "text", key: "banner_title", label: "Banner title" },
+          { kind: "text", key: "form_heading", label: "Heading above the form" },
+          { kind: "textarea", key: "form_intro", label: "Paragraph above the form", rows: 3 },
+          { kind: "text", key: "form_cta", label: "Send button text" },
+          {
+            kind: "text",
+            key: "art_note",
+            label: "Reassuring note beside the form",
+            placeholder: "Every message gets a real reply — usually the same day.",
+          },
+        ],
+      },
+      {
+        title: "Contact details",
+        fields: [
+          { kind: "text", key: "email", label: "Email address" },
+          { kind: "text", key: "phone", label: "Phone number" },
+          { kind: "text", key: "address", label: "Address" },
+          { kind: "text", key: "office_hours_label", label: "Opening hours label" },
+          {
+            kind: "text",
+            key: "office_hours",
+            label: "Opening hours",
+            placeholder: "Sat – Thu, 9am – 7pm (BST)",
+          },
+        ],
+      },
+      {
+        title: "Map",
+        fields: [
+          { kind: "text", key: "map_label", label: "Caption under the map" },
+          {
+            kind: "textarea",
+            key: "map_embed",
+            label: "Google Maps embed code",
+            rows: 4,
+            hint: "In Google Maps: Share → Embed a map → Copy HTML, then paste it here. Leave empty to hide the map.",
+          },
+        ],
+      },
+    ],
+  },
+
+  about: {
+    title: "About page",
+    description: "Your story, the numbers you show off, and why people travel with you.",
+    where: "/about",
+    sections: [
+      {
+        title: "Opening",
+        fields: [
+          { kind: "text", key: "eyebrow", label: "Small label above the heading" },
+          { kind: "text", key: "heading_1", label: "Heading — first line" },
+          { kind: "text", key: "heading_2", label: "Heading — second line" },
+          {
+            kind: "list",
+            key: "intro_paragraphs",
+            label: "Opening paragraphs",
+            multiline: true,
+            hint: "Each box is one paragraph.",
+          },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to" },
+          { kind: "image", key: "hero_image", label: "Main photo" },
+          {
+            kind: "textarea",
+            key: "intro_strip",
+            label: "Wide paragraph across the page",
+            rows: 5,
+          },
+        ],
+      },
+      {
+        title: "Numbers",
+        description: "The four figures shown in a row.",
+        fields: [
+          {
+            kind: "rows",
+            key: "stats",
+            label: "Numbers",
+            columns: [
+              { key: "value", label: "Figure", placeholder: "40+", span: 4 },
+              { key: "label", label: "What it counts", placeholder: "Tours & Itineraries", span: 8 },
+            ],
+            blank: { value: "", label: "" },
+          },
+        ],
+      },
+      {
+        title: "Mission, vision & values",
+        fields: [
+          { kind: "text", key: "mvv_kicker", label: "Small label above the heading" },
+          { kind: "text", key: "mvv_heading", label: "Heading" },
+          { kind: "textarea", key: "mvv_intro", label: "Paragraph under the heading", rows: 2 },
+          {
+            kind: "rows",
+            key: "pillars",
+            label: "Cards",
+            columns: [
+              { key: "icon", label: "Emoji", placeholder: "🧭", span: 3 },
+              { key: "title", label: "Title", placeholder: "Mission", span: 9 },
+              { key: "text", label: "Description", type: "textarea" },
+            ],
+            blank: { icon: "", title: "", text: "" },
+          },
+        ],
+      },
+      {
+        title: "Why travel with us",
+        fields: [
+          { kind: "text", key: "why_kicker", label: "Small label above the heading" },
+          { kind: "text", key: "why_heading", label: "Heading" },
+          {
+            kind: "rows",
+            key: "why_items",
+            label: "Reasons",
+            columns: [
+              { key: "title", label: "Title" },
+              { key: "text", label: "Description", type: "textarea" },
+            ],
+            blank: { title: "", text: "" },
+          },
+        ],
+      },
+    ],
+  },
+
+  whatsapp: {
+    title: "WhatsApp",
+    description: "Your WhatsApp number and the chat prompts shown around the site.",
+    where: "Floating button on every page, plus the contact page",
+    sections: [
+      {
+        title: "Your number",
+        fields: [
+          {
+            kind: "text",
+            key: "number",
+            label: "Number as people should read it",
+            placeholder: "+880 1XXX-XXXXXX",
+          },
+          {
+            kind: "text",
+            key: "link",
+            label: "WhatsApp chat link",
+            hint: "Digits only after wa.me/, no plus sign or spaces — e.g. https://wa.me/8801XXXXXXXXX",
+          },
+        ],
+      },
+      {
+        title: "Wording",
+        fields: [
+          { kind: "text", key: "float_label", label: "Floating button label" },
+          { kind: "text", key: "strip_heading", label: "Chat invitation heading" },
+          { kind: "textarea", key: "strip_body", label: "Chat invitation paragraph", rows: 2 },
+          { kind: "text", key: "strip_cta", label: "Chat invitation button text" },
+        ],
+      },
+    ],
+  },
+};
+
+/** Display order on the settings index — grouped by where it appears, not alphabetically. */
+export const SETTINGS_ORDER = [
+  "header",
+  "footer",
+  "hero",
+  "homepage",
+  "gallery",
+  "tours_page",
+  "blog_page",
+  "reviews",
+  "about",
+  "contact",
+  "whatsapp",
+] as const;
+
+// ---------------------------------------------------------------------------
+// Value coercion
+// ---------------------------------------------------------------------------
+
+type Obj = Record<string, unknown>;
+
+const asObject = (v: unknown): Obj =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {};
+
+const asText = (v: unknown): string =>
+  typeof v === "string" ? v : v === null || v === undefined ? "" : String(v);
+
+const asTextList = (v: unknown): string[] => (Array.isArray(v) ? v.map(asText) : []);
+
+const asRows = (v: unknown): Obj[] => (Array.isArray(v) ? v.map(asObject) : []);
+
+const asLinks = (v: unknown): LinkRow[] =>
+  Array.isArray(v)
+    ? v.map((row) => ({ label: asText(asObject(row).label), to: asText(asObject(row).to) }))
+    : [];
+
+const asLinkGroups = (v: unknown): { title: string; links: LinkRow[] }[] =>
+  Array.isArray(v)
+    ? v.map((row) => ({ title: asText(asObject(row).title), links: asLinks(asObject(row).links) }))
+    : [];
+
+const asGroups = (v: unknown): { title: string; items: string[] }[] =>
+  Array.isArray(v)
+    ? v.map((row) => ({
+        title: asText(asObject(row).title),
+        items: asTextList(asObject(row).items),
+      }))
+    : [];
+
+/**
+ * Merges the edited fields back over the value that was actually stored.
+ *
+ * The spread is what protects keys this form does not describe — `about.team`, say —
+ * from being wiped by an editor who never saw them.
+ */
+export function mergeSetting(stored: unknown, edited: Obj): Obj {
+  return { ...asObject(stored), ...edited };
+}
+
+/** Stored value on top of the shipped defaults, so untouched fields open pre-filled. */
+export function hydrateSetting(defaults: unknown, stored: unknown): Obj {
+  return { ...asObject(defaults), ...asObject(stored) };
+}
+
+// ---------------------------------------------------------------------------
+// Renderer
+// ---------------------------------------------------------------------------
+
+export function SettingsSections({
+  schema,
+  value,
+  onChange,
+}: {
+  schema: SettingsSchema;
+  value: Obj;
+  onChange: (next: Obj) => void;
+}) {
+  const set = (key: string, v: unknown) => onChange({ ...value, [key]: v });
+
+  return (
+    <div className="flex flex-col gap-4">
+      {schema.sections.map((section) => (
+        <Card key={section.title} title={section.title} description={section.description}>
+          {section.fields.map((field) => (
+            <FieldControl
+              key={field.key}
+              field={field}
+              value={value[field.key]}
+              onChange={(v) => set(field.key, v)}
+            />
+          ))}
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function FieldControl({
+  field,
+  value,
+  onChange,
+}: {
+  field: SettingsField;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  switch (field.kind) {
+    case "text":
+      return (
+        <TextField
+          label={field.label}
+          hint={field.hint}
+          placeholder={field.placeholder}
+          value={asText(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "textarea":
+      return (
+        <TextArea
+          label={field.label}
+          hint={field.hint}
+          rows={field.rows}
+          value={asText(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "image":
+      return (
+        <ImageField
+          label={field.label}
+          hint={field.hint}
+          value={asText(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "select":
+      return (
+        <SelectField
+          label={field.label}
+          hint={field.hint}
+          value={asText(value)}
+          options={field.options}
+          onChange={onChange}
+        />
+      );
+
+    case "list":
+      return (
+        <StringListField
+          label={field.label}
+          hint={field.hint}
+          multiline={field.multiline}
+          placeholder={field.placeholder}
+          values={asTextList(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "links":
+      return (
+        <LinkListField
+          label={field.label}
+          hint={field.hint}
+          addLabel={field.addLabel}
+          values={asLinks(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "linkGroups":
+      return (
+        <LinkGroupField
+          label={field.label}
+          hint={field.hint}
+          values={asLinkGroups(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "groups":
+      return (
+        <GroupedListField
+          label={field.label}
+          hint={field.hint}
+          values={asGroups(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "rows":
+      return (
+        <RepeaterField
+          label={field.label}
+          hint={field.hint}
+          title={field.title}
+          columns={field.columns}
+          values={asRows(value)}
+          blank={() => ({ ...field.blank })}
+          onChange={onChange}
+        />
+      );
+  }
+}
