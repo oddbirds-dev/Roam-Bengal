@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Card } from "@/components/admin/admin-ui";
 import {
+  BlockListField,
   GroupedListField,
   LinkGroupField,
   LinkListField,
@@ -9,10 +10,17 @@ import {
   StringListField,
   TextArea,
   TextField,
+  type ContentBlock,
   type LinkRow,
   type RepeaterColumn,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import {
+  INFO_SLUGS,
+  POLICY_SLUGS,
+  infoDefaults,
+  policyDefaults,
+} from "@/content/policy-defaults";
 
 /**
  * Plain-language forms for `site_settings`.
@@ -55,6 +63,7 @@ export type SettingsField =
   | { kind: "links"; key: string; label: string; hint?: string; addLabel?: string }
   | { kind: "linkGroups"; key: string; label: string; hint?: string }
   | { kind: "groups"; key: string; label: string; hint?: string }
+  | { kind: "blocks"; key: string; label: string; hint?: string }
   | {
       kind: "rows";
       key: string;
@@ -677,6 +686,78 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Policy and info pages
+//
+// Every one of these shares the `PolicyPage` shape from src/content/policy-defaults.ts
+// and renders through PolicyLayout, so one builder covers all eleven.
+// ---------------------------------------------------------------------------
+
+function pageSchema(title: string, path: string, description: string): SettingsSchema {
+  return {
+    title,
+    description,
+    where: path,
+    sections: [
+      {
+        title: "Page top",
+        fields: [
+          { kind: "text", key: "eyebrow", label: "Small label above the title" },
+          { kind: "text", key: "title", label: "Page title" },
+          { kind: "textarea", key: "subhead", label: "Sentence under the title", rows: 2 },
+        ],
+      },
+      {
+        title: "Page sections",
+        description:
+          "Each section has a heading, and any mix of paragraphs and bullet points beneath it.",
+        fields: [{ kind: "blocks", key: "blocks", label: "Sections" }],
+      },
+      {
+        title: "Questions box at the bottom",
+        fields: [
+          { kind: "text", key: "contact_heading", label: "Heading" },
+          { kind: "textarea", key: "contact_body", label: "Paragraph", rows: 2 },
+        ],
+      },
+    ],
+  };
+}
+
+const POLICY_META: Record<(typeof POLICY_SLUGS)[number], string> = {
+  payment: "How and when guests pay, and which methods you accept.",
+  cancellation: "What happens when a guest cancels a booked trip.",
+  refund: "When money is returned, and how much.",
+  privacy: "What guest information you collect and how it is handled.",
+  terms: "The terms guests agree to when they book.",
+};
+
+const INFO_META: Record<(typeof INFO_SLUGS)[number], string> = {
+  "visa-information": "Entry requirements and the visa help you offer.",
+  "embassy-directory": "Embassy and consulate contacts for visiting guests.",
+  "travel-faqs":
+    "The page wrapper only — the questions themselves are edited under FAQs in the menu.",
+  "responsible-travel": "Your promises on local pay, wildlife, and the environment.",
+  guides: "Who your guides are and how they are chosen.",
+  careers: "Roles you are hiring for and how to apply.",
+};
+
+for (const slug of POLICY_SLUGS) {
+  SETTINGS_SCHEMA[`policy_${slug}`] = pageSchema(
+    policyDefaults[slug].title,
+    `/policies/${slug}`,
+    POLICY_META[slug],
+  );
+}
+
+for (const slug of INFO_SLUGS) {
+  SETTINGS_SCHEMA[`info_${slug}`] = pageSchema(
+    infoDefaults[slug].title,
+    `/${slug}`,
+    INFO_META[slug],
+  );
+}
+
 /** Display order on the settings index — grouped by where it appears, not alphabetically. */
 export const SETTINGS_ORDER = [
   "header",
@@ -691,6 +772,12 @@ export const SETTINGS_ORDER = [
   "contact",
   "whatsapp",
 ] as const;
+
+/** Policy and info pages, listed separately from the site chrome above. */
+export const PAGE_SETTINGS_ORDER = [
+  ...INFO_SLUGS.map((slug) => `info_${slug}`),
+  ...POLICY_SLUGS.map((slug) => `policy_${slug}`),
+];
 
 // ---------------------------------------------------------------------------
 // Value coercion
@@ -716,6 +803,20 @@ const asLinks = (v: unknown): LinkRow[] =>
 const asLinkGroups = (v: unknown): { title: string; links: LinkRow[] }[] =>
   Array.isArray(v)
     ? v.map((row) => ({ title: asText(asObject(row).title), links: asLinks(asObject(row).links) }))
+    : [];
+
+const asBlocks = (v: unknown): ContentBlock[] =>
+  Array.isArray(v)
+    ? v.map((row) => {
+        const b = asObject(row);
+        return {
+          heading: asText(b.heading),
+          // Both lists are optional in the shipped defaults — a section may be all prose
+          // or all bullets — so a missing key becomes an empty list, not undefined.
+          paragraphs: asTextList(b.paragraphs),
+          items: asTextList(b.items),
+        };
+      })
     : [];
 
 const asGroups = (v: unknown): { title: string; items: string[] }[] =>
@@ -856,6 +957,16 @@ function FieldControl({
           label={field.label}
           hint={field.hint}
           values={asLinkGroups(value)}
+          onChange={onChange}
+        />
+      );
+
+    case "blocks":
+      return (
+        <BlockListField
+          label={field.label}
+          hint={field.hint}
+          values={asBlocks(value)}
           onChange={onChange}
         />
       );

@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import {
+  PAGE_SETTINGS_ORDER,
   SETTINGS_ORDER,
   SETTINGS_SCHEMA,
   SettingsSections,
@@ -17,6 +18,7 @@ import {
   mergeSetting,
   type SettingsSchema,
 } from "@/components/admin/settings-form";
+import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminListSettings, adminSaveSetting } from "@/lib/admin-content.functions";
 
@@ -27,8 +29,16 @@ export const Route = createFileRoute("/_authenticated/admin/settings")({
 
 type SettingsRow = { id: string; key: string; value: unknown; description: string | null };
 
-const defaultsFor = (key: string): unknown =>
-  (siteDefaults as Record<string, unknown>)[key] ?? {};
+/** Mirrors how the public pages resolve a key: site chrome, then policy, then info. */
+function defaultsFor(key: string): unknown {
+  if (key.startsWith("policy_")) {
+    return (policyDefaults as Record<string, unknown>)[key.slice("policy_".length)] ?? {};
+  }
+  if (key.startsWith("info_")) {
+    return (infoDefaults as Record<string, unknown>)[key.slice("info_".length)] ?? {};
+  }
+  return (siteDefaults as Record<string, unknown>)[key] ?? {};
+}
 
 /**
  * Site content, edited as forms rather than JSON.
@@ -74,38 +84,22 @@ function SettingsScreen() {
         subtitle="Pick a part of the website to change its wording, photos, and links. Everything here is public — never put a password or private note in it."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {SETTINGS_ORDER.map((key) => {
-          const schema = SETTINGS_SCHEMA[key]!;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setOpenKey(key)}
-              className="flex h-full flex-col rounded-2xl border border-rule bg-paper p-5 text-left transition-colors hover:border-green"
-            >
-              <h2 className="font-display text-[1.05rem] font-bold text-green-dark">
-                {schema.title}
-              </h2>
-              <p className="mt-1.5 flex-1 text-[0.82rem] leading-6 text-muted">
-                {schema.description}
-              </p>
-              <span className="mt-4 flex items-center justify-between">
-                <span className="rounded-full bg-cream px-2.5 py-1 text-[0.7rem] font-medium text-muted">
-                  {schema.where}
-                </span>
-                <span className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-green">
-                  Edit
-                  <AdminIcon name="chevron" className="h-4 w-4" />
-                </span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <SectionGrid
+        heading="Around the site"
+        blurb="Wording and pictures that appear on the homepage or on every page."
+        keys={SETTINGS_ORDER}
+        onOpen={setOpenKey}
+      />
+
+      <SectionGrid
+        heading="Standalone pages"
+        blurb="Full pages of text — the ones your footer links to, and your booking policies."
+        keys={PAGE_SETTINGS_ORDER}
+        onOpen={setOpenKey}
+      />
 
       {extras.length ? (
-        <div className="mt-8">
+        <div className="mt-10">
           <h2 className="mb-3 font-display text-[1.05rem] font-bold text-green-dark">
             Other content
           </h2>
@@ -136,6 +130,58 @@ function SettingsScreen() {
         </div>
       ) : null}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+function SectionGrid({
+  heading,
+  blurb,
+  keys,
+  onOpen,
+}: {
+  heading: string;
+  blurb: string;
+  keys: readonly string[];
+  onOpen: (key: string) => void;
+}) {
+  return (
+    <section className="mb-10">
+      <h2 className="font-display text-[1.15rem] font-bold text-green-dark">{heading}</h2>
+      <p className="mt-1 mb-4 text-[0.82rem] text-muted">{blurb}</p>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {keys.map((key) => {
+          const schema = SETTINGS_SCHEMA[key];
+          if (!schema) return null;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onOpen(key)}
+              className="flex h-full flex-col rounded-2xl border border-rule bg-paper p-5 text-left transition-colors hover:border-green"
+            >
+              <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                {schema.title}
+              </h3>
+              <p className="mt-1.5 flex-1 text-[0.82rem] leading-6 text-muted">
+                {schema.description}
+              </p>
+              <span className="mt-4 flex items-center justify-between gap-2">
+                <span className="rounded-full bg-cream px-2.5 py-1 text-[0.7rem] font-medium text-muted">
+                  {schema.where}
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[0.8rem] font-semibold text-green">
+                  Edit
+                  <AdminIcon name="chevron" className="h-4 w-4" />
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
