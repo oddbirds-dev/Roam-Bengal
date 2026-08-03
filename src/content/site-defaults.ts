@@ -225,7 +225,8 @@ export const siteDefaults = {
 
   blog_page: {
     volume_label: "The Roam Bengal Journal — Vol. 04",
-    heading: "Notes From The Rivers, Hills & Tea Gardens",
+    // *…* renders as the reference masthead's italic orange phrase.
+    heading: "Notes From The *Rivers, Hills* & Tea Gardens",
     subtext:
       "Field notes, guides, and honest advice from the boatmen and guides who call these routes home.",
     featured_eyebrow: "Featured Story",

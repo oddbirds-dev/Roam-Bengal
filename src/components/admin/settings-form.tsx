@@ -494,7 +494,12 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             label: "Small label at the top",
             placeholder: "The Roam Bengal Journal — Vol. 04",
           },
-          { kind: "text", key: "heading", label: "Heading" },
+          {
+            kind: "text",
+            key: "heading",
+            label: "Heading",
+            hint: "Wrap a phrase in *asterisks* to show it in italic orange.",
+          },
           { kind: "textarea", key: "subtext", label: "Paragraph under the heading", rows: 2 },
         ],
       },

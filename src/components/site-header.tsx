@@ -75,9 +75,11 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
                 onDark ? "text-white/90 hover:text-white" : "text-ink hover:text-green"
               }`}
               activeProps={{
-                className: `after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-orange ${
-                  onDark ? "text-white" : "text-ink"
-                }`,
+                // Overlay pages mark the active link with an orange rule; the solid
+                // header on /blog and the package pages colours the label instead.
+                className: onDark
+                  ? "text-white after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-orange"
+                  : "text-orange font-semibold",
               }}
               activeOptions={{ exact: item.to === "/" }}
             >

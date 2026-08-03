@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { TourCard } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
+import { PhotoFrame } from "@/components/ui/photo-frame";
+import { DhakaScene } from "@/components/art/dhaka-scene";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
   listActivities,
@@ -39,11 +41,29 @@ export const Route = createFileRoute("/tours/")({
   component: ToursIndex,
 });
 
+const BANNER_BG = "linear-gradient(160deg, #1E5F3B 0%, #123D26 100%)";
+const BANNER_OVERLAY =
+  "linear-gradient(180deg, rgba(8,15,10,0.35) 0%, rgba(8,15,10,0.15) 40%, rgba(8,15,10,0.55) 100%)";
+const DREAM_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
+
+/** `.tour-photo-frame` colours, cycled down the listing in reference order. */
+const TOUR_FRAMES = [
+  "linear-gradient(160deg,#F0791E,#C43B0E)",
+  "linear-gradient(160deg,#22B57A,#0B6B47)",
+  "linear-gradient(160deg,#8C6A3D,#5A3E1B)",
+  "linear-gradient(160deg,#F0791E,#C4390E)",
+  "linear-gradient(160deg,#3E7A6E,#123D30)",
+  "linear-gradient(160deg,#F2B705,#8C6A3D)",
+  "linear-gradient(160deg,#7A2408,#2A0D02)",
+  "linear-gradient(160deg,#1E5F3B,#0B2818)",
+  "linear-gradient(160deg,#178C7A,#123D30)",
+];
+
 function ToursIndex() {
   const { tours, activities, themes } = Route.useLoaderData();
   const { theme } = Route.useSearch();
   const navigate = useNavigate({ from: "/tours/" });
-  const { tours_page } = useSiteSettings();
+  const { tours_page, homepage } = useSiteSettings();
 
   const active = theme ?? "all";
   const visible =
@@ -63,39 +83,54 @@ function ToursIndex() {
 
   return (
     <>
-      <div className="relative bg-green-dark">
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/30 to-ink/60" />
-        <div className="relative z-10">
-          <SiteHeader />
-          <div className="wrap py-20 text-center">
-            <h1 className="font-display text-[clamp(2rem,5vw,3.2rem)] leading-tight text-white">
-              {tours_page.banner_title}
-            </h1>
-          </div>
+      {/* Page banner */}
+      <div
+        className="relative flex min-h-[460px] flex-col overflow-hidden text-white"
+        style={{ background: BANNER_BG }}
+      >
+        <PhotoFrame
+          src=""
+          alt="Person walking a forest railway track in Bangladesh at sunrise"
+          gradientCss="transparent"
+          priority
+          placeholderLabel="images/tours-banner.jpg"
+          className="absolute inset-0 z-0 h-full w-full"
+        />
+        <div className="absolute inset-0 z-[1]" style={{ background: BANNER_OVERLAY }} />
+
+        <SiteHeader />
+
+        <div className="relative z-[2] flex flex-1 items-center justify-center p-10">
+          <h1 className="max-w-[900px] text-center font-body text-[clamp(1.5rem,3.4vw,2.4rem)] font-light tracking-[0.06em] uppercase [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]">
+            {tours_page.banner_title}
+          </h1>
         </div>
       </div>
 
       <main id="main">
-        <section className="py-16">
-          <div className="wrap max-w-3xl text-center">
-            <h2 className="font-display text-[clamp(1.6rem,3.2vw,2.2rem)] leading-tight">
+        {/* Intro */}
+        <section className="pt-[70px] pb-5">
+          <div className="wrap">
+            <h2 className="mb-6 font-kalam text-[clamp(1.7rem,3vw,2.3rem)] leading-[1.3] font-bold uppercase">
               <span className="text-green">{tours_page.intro_heading_1}</span>
               <br />
               <span className="text-orange">{tours_page.intro_heading_2}</span>
             </h2>
             {tours_page.intro_paragraphs.map((p) => (
-              <p key={p} className="mt-4 text-[0.92rem] leading-7 text-muted">
+              <p key={p} className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] text-ink">
                 {p}
               </p>
             ))}
-            <p className="mt-4 font-semibold text-green-dark">{tours_page.intro_bold}</p>
+            <p className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] font-bold text-ink">
+              {tours_page.intro_bold}
+            </p>
           </div>
         </section>
 
         {/* Filter pills are driven by `activities` (the theme axis), not tours.category
             (the duration axis). The active theme lives in the URL so it is linkable. */}
-        <section className="pb-6">
-          <div className="wrap flex flex-wrap justify-center gap-3">
+        <section className="shell pt-[60px] pb-5">
+          <div className="wide mb-10 flex flex-wrap justify-center gap-3">
             <FilterPill
               label="All Tours"
               isActive={active === "all"}
@@ -110,43 +145,70 @@ function ToursIndex() {
               />
             ))}
           </div>
-          <p className="mt-5 text-center text-[0.84rem] text-muted" aria-live="polite">
+          <p className="mb-[30px] text-center text-[0.85rem] text-muted" aria-live="polite">
             {active === "all"
               ? `Showing all ${visible.length} tours`
               : `Showing ${visible.length} ${activeName} tour${visible.length === 1 ? "" : "s"}`}
           </p>
         </section>
 
-        <section className="pb-20">
-          <div className="wrap">
-            {visible.length ? (
-              <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                {visible.map((tour) => (
-                  <TourCard key={tour.id} tour={tour} />
-                ))}
+        {visible.length ? (
+          <div className="wide grid gap-[26px] px-5 pb-[60px] nav:grid-cols-3 nav:px-10 nav:pb-[90px]">
+            {visible.map((tour, i) => (
+              <TourCard
+                key={tour.id}
+                tour={tour}
+                gradientCss={TOUR_FRAMES[i % TOUR_FRAMES.length]}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="wide px-5 pb-[60px] nav:px-10 nav:pb-[90px]">
+            <div className="rounded-[18px] border border-dashed border-rule py-20 text-center">
+              <p className="font-display text-xl font-bold text-green">
+                No tours in this category yet.
+              </p>
+              <p className="mt-2 text-[0.9rem] text-muted">
+                Try another theme, or tell us what you have in mind and we will build it.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTheme("all")}
+                  className="inline-flex items-center rounded-[30px] border-[1.5px] border-green px-[26px] py-3 text-[0.86rem] font-semibold text-green transition-colors hover:bg-green hover:text-white"
+                >
+                  Show all tours
+                </button>
+                <ButtonLink to="/contact" variant="green-dark">
+                  Plan a custom trip
+                </ButtonLink>
               </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-rule py-20 text-center">
-                <p className="font-display text-xl text-green">
-                  No tours in this category yet.
+            </div>
+          </div>
+        )}
+
+        {/* Dream CTA — shared with the homepage */}
+        <section id="contact" className="py-[70px]" style={{ background: DREAM_BG }}>
+          <div className="wrap grid items-center gap-10 nav:grid-cols-2">
+            <div>
+              <h2 className="mb-[22px] font-kalam text-[clamp(1.9rem,3.4vw,2.5rem)] leading-[1.3] font-bold">
+                <span className="text-green">{homepage.cta_heading_1}</span>
+                <br />
+                About <span className="text-gold">{homepage.cta_heading_2}</span>
+              </h2>
+              {homepage.cta_paragraphs.map((p) => (
+                <p
+                  key={p}
+                  className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink"
+                >
+                  {p}
                 </p>
-                <p className="mt-2 text-[0.9rem] text-muted">
-                  Try another theme, or tell us what you have in mind and we will build it.
-                </p>
-                <div className="mt-6 flex justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("all")}
-                    className="inline-flex items-center rounded-[30px] border-[1.5px] border-green-dark px-5 py-2.5 text-[0.84rem] font-semibold text-green-dark"
-                  >
-                    Show all tours
-                  </button>
-                  <ButtonLink to="/contact" variant="green-dark">
-                    Plan a custom trip
-                  </ButtonLink>
-                </div>
-              </div>
-            )}
+              ))}
+              <ButtonLink to={homepage.cta_link} variant="green-dark">
+                {homepage.cta_label}
+              </ButtonLink>
+            </div>
+            <DhakaScene className="h-auto w-full" />
           </div>
         </section>
       </main>
@@ -157,6 +219,7 @@ function ToursIndex() {
   );
 }
 
+/** `.filter-pill` — orange when active, per the tours reference. */
 function FilterPill({
   label,
   isActive,
@@ -171,10 +234,10 @@ function FilterPill({
       type="button"
       onClick={onClick}
       aria-pressed={isActive}
-      className={`rounded-[30px] border-[1.5px] px-5 py-2.5 text-[0.84rem] font-semibold transition-colors ${
+      className={`cursor-pointer rounded-[30px] border-[1.5px] px-[22px] py-2.5 text-[0.85rem] font-semibold transition-all duration-200 ${
         isActive
-          ? "border-green-dark bg-green-dark text-white"
-          : "border-rule bg-paper text-ink hover:border-green"
+          ? "border-orange bg-orange text-white"
+          : "border-[#E7DDD0] bg-paper text-muted hover:border-orange hover:text-orange"
       }`}
     >
       {label}

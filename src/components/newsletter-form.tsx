@@ -11,7 +11,7 @@ export function NewsletterForm({ cta, source }: { cta: string; source: string })
 
   if (state === "done") {
     return (
-      <p className="mt-6 rounded-xl bg-paper p-5 text-[0.9rem] font-medium text-green-dark">
+      <p className="rounded-xl bg-paper p-5 text-[0.9rem] font-medium text-green-dark">
         ✅ You're on the list. Look out for the next dispatch.
       </p>
     );
@@ -19,7 +19,6 @@ export function NewsletterForm({ cta, source }: { cta: string; source: string })
 
   return (
     <form
-      className="mt-6"
       onSubmit={async (e) => {
         e.preventDefault();
         setState("sending");
@@ -33,7 +32,7 @@ export function NewsletterForm({ cta, source }: { cta: string; source: string })
         }
       }}
     >
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-wrap gap-2.5">
         <label className="sr-only" htmlFor="newsletter-email">
           Email address
         </label>
@@ -43,8 +42,8 @@ export function NewsletterForm({ cta, source }: { cta: string; source: string })
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@email.com"
-          className="flex-1 rounded-[30px] border-[1.5px] border-rule bg-paper px-5 py-3 text-[0.88rem] outline-none focus:border-green"
+          placeholder="Your email address"
+          className="min-w-[260px] flex-1 rounded-[30px] border-[1.5px] border-[#D8E5DB] bg-paper px-5 py-3 text-[0.88rem] outline-none focus:border-green"
         />
         <Button type="submit" variant="green-dark" disabled={state === "sending"}>
           {state === "sending" ? "Signing up…" : cta}
