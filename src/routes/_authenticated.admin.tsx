@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
+import { AdminIcon } from "@/components/admin/icons";
+import { supabase } from "@/integrations/supabase/client";
+import { whoAmI } from "@/lib/admin.functions";
+
+/**
+ * Admin shell: fixed sidebar, top bar, content column.
+ *
+ * The role check here is cosmetic — it hides UI. Real enforcement is
+ * `requireSupabaseAuth` + `assertAdmin` + RLS on every server function.
+ */
+export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async () => {
+    const me = await whoAmI();
+    if (!me.isAdmin) throw redirect({ to: "/" });
+    return { me };
+  },
+  loader: ({ context }) => context.me,
+  component: AdminShell,
+});
+
+const NAV = [
+  { label: "Dashboard", to: "/admin", icon: "dashboard" },
+  { label: "Inquiries", to: "/admin/inquiries", icon: "inbox" },
+  { label: "Tours", to: "/admin/tours", icon: "map" },
+  // No Destinations entry: the table exists but no destination pages ship in v1
+  // (PRD §16), so editing them would produce content with nowhere to appear.
+  { label: "Activities", to: "/admin/activities", icon: "activity" },
+  { label: "Blogs", to: "/admin/posts", icon: "news" },
+  { label: "Reviews", to: "/admin/testimonials", icon: "star" },
+  { label: "FAQs", to: "/admin/faqs", icon: "help" },
+  { label: "Site content", to: "/admin/settings", icon: "gear" },
+] as const;
+
+function AdminShell() {
+  const me = Route.useLoaderData();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => setMenuOpen(false), [pathname]);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    await navigate({ to: "/auth" });
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F6F8F6]">
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-rule bg-paper transition-transform lg:translate-x-0 ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-[68px] shrink-0 items-center border-b border-rule px-6">
+          <span className="font-display text-[1.25rem] font-bold text-ink">Admin Panel</span>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          <span className="mb-2 block px-3 text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase">
+            Management
+          </span>
+          <div className="flex flex-col gap-0.5">
+            {NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                activeOptions={{ exact: item.to === "/admin" }}
+                className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green"
+                activeProps={{ className: "bg-mint text-green font-semibold" }}
+              >
+                {({ isActive }) => (
+                  <>
+                    <AdminIcon name={item.icon} />
+                    <span className="flex-1">{item.label}</span>
+                    {isActive ? (
+                      <AdminIcon name="chevron" className="h-4 w-4 opacity-70" />
+                    ) : null}
+                  </>
+                )}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        <div className="shrink-0 border-t border-rule px-3 py-4">
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-rust/5 hover:text-rust"
+          >
+            <AdminIcon name="signOut" />
+            Sign out
+          </button>
+          <p className="mt-2 truncate px-3 text-[0.72rem] text-muted" title={me.email ?? ""}>
+            {me.email}
+          </p>
+        </div>
+      </aside>
+
+      {menuOpen ? (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-ink/40 lg:hidden"
+        />
+      ) : null}
+
+      {/* Main column */}
+      <div className="lg:pl-[260px]">
+        <header className="flex h-[68px] items-center justify-between border-b border-rule bg-paper px-5 sm:px-8">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-rule text-ink lg:hidden"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+
+          <div className="ml-auto">
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg border border-rule px-4 py-2.5 text-[0.84rem] font-medium text-ink transition-colors hover:border-green hover:text-green"
+            >
+              <AdminIcon name="external" className="h-4 w-4" />
+              View store
+            </a>
+          </div>
+        </header>
+
+        <main id="main" className="px-5 py-8 sm:px-8">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}

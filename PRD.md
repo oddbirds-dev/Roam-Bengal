@@ -397,9 +397,13 @@ policy, and make `message` required in **both** Zod and the policy.
 
 Backs the blog page's "Get New Stories In Your Inbox" box.
 
+```text
+id uuid PK · email text NOT NULL · source text · created_at timestamptz
+UNIQUE INDEX on lower(email)
 ```
-id uuid PK · email citext NOT NULL UNIQUE · source text · created_at timestamptz
-```
+
+Case-insensitive uniqueness comes from the functional index rather than a `citext` column, so
+no extension has to be installed into `public` (which the security advisor flags).
 
 RLS: `INSERT` granted to `anon`/`authenticated` with a `WITH CHECK` email-format constraint
 mirroring `inquiries`; `SELECT`/`UPDATE`/`DELETE` admin-only. Public cannot read the list.
@@ -425,7 +429,7 @@ Seeded (`ON CONFLICT (key) DO NOTHING`) from BACKEND.md §10: `header`, `footer`
 ### 8.8 RLS
 
 Apply BACKEND.md §7 unchanged: the standard content-table pattern (`public read published X`
-+ `admins manage X`) for `tours`, `destinations`, `blog_posts`, `testimonials`, `faqs`;
+plus `admins manage X`) for `tours`, `destinations`, `blog_posts`, `testimonials`, `faqs`;
 always-public `SELECT` for `activities`, `tour_activities`, `site_settings`, `seo_meta`,
 `redirects`; asymmetric write-only-for-public on `inquiries` and `newsletter_subscribers`;
 `SELECT`-only grant on `user_roles`. Every policy delegates to `private.has_role`.
@@ -445,6 +449,16 @@ error logged server-side.
 
 **Admin** (`admin-content.functions.ts`): the full BACKEND.md list. All mutations are `POST`,
 including deletes. All Zod-validated. `assertAdmin(context)` is the first line of every handler.
+
+> **Two distinct failure shapes reach the client, and callers must handle both.** A thrown
+> `Response` (our `httpError`) arrives as a real HTTP status — 401, 403, 404. An error thrown
+> *inside* a handler, such as a Zod validation failure, arrives as **HTTP 200** with the error
+> carried in the reply envelope's `error` field. Checking only the status code will silently
+> treat a rejected save as a success.
+>
+> **An UPDATE filtered to zero rows by RLS returns success with no row**, not an error. Every
+> update here therefore does `.select("id").maybeSingle()` and 404s on an empty result —
+> otherwise a save that RLS silently discarded would look like it worked.
 
 **SEO** (`seo.functions.ts`): as specified, but `getSeoMeta` and `listRedirectsPublic` must
 actually be wired in this build (see §4 deviations).
@@ -559,7 +573,8 @@ testimonials 9 · faqs 6 · site_settings 12.
 
 ### Remaining provisioning steps
 
-1. **Create the first admin.** Create the user in the Supabase dashboard (Auth → Users), then:
+1. **Create the first admin.** Create the user in the Supabase **dashboard** (Auth → Users),
+   then grant the role:
 
    ```sql
    INSERT INTO public.user_roles (user_id, role)
@@ -568,6 +583,14 @@ testimonials 9 · faqs 6 · site_settings 12.
 
    There is no sign-up route and `enable_signup = false` in `supabase/config.toml` — admins are
    provisioned by hand, by design.
+
+   > **Do not create auth users with `INSERT INTO auth.users`.** GoTrue scans
+   > `confirmation_token`, `recovery_token`, `email_change`, `email_change_token_new`,
+   > `email_change_token_current`, `phone_change`, `phone_change_token` and
+   > `reauthentication_token` into non-nullable Go strings. A hand-inserted row leaves them
+   > `NULL`, and *every* password grant for the whole project then fails with a
+   > `500 "Database error querying schema"` — which looks like an outage, not a bad row. If
+   > you must seed a user in SQL, set all eight to `''`.
 
 2. **Pull the migrations into the repo.** They were applied remotely; the repo must become the
    source of truth. In Phase 1, after the toolchain exists:
@@ -592,7 +615,9 @@ testimonials 9 · faqs 6 · site_settings 12.
 | **3. Marketing pages** | `/`, `/tours`, `/tours/:slug`, `/about` | Pixel-comparable to the reference at 1440px |
 | **4. Content pages** | `/blog`, `/blog/:slug`, `/reviews`, `/contact`, 5 policy pages, 6 info pages, `/gallery` | All footer links resolve; no 404s |
 | **5. Capture** | `submitInquiry`, `subscribeNewsletter`, WhatsApp float/strip, "Book Now" prefill | Inquiry appears in DB with `status='new'` |
-| **6. Auth + admin** | `/auth`, route guards, dashboard, all CRUD screens, image upload | Admin can create and publish a tour end-to-end without SQL |
+| **6a. Auth** ✅ | `/auth`, `requireSupabaseAuth`, `attachSupabaseAuth`, `assertAdmin`, `whoAmI`, route guards, admin shell + dashboard | **Done.** `npm run test:auth` — 16 checks green |
+| **6b. Admin API** ✅ | 28 server functions across tours, destinations, activities, posts, testimonials, FAQs, settings, inquiries, subscribers | **Done.** `npm run test:admin` — 27 checks green |
+| **6c. Admin CMS screens** ✅ | Tours list + full editor, blog, reviews, FAQs, themes, inquiries queue, settings, image upload | **Done.** `npm run test:cms` — 20 checks green |
 | **7. SEO** | sitemap, robots, `seo_meta` rendering, redirect middleware, JSON-LD | Rich-results test passes on a tour page |
 | **8. Responsive + a11y** | Mobile nav (new — see §16), 320–1920px sweep, focus states, contrast | Lighthouse a11y ≥ 95, no horizontal scroll |
 | **9. Deploy** | Env wiring, Docker or Lovable target, custom domain, `SITE_URL` | Production URL live with real content |
