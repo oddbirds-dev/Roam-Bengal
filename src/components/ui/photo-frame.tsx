@@ -32,7 +32,10 @@ interface PhotoFrameProps {
   src?: string | null;
   alt: string;
   gradient?: FrameGradient;
+  /** Raw CSS gradient, for the one-off frames the reference styles inline. */
+  gradientCss?: string;
   className?: string;
+  style?: React.CSSProperties;
   /** Hero images should not be lazy — it delays LCP. */
   priority?: boolean;
   /** Shown in dev when `src` is empty, mirroring the reference placeholder label. */
@@ -44,7 +47,9 @@ export function PhotoFrame({
   src,
   alt,
   gradient = "green",
+  gradientCss,
   className = "",
+  style,
   priority = false,
   placeholderLabel,
   children,
@@ -52,10 +57,15 @@ export function PhotoFrame({
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(src) && !failed;
 
+  // The frame needs a positioned box for the absolute <img>, but Tailwind emits
+  // `.relative` after `.absolute`, so hardcoding it would silently beat a caller's
+  // `absolute`/`fixed` no matter the class order. Only add it when nothing else sets one.
+  const positioned = /(?:^|\s)(?:absolute|fixed|sticky)(?:\s|$)/.test(className);
+
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
-      style={{ background: FRAME_GRADIENTS[gradient] }}
+      className={`${positioned ? "" : "relative"} overflow-hidden ${className}`}
+      style={{ background: gradientCss ?? FRAME_GRADIENTS[gradient], ...style }}
     >
       {import.meta.env.DEV && !showImage && placeholderLabel ? (
         <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-3 text-center text-[0.66rem] font-medium tracking-wide text-white/80">

@@ -13,17 +13,32 @@ export function SectionHead({
   return (
     <div className={`text-center ${className}`}>
       {kicker ? <Eyebrow>{kicker}</Eyebrow> : null}
-      <h2 className="font-display text-[clamp(1.7rem,3.4vw,2.4rem)] leading-tight text-green">
+      <h2 className="mb-4 font-display text-[clamp(1.9rem,3.4vw,2.5rem)] leading-tight text-ink">
         {children}
       </h2>
-      <div className="mx-auto mt-4 h-[3px] w-16 rounded-full bg-gold" />
+      <Divider />
     </div>
   );
 }
 
-export function Eyebrow({ children }: { children: ReactNode }) {
+/** 70×4 orange→gold rule under every centred section heading. */
+export function Divider() {
   return (
-    <span className="mb-2 block text-[0.72rem] font-semibold tracking-[0.2em] text-orange uppercase">
+    <div className="mx-auto mb-11 h-1 w-[70px] rounded-[2px] bg-gradient-to-r from-orange to-gold" />
+  );
+}
+
+export function Eyebrow({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`mb-2 block text-[0.78rem] font-bold tracking-[0.14em] text-orange uppercase ${className}`}
+    >
       {children}
     </span>
   );

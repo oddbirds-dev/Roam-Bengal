@@ -43,38 +43,42 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
       className={
         onDark
           ? "relative z-30 w-full"
-          : "relative z-30 w-full border-b border-rule bg-paper"
+          : "relative z-30 w-full border-b border-[#EEE7DA] bg-paper"
       }
     >
-      <nav className="wrap flex items-center justify-between gap-6 py-5">
-        <Link to="/" className="flex flex-col gap-1" aria-label={header.logo_alt}>
+      <nav className="wrap flex items-center justify-between gap-6 py-[22px]">
+        <Link to="/" className="block leading-none" aria-label={header.logo_alt}>
           <span className="flex items-center gap-2.5">
-            <LogoMark className="h-11 w-11 shrink-0" />
-            <span className="font-display text-2xl leading-none font-bold">
-              <span className={onDark ? "text-white" : "text-green-dark"}>
+            <LogoMark className="h-[38px] w-[38px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.25)]" />
+            <span className="font-kalam text-[1.6rem] leading-none font-bold tracking-[-0.01em]">
+              <span className={onDark ? "text-white" : "text-ink"}>
                 {header.wordmark_1}
               </span>
-              <span className="text-orange">{header.wordmark_2}</span>
+              <span className="ml-[5px] text-orange">{header.wordmark_2}</span>
             </span>
           </span>
           <span
-            className={`text-[0.58rem] font-semibold tracking-[0.18em] ${
-              onDark ? "text-white/70" : "text-muted"
+            className={`mt-[5px] ml-[48px] block text-[0.48rem] font-bold tracking-[0.1em] whitespace-nowrap ${
+              onDark ? "text-white/75" : "text-muted"
             }`}
           >
             {header.tagline}
           </span>
         </Link>
 
-        <div className="hidden items-center gap-8 nav:flex">
+        <div className="hidden items-center gap-[30px] text-[0.9rem] font-medium nav:flex">
           {header.nav.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className={`text-[0.9rem] font-medium transition-colors ${
-                onDark ? "text-white/90 hover:text-gold" : "text-ink hover:text-green"
+              className={`relative pb-1.5 transition-colors ${
+                onDark ? "text-white/90 hover:text-white" : "text-ink hover:text-green"
               }`}
-              activeProps={{ className: onDark ? "text-gold" : "text-green font-semibold" }}
+              activeProps={{
+                className: `after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-orange ${
+                  onDark ? "text-white" : "text-ink"
+                }`,
+              }}
               activeOptions={{ exact: item.to === "/" }}
             >
               {item.label}
@@ -117,9 +121,9 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
             className="absolute inset-y-0 right-0 flex w-[min(320px,85vw)] flex-col gap-2 bg-paper p-6 shadow-2xl"
           >
             <div className="mb-4 flex items-center justify-between">
-              <span className="font-display text-xl font-bold">
-                <span className="text-green-dark">{header.wordmark_1}</span>
-                <span className="text-orange">{header.wordmark_2}</span>
+              <span className="font-kalam text-[1.4rem] font-bold">
+                <span className="text-ink">{header.wordmark_1}</span>
+                <span className="ml-[5px] text-orange">{header.wordmark_2}</span>
               </span>
               <button
                 type="button"

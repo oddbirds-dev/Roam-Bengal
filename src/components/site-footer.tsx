@@ -7,57 +7,56 @@ export function SiteFooter() {
   const { footer } = useSiteSettings();
 
   return (
-    <footer className="bg-green-dark text-white/80">
-      <div className="wrap grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-[1.6fr_repeat(5,1fr)]">
-        <div className="max-w-sm">
-          <span className="mb-4 flex items-center gap-2.5">
-            <LogoMark className="h-10 w-10 shrink-0" />
-            <span className="font-display text-xl leading-none font-bold">
+    <footer
+      className="pt-14 pb-6 text-white"
+      style={{ background: "linear-gradient(160deg,#123D26,#B5810A)" }}
+    >
+      <div className="wrap mb-10 grid grid-cols-2 gap-8 nav:grid-cols-[1.3fr_repeat(5,0.9fr)]">
+        <div className="col-span-2 nav:col-span-1">
+          <span className="flex items-center gap-2.5 leading-none">
+            <LogoMark className="h-[38px] w-[38px] shrink-0" />
+            <span className="font-kalam text-[1.6rem] leading-none font-bold tracking-[-0.01em]">
               <span className="text-white">Roam</span>
-              <span className="text-orange">Bengal</span>
+              <span className="ml-[5px] text-orange">Bengal</span>
             </span>
           </span>
-          <p className="text-[0.86rem] leading-7">{footer.intro}</p>
+          <p className="mt-3.5 max-w-[260px] text-[0.85rem] opacity-70">{footer.intro}</p>
         </div>
 
         {footer.columns.map((col) => (
           <div key={col.title}>
-            <h4 className="mb-4 font-display text-[0.98rem] font-bold text-white">
+            <h4 className="mb-3.5 text-[0.8rem] font-bold tracking-[0.06em] text-gold uppercase">
               {col.title}
             </h4>
-            <div className="flex flex-col gap-2.5">
-              {col.links.map((link) =>
-                isExternal(link.to) ? (
-                  <a
-                    key={link.label}
-                    href={link.to}
-                    className="text-[0.84rem] transition-colors hover:text-gold"
-                    {...(link.to.startsWith("http")
-                      ? { target: "_blank", rel: "noreferrer noopener" }
-                      : {})}
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className="text-[0.84rem] transition-colors hover:text-gold"
-                  >
-                    {link.label}
-                  </Link>
-                ),
-              )}
-            </div>
+            {col.links.map((link) =>
+              isExternal(link.to) ? (
+                <a
+                  key={link.label}
+                  href={link.to}
+                  className="mb-2.5 block text-[0.87rem] opacity-85 transition-opacity hover:opacity-100"
+                  {...(link.to.startsWith("http")
+                    ? { target: "_blank", rel: "noreferrer noopener" }
+                    : {})}
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="mb-2.5 block text-[0.87rem] opacity-85 transition-opacity hover:opacity-100"
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
           </div>
         ))}
       </div>
 
-      <div className="border-t border-white/15">
-        <div className="wrap flex flex-col gap-2 py-5 text-[0.78rem] sm:flex-row sm:items-center sm:justify-between">
-          <span>{footer.copyright}</span>
-          <span>{footer.site_label}</span>
-        </div>
+      <div className="wrap flex flex-wrap justify-between gap-2.5 border-t border-white/15 pt-[22px] text-[0.78rem] opacity-60">
+        <span>{footer.copyright}</span>
+        <span>{footer.site_label}</span>
       </div>
     </footer>
   );

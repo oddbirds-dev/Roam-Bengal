@@ -120,6 +120,21 @@
   }
 }
 
+/* The reference sections are `padding: … 40px` with a `max-width:1240px` inner grid,
+   which is one pixel wider than `.wrap` (that one pads inside its own 1240px box). */
+@utility shell {
+  padding-inline: 40px;
+
+  @media (max-width: 640px) {
+    padding-inline: 20px;
+  }
+}
+
+@utility wide {
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
 /* Screen-reader-only, for skip links and icon-button labels. */
 @utility sr-only-focusable {
   position: absolute;

@@ -10,6 +10,7 @@ export type ButtonVariant =
   | "green-dark"
   | "outline-light"
   | "outline-dark"
+  | "blue"
   | "rust"
   | "whatsapp";
 
@@ -18,13 +19,17 @@ const BASE =
   "font-semibold text-[0.88rem] cursor-pointer border-[1.5px] border-transparent " +
   "transition-all duration-200 text-center";
 
+/* Colours are the reference `.btn-*` rules verbatim. `.btn-green` is a misnomer
+   inherited from the source CSS — it paints orange (`--orange`), not green. */
 const VARIANTS: Record<ButtonVariant, string> = {
-  green: "bg-green-bright text-white hover:bg-green-deep",
-  "green-dark": "bg-green-dark text-white hover:bg-green",
-  "outline-light": "border-white/70 text-white hover:bg-white hover:text-green-dark",
-  "outline-dark": "border-green-dark text-green-dark hover:bg-green-dark hover:text-white",
+  green: "bg-orange text-white hover:bg-[#D9600F]",
+  "green-dark": "bg-green-dark text-white hover:bg-[#0B2818]",
+  "outline-light": "border-white/60 text-white hover:bg-white/15",
+  // `.btn-line`
+  "outline-dark": "border-green text-green hover:bg-green hover:text-white",
+  blue: "bg-[#3EA8E0] text-white hover:bg-[#2384B8]",
   rust: "bg-rust text-white hover:bg-rust-dark",
-  whatsapp: "bg-[#25D366] text-white hover:bg-[#1da851]",
+  whatsapp: "bg-[#25D366] text-white hover:bg-[#1FBE5A]",
 };
 
 export function buttonClass(variant: ButtonVariant = "green", extra = "") {
