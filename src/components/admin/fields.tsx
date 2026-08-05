@@ -9,8 +9,9 @@ import type { ReactNode } from "react";
  */
 
 const inputBase =
-  "w-full rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2.5 text-[0.88rem] " +
-  "outline-none transition-colors focus:border-green disabled:bg-cream disabled:text-muted";
+  "w-full rounded-[10px] border border-rule bg-paper px-3.5 py-2.5 text-[0.88rem] " +
+  "outline-none transition-colors focus:border-green focus:ring-2 focus:ring-green/15 " +
+  "disabled:bg-cream disabled:text-muted";
 
 export function Label({
   htmlFor,
@@ -25,10 +26,12 @@ export function Label({
 }) {
   return (
     <label htmlFor={htmlFor} className="mb-1.5 block">
-      <span className="text-[0.82rem] font-semibold text-ink">
+      <span className="text-[0.66rem] font-semibold tracking-[0.11em] text-muted uppercase">
         {children} {required ? <span className="text-rust">*</span> : null}
       </span>
-      {hint ? <span className="mt-0.5 block text-[0.74rem] text-muted">{hint}</span> : null}
+      {hint ? (
+        <span className="mt-0.5 block text-[0.73rem] text-muted/85">{hint}</span>
+      ) : null}
     </label>
   );
 }

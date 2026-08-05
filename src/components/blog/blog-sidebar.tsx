@@ -83,8 +83,7 @@ export function BlogSidebar({
                     </span>
                   </div>
                   <ButtonLink
-                    to="/tours/$slug"
-                    params={{ slug: tour.slug }}
+                    to={`/tours/${tour.slug}`}
                     variant="green"
                     className="px-4 py-1.5 text-[0.75rem] min-h-0"
                   >

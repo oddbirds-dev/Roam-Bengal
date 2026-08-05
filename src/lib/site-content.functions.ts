@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { serverClient } from "@/integrations/supabase/client";
-import type { Database, Json } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/supabase/types";
+import { toTourDTO } from "@/lib/tour-dto";
 import type {
   ActivityDTO,
   BlogPostDTO,
@@ -9,7 +10,6 @@ import type {
   JsonValue,
   SettingsMap,
   TestimonialDTO,
-  TourCategory,
   TourDTO,
 } from "@/lib/content-types";
 
@@ -31,10 +31,6 @@ function num(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function intOr(value: unknown, fallback: number): number {
-  return num(value) ?? fallback;
-}
-
 function arr<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
@@ -43,61 +39,8 @@ function strArr(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : [];
 }
 
-function jsonObject(value: Json | null | undefined): Record<string, string> {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, string>;
-  }
-  return {};
-}
-
-const CATEGORIES: TourCategory[] = ["day-tour", "multi-day", "holiday"];
-
-function toTour(row: TourRow): TourDTO {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    // The DB CHECK constraint enforces this, but a legacy value would otherwise widen
-    // the union and break exhaustive handling downstream.
-    category: CATEGORIES.includes(row.category as TourCategory)
-      ? (row.category as TourCategory)
-      : "multi-day",
-    summary: row.summary,
-    heroImage: row.hero_image,
-    images: strArr(row.images),
-    durationLabel: row.duration_label,
-    durationDays: intOr(row.duration_days, 1),
-    priceUsd: num(row.price_usd),
-    discountPriceUsd: num(row.discount_price_usd),
-    priceNote: row.price_note,
-    rating: num(row.rating),
-    reviewsCount: intOr(row.reviews_count, 0),
-    destinationLabel: row.destination_label,
-    activityLabel: row.activity_label,
-    isFeatured: Boolean(row.is_featured),
-    activitiesCount: num(row.activities_count),
-    groupSizeMax: num(row.group_size_max),
-    stopsCount: num(row.stops_count),
-    facts: jsonObject(row.facts),
-    overview: arr<string>(row.overview),
-    overviewTip: row.overview_tip,
-    highlights: strArr(row.highlights),
-    glance: arr(row.glance),
-    addons: arr(row.addons),
-    itinerary: arr(row.itinerary),
-    offers: arr(row.offers),
-    inclusions: strArr(row.inclusions),
-    exclusions: strArr(row.exclusions),
-    accessibility: arr(row.accessibility),
-    advice: arr(row.advice),
-    pledge: strArr(row.pledge),
-    whyItems: strArr(row.why_items),
-    faqs: arr(row.faqs),
-    mapEmbed: row.map_embed,
-    videoUrl: row.video_url,
-    relatedSlugs: strArr(row.related_slugs),
-  };
-}
+/** Tours map through the shared mapper — the admin preview runs the same code. */
+const toTour = (row: TourRow): TourDTO => toTourDTO(row);
 
 function toPost(row: PostRow): BlogPostDTO {
   return {

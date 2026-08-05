@@ -8,6 +8,8 @@ import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
+import { toTourDTO } from "@/lib/tour-dto";
+import { useTourDraft } from "@/lib/tour-preview";
 import {
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
@@ -16,15 +18,33 @@ import {
 } from "@/lib/content-types";
 
 export const Route = createFileRoute("/tours/$slug")({
-  loader: async ({ params }) => {
+  /**
+   * `?preview=1` puts the page in admin-preview mode: it takes its content from the
+   * editor over postMessage instead of the database. Nothing else on the site links
+   * here with a search param, so anything unrecognised is simply dropped.
+   */
+  // The router JSON-parses search values, so `?preview=1` arrives as the number 1.
+  validateSearch: (search: Record<string, unknown>): { preview?: true } => {
+    const raw = search.preview;
+    const on = raw === 1 || raw === "1" || raw === true || raw === "true";
+    return on ? { preview: true } : {};
+  },
+  loaderDeps: ({ search }) => ({ preview: search.preview === true }),
+  loader: async ({ params, deps }) => {
     const [tour, allTours] = await Promise.all([
       getTourBySlug({ data: { slug: params.slug } }),
       listPublishedTours(),
     ]);
-    if (!tour) throw notFound();
-    
+    // A previewed tour is usually a draft, and a brand-new one has no row at all —
+    // in preview mode the real content arrives from the parent window, so an empty
+    // shell is the correct starting state rather than a 404.
+    if (!tour) {
+      if (deps.preview) return { tour: blankTour(params.slug), allTours, seoMeta: null };
+      throw notFound();
+    }
+
     const seoMeta = await getSeoMeta({ data: { entity_type: "tour", entity_id: tour.id } });
-    
+
     return { tour, allTours, seoMeta };
   },
   head: ({ loaderData }) => {
@@ -54,7 +74,12 @@ const TABS = [
 ] as const;
 
 function TourDetail() {
-  const { tour, allTours } = Route.useLoaderData();
+  const { tour: saved, allTours } = Route.useLoaderData();
+  const { preview } = Route.useSearch();
+
+  // In preview mode the editor's unsaved form wins over whatever is in the database.
+  const draft = useTourDraft(preview === true);
+  const tour = draft ?? saved;
 
   const related = resolveRelated(tour, allTours);
   const facts = TOUR_FACT_KEYS.map((key) => [key, factValue(tour, key)] as const).filter(
@@ -408,9 +433,22 @@ function TourDetail() {
             <div className="mt-1 font-display text-[2rem] leading-none font-bold text-green">
               {formatPrice(tour.discountPriceUsd ?? tour.priceUsd)}
               <span className="ml-1 text-[0.78rem] font-normal text-muted">
-                / Person* From
+                / Adult* From
               </span>
             </div>
+
+            {tour.childPriceUsd !== null ? (
+              <div className="mt-2 text-[0.86rem] font-semibold text-ink">
+                {formatPrice(tour.discountChildPriceUsd ?? tour.childPriceUsd)}
+                <span className="ml-1 text-[0.75rem] font-normal text-muted">/ Child</span>
+              </div>
+            ) : null}
+
+            {tour.priceBdt !== null ? (
+              <div className="mt-1.5 text-[0.78rem] text-muted">
+                ৳{tour.priceBdt.toLocaleString("en-BD")} for Bangladeshi nationals
+              </div>
+            ) : null}
 
             <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
               {PROMISES.map((p) => (
@@ -498,6 +536,11 @@ const PROMISES = [
   "No Shopping Detours, Ever",
   "Direct Booking Savings",
 ];
+
+/** Empty shell for preview mode, replaced the moment the editor's draft arrives. */
+function blankTour(slug: string): TourDTO {
+  return toTourDTO({ slug, title: "Untitled tour" });
+}
 
 function Section({
   id,

@@ -40,7 +40,7 @@ function ToursList() {
 
       <div className="mt-4">
         <Table
-          head={["Title", "Destination", "Days", "From", "Status", ""]}
+          head={["Title", "Destination", "Days", "From", "Status", "", ""]}
           empty={tours.length === 0}
         >
           {tours.map((tour) => (
@@ -69,6 +69,15 @@ function ToursList() {
                   )}
                   {tour.is_featured ? <Badge tone="orange">Featured</Badge> : null}
                 </span>
+              </Td>
+              <Td className="text-right">
+                <Link
+                  to="/admin/tours/$id"
+                  params={{ id: tour.id }}
+                  className="inline-flex items-center justify-center rounded-[30px] border-[1.5px] border-rule bg-paper px-5 py-2.5 text-[0.84rem] font-semibold text-ink transition-colors hover:border-green hover:text-green"
+                >
+                  Edit
+                </Link>
               </Td>
               <Td className="text-right">
                 <DeleteButton

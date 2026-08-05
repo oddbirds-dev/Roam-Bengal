@@ -147,7 +147,7 @@ function AdminShell() {
               className="inline-flex items-center gap-2 rounded-lg border border-rule px-4 py-2.5 text-[0.84rem] font-medium text-ink transition-colors hover:border-green hover:text-green"
             >
               <AdminIcon name="external" className="h-4 w-4" />
-              View store
+              View website
             </a>
           </div>
         </header>

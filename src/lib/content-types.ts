@@ -99,12 +99,17 @@ export interface TourDTO {
   durationLabel: string | null;
   durationDays: number;
   priceUsd: number | null;
+  priceBdt: number | null;
   discountPriceUsd: number | null;
+  /** Blank hides the child row in the booking box. */
+  childPriceUsd: number | null;
+  discountChildPriceUsd: number | null;
   priceNote: string | null;
   rating: number | null;
   reviewsCount: number;
   destinationLabel: string | null;
   activityLabel: string | null;
+  primaryDestinationSlug: string | null;
   isFeatured: boolean;
   activitiesCount: number | null;
   groupSizeMax: number | null;
