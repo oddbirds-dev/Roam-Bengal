@@ -6,6 +6,8 @@ import { TourCard, formatPrice } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
+import { getSeoMeta } from "@/lib/seo.functions";
+import { buildSeoMeta } from "@/lib/seo-head";
 import {
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
@@ -20,20 +22,21 @@ export const Route = createFileRoute("/tours/$slug")({
       listPublishedTours(),
     ]);
     if (!tour) throw notFound();
-    return { tour, allTours };
+    
+    const seoMeta = await getSeoMeta({ data: { entity_type: "tour", entity_id: tour.id } });
+    
+    return { tour, allTours, seoMeta };
   },
   head: ({ loaderData }) => {
     const tour = loaderData?.tour;
     if (!tour) return {};
-    return {
-      meta: [
-        { title: `${tour.title} — Roam Bengal` },
-        { name: "description", content: tour.summary ?? "" },
-        { property: "og:title", content: `${tour.title} — Roam Bengal` },
-        { property: "og:description", content: tour.summary ?? "" },
-        { property: "og:type", content: "website" },
-      ],
-    };
+    
+    return buildSeoMeta(loaderData.seoMeta, {
+      title: `${tour.title} — Roam Bengal`,
+      description: tour.summary ?? "",
+      image: tour.heroImage ?? tour.images[0] ?? undefined,
+      urlPath: `/tours/${tour.slug}`
+    });
   },
   component: TourDetail,
 });

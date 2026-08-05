@@ -24,13 +24,14 @@ There is **no separate backend service**. "The backend" is two things stitched t
 - [8. Storage](#8-storage)
 - [9. Server function catalog](#9-server-function-catalog)
 - [10. The `site_settings` content model](#10-the-site_settings-content-model)
-- [11. SEO subsystem](#11-seo-subsystem)
-- [12. Migrations](#12-migrations)
-- [13. Worked end-to-end flows](#13-worked-end-to-end-flows)
-- [14. Error handling](#14-error-handling)
-- [15. Deployment](#15-deployment)
-- [16. Known gaps and gotchas](#16-known-gaps-and-gotchas)
-- [17. Recipe: adding a new backed entity](#17-recipe-adding-a-new-backed-entity)
+- [11. Live Preview system](#11-live-preview-system)
+- [12. SEO subsystem](#12-seo-subsystem)
+- [13. Migrations](#13-migrations)
+- [14. Worked end-to-end flows](#14-worked-end-to-end-flows)
+- [15. Error handling](#15-error-handling)
+- [16. Deployment](#16-deployment)
+- [17. Known gaps and gotchas](#17-known-gaps-and-gotchas)
+- [18. Recipe: adding a new backed entity](#18-recipe-adding-a-new-backed-entity)
 
 ---
 
@@ -80,6 +81,9 @@ Key files:
 | Inquiry submission | [src/lib/inquiries.functions.ts](src/lib/inquiries.functions.ts) |
 | SEO / redirects / robots | [src/lib/seo.functions.ts](src/lib/seo.functions.ts) |
 | DTO shapes shared client↔server | [src/lib/content-types.ts](src/lib/content-types.ts) |
+| Settings definitions | [src/lib/content-schema.ts](src/lib/content-schema.ts) |
+| Live preview protocol | [src/lib/preview-protocol.ts](src/lib/preview-protocol.ts) |
+| Live preview injector | [src/components/preview-bridge.tsx](src/components/preview-bridge.tsx) |
 | Migrations | [supabase/migrations/](supabase/migrations/) |
 
 ---
@@ -578,9 +582,11 @@ generated `Database` type predates those tables in some code paths.
 ## 10. The `site_settings` content model
 
 A single key/value table backs all editable chrome and page copy. `value` is an arbitrary
-jsonb object; each key has its own informal shape.
+jsonb object. 
 
-**Seeded keys** (migration `20260712131549`, inserted `ON CONFLICT (key) DO NOTHING` so
+**`content-schema.ts`**: The shape of these keys is no longer informal or guessed. Everything the admin settings panel renders is driven by [src/lib/content-schema.ts](src/lib/content-schema.ts). A field only appears in the admin panel if it is defined in the schema, ensuring the editor only offers fields that the site actually reads.
+
+**Seeded keys** (migration `20260712131549` and `20260803000000`, inserted `ON CONFLICT (key) DO NOTHING` so
 re-running never clobbers live edits):
 
 | Key | Contains |
@@ -600,6 +606,9 @@ re-running never clobbers live edits):
 - `info_<slug>` → override for standalone info pages, built by
   `infoKey()` in [info-content.ts:34](src/lib/info-content.ts#L34)
   (`/visa-information` → `info_visa-information`).
+- `page_<route>` → headings and intros for the list pages (`page_tours`, `page_destinations`, `page_activities`, `page_blogs`, `page_reviews`).
+- `whatsapp` → `{ enabled: boolean, number: string, button_label: string }`, powers the floating WhatsApp chat widget globally.
+- `homepage_layout` → `{ sections: { id: string, visible: boolean }[] }`, stores the section ordering and visibility state for the drag-and-drop homepage builder.
 
 **How overrides merge.** Info and policy pages ship their default copy in code and merge the
 stored JSON over it via `mergeInfo()`
@@ -617,7 +626,20 @@ band rendered four empty cells. The migration rewrites existing rows onto the sh
 
 ---
 
-## 11. SEO subsystem
+## 11. Live Preview system
+
+The admin panel allows real-time previewing of unsaved content via an iframe. This applies to settings, tours, blogs, and reviews. 
+
+The system has three main parts:
+1. **`EditorShell`** (admin side): Renders the edit form on the left and an iframe of the public page on the right. It debounces the form state and sends it into the iframe using `postMessage`. It also handles "Save" and "Discard" actions centrally.
+2. **`preview-protocol.ts`**: Defines the strict message types (`PreviewReadyMessage`, `PreviewSettingsMessage`, `PreviewFocusMessage`) so the iframe only listens to trusted sources and rejects unrelated extensions/widgets.
+3. **`PreviewBridge`** (public side): A component rendered on every public page but completely inert unless `window.top !== window.self`. When embedded, it announces itself and listens for `settings` messages. Upon receiving one, it calls `queryClient.setQueryData()` to push the draft content directly into the TanStack Query cache. 
+
+Because TanStack Query is the source of truth for the page components, pushing to its cache causes the entire page to re-render with the draft content instantly, without a reload and without writing anything to Supabase. The preview bridge intercepts global settings (`site-settings`) as well as entity-specific overrides (`tour-preview`, `blog-preview`, `reviews-preview`).
+
+---
+
+## 12. SEO subsystem
 
 Four independent pieces:
 
@@ -640,7 +662,7 @@ Public route `head()` functions currently build their tags from loader data dire
 
 ---
 
-## 12. Migrations
+## 13. Migrations
 
 Applied in filename order. `supabase/config.toml` pins `project_id = "ceuwxvcazqxqjgtcmzhy"`.
 
@@ -661,6 +683,7 @@ Applied in filename order. `supabase/config.toml` pins `project_id = "ceuwxvcazq
 | `20260721124158_…` | Re-declares both with `IF NOT EXISTS` — a **no-op** on any DB where the previous migration ran |
 | `20260801000000_…` | Normalizes `homepage.stats` from `{n,l}` to `{value,label}` |
 | `20260802000000_…` | `tours.child_price_usd`, `discount_child_price_usd`, `facts jsonb` |
+| `20260803000000_…` | Content alignment: renames drifted `hero`/`homepage` keys, seeds `page_*`/`whatsapp`/`homepage_layout` |
 
 The two `20260721` migrations disagree: the first declares `entity_id text` and adds an index;
 the second declares `entity_id uuid` with a `CHECK` on `status_code` and different policy
@@ -672,7 +695,7 @@ Later migrations use `ADD COLUMN IF NOT EXISTS` throughout, so they are safely r
 
 ---
 
-## 13. Worked end-to-end flows
+## 14. Worked end-to-end flows
 
 ### A. Visitor submits a trip inquiry
 
@@ -729,7 +752,7 @@ Note the index loader awaits its four calls **sequentially**
 
 ---
 
-## 14. Error handling
+## 15. Error handling
 
 Three layers, outermost first:
 
@@ -752,7 +775,7 @@ gate; `submitInquiry` is the one public write and deliberately does not do this.
 
 ---
 
-## 15. Deployment
+## 16. Deployment
 
 Two targets from one codebase, switched by the `DOCKER_BUILD` env var in
 [vite.config.ts:17](vite.config.ts#L17):
@@ -784,7 +807,7 @@ The SSR entry is redirected to `src/server.ts` via `tanstackStart.server.entry`.
 
 ---
 
-## 16. Known gaps and gotchas
+## 17. Known gaps and gotchas
 
 These are observations from reading the code, not bugs introduced by this document.
 
@@ -826,7 +849,7 @@ These are observations from reading the code, not bugs introduced by this docume
 
 ---
 
-## 17. Recipe: adding a new backed entity
+## 18. Recipe: adding a new backed entity
 
 Say you are adding `guides`.
 

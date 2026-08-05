@@ -5,7 +5,14 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { InitialAvatar } from "@/components/sections";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
-import { getPostBySlug, listPublishedPosts } from "@/lib/site-content.functions";
+import { getPostBySlug, listPublishedPosts, listPublishedTours } from "@/lib/site-content.functions";
+import { getSeoMeta } from "@/lib/seo.functions";
+import { buildSeoMeta } from "@/lib/seo-head";
+
+import { BlogShare } from "@/components/blog/blog-share";
+import { BlogSidebar } from "@/components/blog/blog-sidebar";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /**
  * No reference design exists for the post detail page — blog.html links to a
@@ -15,25 +22,32 @@ import { getPostBySlug, listPublishedPosts } from "@/lib/site-content.functions"
  */
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
-    const [post, all] = await Promise.all([
+    const [post, all, tours] = await Promise.all([
       getPostBySlug({ data: { slug: params.slug } }),
       listPublishedPosts(),
+      listPublishedTours(),
     ]);
     if (!post) throw notFound();
-    return { post, related: all.filter((p) => p.slug !== post.slug).slice(0, 3) };
+    
+    const seoMeta = await getSeoMeta({ data: { entity_type: "blog", entity_id: post.id } });
+    
+    return { 
+      post, 
+      related: all.filter((p) => p.slug !== post.slug).slice(0, 3), 
+      seoMeta,
+      tours: tours.slice(0, 5) 
+    };
   },
   head: ({ loaderData }) => {
     const post = loaderData?.post;
     if (!post) return {};
-    return {
-      meta: [
-        { title: `${post.title} — Roam Bengal` },
-        { name: "description", content: post.excerpt ?? "" },
-        { property: "og:title", content: post.title },
-        { property: "og:description", content: post.excerpt ?? "" },
-        { property: "og:type", content: "article" },
-      ],
-    };
+    
+    return buildSeoMeta(loaderData.seoMeta, {
+      title: `${post.title} — Roam Bengal`,
+      description: post.excerpt ?? "",
+      image: post.coverImage ?? undefined,
+      urlPath: `/blog/${post.slug}`
+    });
   },
   component: BlogPost,
 });
