@@ -25,6 +25,8 @@
   --color-green-bright: #22b57a;
   --color-green-deep: #0b6b47;
   --color-orange: #f0791e;
+  /* Booking CTA — a deeper, redder orange than `orange`. */
+  --color-ember: #ec7730;
   --color-gold: #f2b705;
   --color-rust: #c4390e;
   --color-rust-dark: #7a2408;

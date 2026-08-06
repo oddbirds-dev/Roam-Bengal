@@ -469,7 +469,7 @@ function TourDetail() {
 
               <ButtonLink
                 to="/contact"
-                variant="green-dark"
+                variant="ember"
                 className="mt-6 w-full"
                 search={{ tour: tour.slug }}
               >

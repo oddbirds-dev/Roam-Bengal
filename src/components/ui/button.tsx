@@ -8,6 +8,7 @@ import type { ComponentProps, ReactNode } from "react";
 export type ButtonVariant =
   | "green"
   | "green-dark"
+  | "ember"
   | "outline-light"
   | "outline-dark"
   | "blue"
@@ -24,6 +25,8 @@ const BASE =
 const VARIANTS: Record<ButtonVariant, string> = {
   green: "bg-orange text-white hover:bg-[#D9600F]",
   "green-dark": "bg-green-dark text-white hover:bg-[#0B2818]",
+  // Booking CTA. Hover darkens by the same ratio `.btn-green` uses for `--orange`.
+  ember: "bg-ember text-white hover:bg-[#D55E18]",
   "outline-light": "border-white/60 text-white hover:bg-white/15",
   // `.btn-line`
   "outline-dark": "border-green text-green hover:bg-green hover:text-white",
