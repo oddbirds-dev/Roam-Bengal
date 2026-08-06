@@ -14,12 +14,14 @@ import {
 } from "@/components/admin/admin-ui";
 import {
   NumberField,
+  RelatedContentField,
   StringListField,
   TextArea,
   TextField,
   Toggle,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import { invalidateLinkTargets } from "@/components/admin/link-picker";
 import {
   adminDeletePost,
   adminListPosts,
@@ -44,6 +46,7 @@ function blank() {
     author_name: "",
     author_role: "",
     author_avatar: "",
+    related_slugs: [] as string[],
     is_featured: false,
     is_published: true,
     sort_order: 0,
@@ -63,7 +66,11 @@ function PostsScreen() {
     const ok = await run(() =>
       adminUpsertPost({ data: { ...(editing.id ? { id: editing.id } : {}), post: form as never } }),
     );
-    if (ok) setEditing(null);
+    if (ok) {
+      // The link picker caches its list per session; `router.invalidate()` doesn't reach it.
+      invalidateLinkTargets();
+      setEditing(null);
+    }
   }
 
   return (
@@ -164,6 +171,16 @@ function PostsScreen() {
               onChange={(v) => setEditing({ ...editing, form: { ...editing.form, body: v } })}
             />
 
+            <RelatedContentField
+              label="Related posts"
+              hint="Shown in the sidebar. Leave empty to pick automatically."
+              kind="post"
+              values={editing.form.related_slugs}
+              onChange={(v) =>
+                setEditing({ ...editing, form: { ...editing.form, related_slugs: v } })
+              }
+            />
+
             <div className="flex flex-wrap gap-8">
               <Toggle
                 label="Published"
@@ -247,6 +264,7 @@ function hydrate(row: Record<string, unknown>): PostForm {
     author_name: text(row.author_name),
     author_role: text(row.author_role),
     author_avatar: text(row.author_avatar),
+    related_slugs: Array.isArray(row.related_slugs) ? (row.related_slugs as string[]) : [],
     is_featured: Boolean(row.is_featured),
     is_published: Boolean(row.is_published),
     sort_order: Number(row.sort_order ?? 0),

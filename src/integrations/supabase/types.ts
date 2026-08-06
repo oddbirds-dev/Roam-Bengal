@@ -72,6 +72,7 @@ export type Database = {
           is_featured: boolean;
           is_published: boolean;
           read_time: string | null;
+          related_slugs: string[];
           slug: string;
           sort_order: number;
           title: string;
@@ -91,6 +92,7 @@ export type Database = {
           is_featured?: boolean;
           is_published?: boolean;
           read_time?: string | null;
+          related_slugs?: string[];
           slug: string;
           sort_order?: number;
           title: string;
@@ -110,6 +112,7 @@ export type Database = {
           is_featured?: boolean;
           is_published?: boolean;
           read_time?: string | null;
+          related_slugs?: string[];
           slug?: string;
           sort_order?: number;
           title?: string;

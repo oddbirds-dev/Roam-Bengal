@@ -38,15 +38,32 @@ const NAV = [
   { label: "Reviews", to: "/admin/testimonials", icon: "star" },
   { label: "FAQs", to: "/admin/faqs", icon: "help" },
   { label: "Site content", to: "/admin/settings", icon: "gear" },
+  { label: "Links", to: "/admin/links", icon: "search" },
 ] as const;
+
+const COLLAPSE_KEY = "admin:sidebar-collapsed";
 
 function AdminShell() {
   const me = Route.useLoaderData();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
+  // Desktop-only rail toggle. Starts expanded so SSR and first paint agree;
+  // the stored preference is applied after mount.
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => setMenuOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (localStorage.getItem(COLLAPSE_KEY) === "1") setCollapsed(true);
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      localStorage.setItem(COLLAPSE_KEY, prev ? "0" : "1");
+      return !prev;
+    });
+  }
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -57,16 +74,53 @@ function AdminShell() {
     <div className="min-h-screen bg-[#F6F8F6]">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-rule bg-paper transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-rule bg-paper transition-[transform,width] lg:translate-x-0 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${collapsed ? "lg:w-19" : ""}`}
       >
-        <div className="flex h-[68px] shrink-0 items-center border-b border-rule px-6">
-          <span className="font-display text-[1.25rem] font-bold text-ink">Admin Panel</span>
+        <div
+          className={`flex h-[68px] shrink-0 items-center gap-2 border-b border-rule px-6 ${
+            collapsed ? "lg:justify-center lg:px-0" : ""
+          }`}
+        >
+          <span
+            className={`font-display flex-1 text-[1.25rem] font-bold text-ink ${
+              collapsed ? "lg:hidden" : ""
+            }`}
+          >
+            Admin Panel
+          </span>
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden h-9 w-9 items-center justify-center rounded-lg border border-rule text-ink/70 transition-colors hover:border-green hover:text-green lg:inline-flex"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className={collapsed ? "rotate-180" : ""}
+            >
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-5">
-          <span className="mb-2 block px-3 text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase">
+        <nav className={`flex-1 overflow-y-auto px-3 py-5 ${collapsed ? "lg:px-2" : ""}`}>
+          <span
+            className={`mb-2 block px-3 text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase ${
+              collapsed ? "lg:hidden" : ""
+            }`}
+          >
             Management
           </span>
           <div className="flex flex-col gap-0.5">
@@ -75,15 +129,21 @@ function AdminShell() {
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/admin" }}
-                className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green"
+                title={collapsed ? item.label : undefined}
+                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green ${
+                  collapsed ? "lg:justify-center lg:px-0" : ""
+                }`}
                 activeProps={{ className: "bg-mint text-green font-semibold" }}
               >
                 {({ isActive }) => (
                   <>
                     <AdminIcon name={item.icon} />
-                    <span className="flex-1">{item.label}</span>
+                    <span className={`flex-1 ${collapsed ? "lg:hidden" : ""}`}>{item.label}</span>
                     {isActive ? (
-                      <AdminIcon name="chevron" className="h-4 w-4 opacity-70" />
+                      <AdminIcon
+                        name="chevron"
+                        className={`h-4 w-4 opacity-70 ${collapsed ? "lg:hidden" : ""}`}
+                      />
                     ) : null}
                   </>
                 )}
@@ -92,16 +152,24 @@ function AdminShell() {
           </div>
         </nav>
 
-        <div className="shrink-0 border-t border-rule px-3 py-4">
+        <div className={`shrink-0 border-t border-rule px-3 py-4 ${collapsed ? "lg:px-2" : ""}`}>
           <button
             type="button"
             onClick={signOut}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-rust/5 hover:text-rust"
+            title={collapsed ? "Sign out" : undefined}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-rust/5 hover:text-rust ${
+              collapsed ? "lg:justify-center lg:px-0" : ""
+            }`}
           >
             <AdminIcon name="signOut" />
-            Sign out
+            <span className={collapsed ? "lg:hidden" : ""}>Sign out</span>
           </button>
-          <p className="mt-2 truncate px-3 text-[0.72rem] text-muted" title={me.email ?? ""}>
+          <p
+            className={`mt-2 truncate px-3 text-[0.72rem] text-muted ${
+              collapsed ? "lg:hidden" : ""
+            }`}
+            title={me.email ?? ""}
+          >
             {me.email}
           </p>
         </div>
@@ -117,7 +185,7 @@ function AdminShell() {
       ) : null}
 
       {/* Main column */}
-      <div className="lg:pl-[260px]">
+      <div className={`transition-[padding] ${collapsed ? "lg:pl-19" : "lg:pl-[260px]"}`}>
         <header className="flex h-[68px] items-center justify-between border-b border-rule bg-paper px-5 sm:px-8">
           <button
             type="button"

@@ -16,6 +16,39 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: ({ handlerType }) => handlerType === "serverFn",
 });
 
+type RedirectRow = { to_path: string; status_code: number };
+
+/**
+ * Redirect lookups are cached per path for a minute.
+ *
+ * This middleware runs on every document request, so an uncached miss is one database
+ * round trip added to every page view — and misses are the common case, which is why they
+ * are cached too.
+ */
+const REDIRECT_TTL_MS = 60_000;
+const redirectCache = new Map<string, { row: RedirectRow | null; expires: number }>();
+
+async function lookupRedirect(path: string): Promise<RedirectRow | null> {
+  const cached = redirectCache.get(path);
+  if (cached && cached.expires > Date.now()) return cached.row;
+
+  const { data, error } = await serverClient()
+    .from("redirects" as never)
+    .select("to_path, status_code")
+    .eq("from_path", path)
+    .maybeSingle();
+
+  if (error) {
+    // Never fail a page load over the redirect table; just don't cache the failure.
+    console.error("[redirects]", error.message);
+    return null;
+  }
+
+  const row = (data as RedirectRow | null) ?? null;
+  redirectCache.set(path, { row, expires: Date.now() + REDIRECT_TTL_MS });
+  return row;
+}
+
 const redirectsMiddleware = createMiddleware().server(async ({ next, request }) => {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -25,23 +58,16 @@ const redirectsMiddleware = createMiddleware().server(async ({ next, request }) 
     return next();
   }
 
-  // Fetch from the active redirects using anon client
-  const { data: redirects } = await serverClient()
-    .from("redirects" as never)
-    .select("from_path, to_path, status_code");
+  const match = await lookupRedirect(path);
+  if (match) {
+    // Build the destination URL preserving query string
+    const toUrl = new URL(match.to_path, url.origin);
+    toUrl.search = url.search;
 
-  if (redirects && Array.isArray(redirects)) {
-    const match = (redirects as Array<{ from_path: string, to_path: string, status_code: number }>).find((r) => r.from_path === path);
-    if (match) {
-      // Build the destination URL preserving query string
-      const toUrl = new URL(match.to_path, url.origin);
-      toUrl.search = url.search;
-      
-      return new Response(null, {
-        status: match.status_code || 301,
-        headers: { Location: toUrl.toString() },
-      });
-    }
+    return new Response(null, {
+      status: match.status_code || 301,
+      headers: { Location: toUrl.toString() },
+    });
   }
 
   return next();

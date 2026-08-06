@@ -11,8 +11,8 @@ import { buildSeoMeta } from "@/lib/seo-head";
 
 import { BlogShare } from "@/components/blog/blog-share";
 import { BlogSidebar } from "@/components/blog/blog-sidebar";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { FormatDocument } from "@/components/ui/format-text";
+import type { BlogPostDTO } from "@/lib/content-types";
 
 /**
  * No reference design exists for the post detail page — blog.html links to a
@@ -20,6 +20,19 @@ import remarkGfm from "remark-gfm";
  * from the policy-page pattern: banner, single prose column, author block, related
  * posts.
  */
+/** Curated `relatedSlugs` win; otherwise fall back to the other posts in sort order.
+ *  Mirrors `resolveRelated` in tours.$slug.tsx. */
+function resolveRelated(post: BlogPostDTO, all: BlogPostDTO[]): BlogPostDTO[] {
+  const others = all.filter((p) => p.slug !== post.slug);
+  if (post.relatedSlugs.length) {
+    const picked = post.relatedSlugs
+      .map((slug) => others.find((p) => p.slug === slug))
+      .filter((p): p is BlogPostDTO => Boolean(p));
+    if (picked.length) return picked.slice(0, 3);
+  }
+  return others.slice(0, 3);
+}
+
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const [post, all, tours] = await Promise.all([
@@ -33,7 +46,7 @@ export const Route = createFileRoute("/blog/$slug")({
     
     return { 
       post, 
-      related: all.filter((p) => p.slug !== post.slug).slice(0, 3), 
+      related: resolveRelated(post, all),
       seoMeta,
       tours: tours.slice(0, 5) 
     };
@@ -118,10 +131,8 @@ export const Route = createFileRoute("/blog/$slug")({
                 ) : null}
 
                 {post.body.length ? (
-                  <article className="prose prose-sm md:prose-base max-w-none text-ink/85 prose-headings:font-display prose-headings:font-bold prose-headings:text-green-dark prose-a:text-orange prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-rule prose-th:bg-cream prose-th:p-3 prose-th:text-left prose-td:border prose-td:border-rule prose-td:p-3">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {post.body.join("\n\n")}
-                    </ReactMarkdown>
+                  <article className="blog-body">
+                    <FormatDocument>{post.body.join("\n\n")}</FormatDocument>
                   </article>
                 ) : (
                   <p className="mt-8 rounded-xl border border-dashed border-rule p-8 text-center text-[0.9rem] text-muted">

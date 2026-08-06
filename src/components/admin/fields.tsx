@@ -1,5 +1,11 @@
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { AdminIcon } from "@/components/admin/icons";
+import {
+  LinkPicker,
+  useLinkTargets,
+  type LinkPickResult,
+} from "@/components/admin/link-picker";
+import type { LinkTargetKind } from "@/lib/link-targets";
 
 /**
  * Form primitives for the admin editors.
@@ -51,6 +57,24 @@ function MarkdownTextarea({
   onChange: (v: string) => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const [picker, setPicker] = useState<PickerState | null>(null);
+
+  /** Inline, non-blocking replacement for `alert()`, which stole the very selection the
+   *  editor was about to format. */
+  const flash = (message: string) => {
+    setHint(message);
+    setTimeout(() => setHint(null), 2600);
+  };
+
+  /** Re-selects a range after a value change; React has to re-render first. */
+  const reselect = (start: number, end: number) => {
+    setTimeout(() => {
+      if (!ref.current) return;
+      ref.current.setSelectionRange(start, end);
+      ref.current.focus();
+    }, 0);
+  };
 
   const applyClass = (cls: string) => {
     if (!ref.current) return;
@@ -62,21 +86,57 @@ function MarkdownTextarea({
     const after = textarea.value.substring(end);
 
     if (!selected) {
-      alert("Please select some text first to apply formatting.");
+      flash("Select some text first, then choose a style.");
       return;
     }
 
     const wrap = `<span class="${cls}">${selected}</span>`;
-    const newValue = before + wrap + after;
-    
-    onChange(newValue);
-    setTimeout(() => {
-      if (ref.current) {
-        const newStart = start + wrap.indexOf(selected);
-        ref.current.setSelectionRange(newStart, newStart + selected.length);
-        ref.current.focus();
-      }
-    }, 0);
+    onChange(before + wrap + after);
+    const newStart = start + wrap.indexOf(selected);
+    reselect(newStart, newStart + selected.length);
+  };
+
+  const openLinkPicker = () => {
+    const textarea = ref.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const existing = findLinkAt(textarea.value, start, end);
+
+    if (existing) {
+      setPicker({
+        range: [existing.start, existing.end],
+        initial: { href: existing.href, text: existing.text },
+        editing: true,
+      });
+      return;
+    }
+
+    setPicker({
+      range: [start, end],
+      initial: { href: "", text: textarea.value.substring(start, end) },
+      editing: false,
+    });
+  };
+
+  const applyLink = ({ value: href, label }: LinkPickResult) => {
+    if (!picker) return;
+    const [start, end] = picker.range;
+    const current = ref.current?.value ?? value;
+    const anchor = label.trim() || current.substring(start, end) || href;
+    const markdown = `[${anchor}](${href})`;
+    onChange(current.substring(0, start) + markdown + current.substring(end));
+    // Land the caret on the anchor text, not the URL — the next edit is usually the words.
+    reselect(start + 1, start + 1 + anchor.length);
+  };
+
+  const removeLink = () => {
+    if (!picker) return;
+    const [start, end] = picker.range;
+    const current = ref.current?.value ?? value;
+    const text = picker.initial.text;
+    onChange(current.substring(0, start) + text + current.substring(end));
+    reselect(start, start + text.length);
   };
 
   const handleBold = (e: React.MouseEvent) => {
@@ -90,7 +150,7 @@ function MarkdownTextarea({
     const before = textarea.value.substring(0, start);
     const after = textarea.value.substring(end);
 
-    let newValue = "";
+    let newValue: string;
     let newStart = start;
     let newEnd = end;
 
@@ -109,12 +169,7 @@ function MarkdownTextarea({
     }
     
     onChange(newValue);
-    setTimeout(() => {
-      if (ref.current) {
-        ref.current.setSelectionRange(newStart, newEnd);
-        ref.current.focus();
-      }
-    }, 0);
+    reselect(newStart, newEnd);
   };
 
   return (
@@ -122,11 +177,23 @@ function MarkdownTextarea({
       <div className="flex items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
         <button
           type="button"
+          // Mousedown, not click: the browser clears the textarea's selection when focus
+          // moves, and click fires too late to save it.
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleBold}
           title="Bold text"
           className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
         >
           <AdminIcon name="bold" className="h-[14px] w-[14px]" />
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={openLinkPicker}
+          title="Insert or edit a link"
+          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+        >
+          <AdminIcon name="link" className="h-[14px] w-[14px]" />
         </button>
         <div className="h-4 w-px bg-rule" />
         <select
@@ -175,6 +242,11 @@ function MarkdownTextarea({
           <option value="font-kalam">Kalam</option>
           <option value="font-custom">Custom</option>
         </select>
+        {hint ? (
+          <span role="status" className="ml-auto truncate text-[0.72rem] font-medium text-rust">
+            {hint}
+          </span>
+        ) : null}
       </div>
       <textarea
         ref={ref}
@@ -185,8 +257,54 @@ function MarkdownTextarea({
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-transparent px-3.5 py-2.5 text-[0.88rem] outline-none disabled:bg-cream disabled:text-muted"
       />
+      {/* Mounted only while open. The tour editor renders ~20 of these textareas, and an
+          always-mounted picker would have every one of them subscribe to the target list
+          on page load. */}
+      {picker ? (
+        <LinkPicker
+          open
+          onClose={() => setPicker(null)}
+          onPick={applyLink}
+          onRemove={picker.editing ? removeLink : undefined}
+          initial={picker.initial}
+          title={picker.editing ? "Edit link" : "Insert link"}
+        />
+      ) : null}
     </div>
   );
+}
+
+interface PickerState {
+  /** Slice of the textarea value the picker will replace. */
+  range: [number, number];
+  initial: { href: string; text: string };
+  /** True when the caret was inside an existing link, enabling "Remove link". */
+  editing: boolean;
+}
+
+/** `[anchor text](/some/path "optional title")` */
+const MD_LINK = /\[([^\]\n]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
+
+/**
+ * The markdown link whose source range contains the caret, if any. Lets the toolbar button
+ * mean "edit this link" when the editor clicks into one, rather than nesting a new link
+ * inside it.
+ */
+function findLinkAt(
+  value: string,
+  start: number,
+  end: number,
+): { start: number; end: number; href: string; text: string } | null {
+  MD_LINK.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = MD_LINK.exec(value)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    if (start >= from && end <= to) {
+      return { start: from, end: to, text: match[1] ?? "", href: match[2] ?? "" };
+    }
+  }
+  return null;
 }
 
 export function TextField({
@@ -254,6 +372,99 @@ export function TextArea({
         placeholder={placeholder}
         onChange={onChange}
       />
+    </div>
+  );
+}
+
+/**
+ * Curated cross-links — `tours.related_slugs` and `blog_posts.related_slugs`.
+ *
+ * Stores slugs (matching the columns), but shows titles: the editor picks "Sundarbans
+ * 3D/2N", not `sundarbans-3d2n`. A slug that no longer resolves stays visible and flagged
+ * rather than silently disappearing, because a renamed tour is exactly the case worth
+ * noticing.
+ */
+export function RelatedContentField({
+  label,
+  hint,
+  kind,
+  values,
+  onChange,
+  max = 12,
+}: {
+  label: string;
+  hint?: string;
+  kind: LinkTargetKind;
+  values: string[];
+  onChange: (v: string[]) => void;
+  max?: number;
+}) {
+  const { targets, loading } = useLinkTargets();
+  const [picking, setPicking] = useState(false);
+
+  const bySlug = new Map(
+    targets.filter((t) => t.kind === kind && t.slug).map((t) => [t.slug!, t]),
+  );
+
+  const remove = (i: number) => onChange(values.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) => onChange(reorder(values, i, dir));
+
+  return (
+    <div>
+      <Label hint={hint}>{label}</Label>
+      <div className="flex flex-col gap-2">
+        {values.map((slug, i) => {
+          const target = bySlug.get(slug);
+          const missing = !loading && !target;
+          return (
+            <div
+              key={`${slug}-${i}`}
+              className={`flex items-center gap-2 rounded-[10px] border px-3 py-2 ${
+                missing ? "border-rust/40 bg-rust/5" : "border-rule bg-paper"
+              }`}
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[0.86rem] font-medium text-ink">
+                  {target?.label ?? slug}
+                </span>
+                <span className="block truncate font-mono text-[0.72rem] text-muted">
+                  {missing ? "No longer exists — remove or re-pick" : slug}
+                </span>
+              </span>
+              {target?.published === false ? (
+                <span className="shrink-0 rounded-full bg-cream px-2.5 py-0.5 text-[0.7rem] font-semibold text-muted">
+                  Draft
+                </span>
+              ) : null}
+              <RowControls
+                onUp={i > 0 ? () => move(i, -1) : undefined}
+                onDown={i < values.length - 1 ? () => move(i, 1) : undefined}
+                onRemove={() => remove(i)}
+              />
+            </div>
+          );
+        })}
+
+        {values.length < max ? (
+          <AddButton onClick={() => setPicking(true)} label={singular(label)} />
+        ) : (
+          <span className="text-[0.78rem] text-muted">Maximum of {max} reached.</span>
+        )}
+      </div>
+
+      {picking ? (
+        <LinkPicker
+          open
+          mode="slug"
+          filter={[kind]}
+          title={`Add ${singular(label).toLowerCase()}`}
+          onClose={() => setPicking(false)}
+          onPick={({ value }) => {
+            // Silently ignore duplicates — re-picking something is a no-op, not an error.
+            if (!values.includes(value)) onChange([...values, value]);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -155,6 +155,8 @@ export interface BlogPostDTO {
   authorRole: string | null;
   authorAvatar: string | null;
   isFeatured: boolean;
+  /** Curated "read next" slugs. Empty means fall back to the newest other posts. */
+  relatedSlugs: string[];
 }
 
 export interface TestimonialDTO {

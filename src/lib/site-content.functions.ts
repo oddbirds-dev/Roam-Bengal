@@ -57,6 +57,7 @@ function toPost(row: PostRow): BlogPostDTO {
     authorRole: row.author_role,
     authorAvatar: row.author_avatar,
     isFeatured: Boolean(row.is_featured),
+    relatedSlugs: strArr(row.related_slugs),
   };
 }
 

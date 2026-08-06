@@ -6,6 +6,7 @@ import {
   GroupedListField,
   KeyValueField,
   NumberField,
+  RelatedContentField,
   RepeaterField,
   SelectField,
   StringListField,
@@ -14,6 +15,7 @@ import {
   Toggle,
 } from "@/components/admin/fields";
 import { GalleryField, ImageField } from "@/components/admin/image-upload";
+import { invalidateLinkTargets } from "@/components/admin/link-picker";
 import {
   adminGetTour,
   adminListActivities,
@@ -213,6 +215,8 @@ function TourEditor() {
 
     setForm((f) => ({ ...f, slug: payload.slug }));
     setBaseline(serialize({ form: payload, themeIds }));
+    // The link picker caches its list per session; `router.invalidate()` doesn't reach it.
+    invalidateLinkTargets();
     reloadPreview();
 
     // A new tour lives at a placeholder route until it has an id.
@@ -624,12 +628,12 @@ function TourEditor() {
                     onChange={(v) => set("video_url", v)}
                   />
                 </div>
-                <StringListField
-                  label="Related tour slugs"
-                  hint="Leave empty to pick automatically."
+                <RelatedContentField
+                  label="Related tours"
+                  hint="Shown as “You Might Also Like”. Leave empty to pick automatically."
+                  kind="tour"
                   values={form.related_slugs}
                   onChange={(v) => set("related_slugs", v)}
-                  placeholder="barisal-backwater-tour"
                 />
               </FormSection>
             </div>

@@ -172,3 +172,123 @@
     border-radius: 30px;
   }
 }
+
+/* Blog post body typography.
+   Hand-written rather than `@tailwindcss/typography`: the repo ships zero Tailwind
+   plugins and every colour here is a `@theme` token, so `prose-*` variants would need
+   retuning against these same variables anyway. Anchors are deliberately absent — they
+   are styled by the `a` override in format-text.tsx, so links match everywhere on the
+   site rather than only inside this container. */
+@layer components {
+  .blog-body {
+    color: color-mix(in oklab, var(--color-ink) 85%, transparent);
+    line-height: 1.75;
+  }
+
+  .blog-body > * + * {
+    margin-block-start: 1.15em;
+  }
+
+  .blog-body h2,
+  .blog-body h3,
+  .blog-body h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-green-dark);
+    line-height: 1.25;
+    margin-block-start: 1.9em;
+  }
+
+  .blog-body h2 {
+    font-size: 1.55rem;
+  }
+  .blog-body h3 {
+    font-size: 1.25rem;
+  }
+  .blog-body h4 {
+    font-size: 1.08rem;
+  }
+
+  .blog-body ul,
+  .blog-body ol {
+    padding-inline-start: 1.4em;
+  }
+
+  .blog-body ul {
+    list-style: disc;
+  }
+  .blog-body ol {
+    list-style: decimal;
+  }
+
+  .blog-body li + li {
+    margin-block-start: 0.4em;
+  }
+
+  .blog-body li::marker {
+    color: var(--color-green);
+  }
+
+  .blog-body blockquote {
+    border-inline-start: 3px solid var(--color-gold);
+    padding: 0.2em 0 0.2em 1.1em;
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--color-green-dark);
+  }
+
+  .blog-body img {
+    border-radius: 14px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .blog-body hr {
+    border: 0;
+    border-block-start: 1px solid var(--color-rule);
+    margin-block: 2em;
+  }
+
+  .blog-body code {
+    background: var(--color-cream);
+    border: 1px solid var(--color-rule);
+    border-radius: 5px;
+    padding: 0.1em 0.35em;
+    font-size: 0.88em;
+  }
+
+  .blog-body pre {
+    background: var(--color-cream);
+    border: 1px solid var(--color-rule);
+    border-radius: 12px;
+    padding: 1em 1.2em;
+    overflow-x: auto;
+  }
+
+  .blog-body pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  /* Tables can exceed the column on mobile; scroll the table, never the page. */
+  .blog-body table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .blog-body th,
+  .blog-body td {
+    border: 1px solid var(--color-rule);
+    padding: 0.7em 0.85em;
+    text-align: start;
+  }
+
+  .blog-body th {
+    background: var(--color-cream);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+}

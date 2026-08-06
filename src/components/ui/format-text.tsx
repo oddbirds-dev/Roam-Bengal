@@ -1,4 +1,37 @@
 import Markdown from "markdown-to-jsx";
+import type { MarkdownToJSX } from "markdown-to-jsx";
+import { SmartLink } from "@/components/ui/smart-link";
+
+/**
+ * The single markdown renderer for the whole site.
+ *
+ * Two option sets share one override map so a link, a bold run, or a `<span class>` from
+ * the admin toolbar looks identical in a tour highlight and in a blog body. Raw HTML is
+ * rendered on purpose — that is how the toolbar's Color/Size/Font buttons work — which is
+ * why `stripUnsafeHtml` runs on write and `SmartLink` re-checks hrefs on render.
+ */
+
+const overrides: MarkdownToJSX.Overrides = {
+  strong: {
+    component: "strong",
+    props: { className: "font-semibold text-ink" },
+  },
+  a: {
+    component: SmartLink,
+    props: { className: "text-orange font-medium underline-offset-2 hover:underline" },
+  },
+};
+
+/** One-line strings: paragraphs, list items, headings, table cells. No block parsing. */
+export const INLINE_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
+  forceInline: true,
+  overrides,
+};
+
+/** Full documents: blog bodies. Headings, lists, tables, images. */
+export const BLOCK_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
+  overrides,
+};
 
 /**
  * Parses inline Markdown-style **bold** tags and basic HTML tags like <span class="...">.
@@ -6,22 +39,16 @@ import Markdown from "markdown-to-jsx";
  */
 export function FormatText({ children }: { children: string }) {
   if (!children || typeof children !== "string") return <>{children}</>;
-  
-  return (
-    <Markdown
-      options={{
-        forceInline: true,
-        overrides: {
-          strong: {
-            component: "strong",
-            props: {
-              className: "font-semibold text-ink",
-            },
-          },
-        },
-      }}
-    >
-      {children}
-    </Markdown>
-  );
+
+  return <Markdown options={INLINE_MARKDOWN_OPTIONS}>{children}</Markdown>;
+}
+
+/**
+ * Block-level sibling of `FormatText`, for content authored as a whole document rather
+ * than a single line. `forceInline` must stay off here or headings and lists collapse.
+ */
+export function FormatDocument({ children }: { children: string }) {
+  if (!children || typeof children !== "string") return <>{children}</>;
+
+  return <Markdown options={BLOCK_MARKDOWN_OPTIONS}>{children}</Markdown>;
 }

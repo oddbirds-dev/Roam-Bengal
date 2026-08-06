@@ -6,6 +6,7 @@ import {
   httpError,
   type SupabaseAuthContext,
 } from "@/integrations/supabase/auth-middleware";
+import { stripUnsafeHtml } from "@/lib/sanitize";
 
 /**
  * Admin write API.
@@ -36,8 +37,23 @@ const slug = z
   .max(160)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase words separated by hyphens");
 
-const optionalText = (max: number) => z.string().max(max).nullish();
-const textArray = (max = 400) => z.array(z.string().max(max)).default([]);
+/**
+ * Every free-text field on every table flows through these two helpers, which makes them
+ * the one place to strip script/style/iframe/on*= before it reaches the database. Body
+ * copy is rendered as raw HTML by markdown-to-jsx (that is how the toolbar's
+ * `<span class>` works), so the scrub happens on write rather than on every render.
+ */
+const optionalText = (max: number) =>
+  z
+    .string()
+    .max(max)
+    .nullish()
+    .transform((v) => (typeof v === "string" ? stripUnsafeHtml(v) : v));
+const textArray = (max = 400) =>
+  z
+    .array(z.string().max(max))
+    .default([])
+    .transform((v) => v.map(stripUnsafeHtml));
 
 /** Surfaces the Postgres message to the admin UI — acceptable behind the admin gate,
  *  where a constraint name is genuinely the most useful thing to show. */
@@ -335,6 +351,7 @@ const PostInput = z.object({
   author_name: optionalText(120),
   author_role: optionalText(120),
   author_avatar: optionalText(1000),
+  related_slugs: z.array(slug).max(12).default([]),
   is_featured: z.boolean().default(false),
   is_published: z.boolean().default(true),
   sort_order: z.coerce.number().int().min(0).max(9999).default(0),
@@ -599,6 +616,37 @@ export const adminDeleteSubscriber = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     return remove(context, "newsletter_subscribers", data.id);
+  });
+
+// ---------------------------------------------------------------------------
+// Link targets
+// ---------------------------------------------------------------------------
+
+/**
+ * Everything the link picker can offer, minus the static pages (those are derived in
+ * `link-targets.ts` and need no round trip).
+ *
+ * Reads through the admin-scoped client on purpose, so unpublished rows come back too —
+ * an editor writing a post should be able to link to a tour that goes live the same day.
+ * The picker badges them "Draft". Four columns over a few dozen rows: no pagination.
+ */
+export const adminListLinkTargets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const [tours, posts] = await Promise.all([
+      context.supabase
+        .from("tours")
+        .select("slug, title, category, is_published")
+        .order("title", { ascending: true }),
+      context.supabase
+        .from("blog_posts")
+        .select("slug, title, category, is_published")
+        .order("title", { ascending: true }),
+    ]);
+    orThrow("adminListLinkTargets(tours)", tours.error);
+    orThrow("adminListLinkTargets(posts)", posts.error);
+    return { tours: tours.data ?? [], posts: posts.data ?? [] };
   });
 
 // ---------------------------------------------------------------------------
