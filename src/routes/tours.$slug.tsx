@@ -95,433 +95,441 @@ function TourDetail() {
         <SiteHeader />
       </div>
 
-      {/* Gallery mosaic: 1 large + 3 */}
-      <div className="wrap grid gap-3 py-6 md:grid-cols-4 md:grid-rows-2">
-        <PhotoFrame
-          src={gallery[0]}
-          alt={`${tour.title} — main photograph`}
-          gradient={gradientFor(tour.slug)}
-          priority
-          placeholderLabel={`images/pkg-${tour.slug}-1.jpg`}
-          className="aspect-[16/10] rounded-2xl md:col-span-2 md:row-span-2 md:aspect-auto"
-        />
-        {[1, 2, 3].map((i) => (
+      {/* Everything between the header and the footer sits on the sand page background. */}
+      <div className="bg-sand">
+        {/* Gallery mosaic: 1 large + 3.
+            The grid gets a fixed height and the tiles fill their tracks, matching
+            `.pkg-gallery` in the reference design. Per-tile aspect ratios cannot work
+            here: the two rows are equal `1fr`, so the wide top-right tile's ratio would
+            set both row heights and the row-spanning big tile would end up twice as tall
+            as the column beside it. Ratios still drive the stacked mobile layout. */}
+        <div className="wrap grid gap-3 py-6 md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[440px]">
           <PhotoFrame
-            key={i}
-            src={gallery[i]}
-            alt={`${tour.title} — photograph ${i + 1}`}
-            gradient={gradientFor(`${tour.slug}-${i}`)}
-            placeholderLabel={`images/pkg-${tour.slug}-${i + 1}.jpg`}
-            className={`aspect-[4/3] rounded-2xl ${i === 1 ? "md:col-span-2" : ""}`}
+            src={gallery[0]}
+            alt={`${tour.title} — main photograph`}
+            gradient={gradientFor(tour.slug)}
+            priority
+            placeholderLabel={`images/pkg-${tour.slug}-1.jpg`}
+            className="aspect-[16/10] rounded-2xl md:col-span-2 md:row-span-2 md:aspect-auto"
           />
-        ))}
-      </div>
+          {[1, 2, 3].map((i) => (
+            <PhotoFrame
+              key={i}
+              src={gallery[i]}
+              alt={`${tour.title} — photograph ${i + 1}`}
+              gradient={gradientFor(`${tour.slug}-${i}`)}
+              placeholderLabel={`images/pkg-${tour.slug}-${i + 1}.jpg`}
+              className={`aspect-[4/3] rounded-2xl md:aspect-auto ${i === 1 ? "md:col-span-2" : ""}`}
+            />
+          ))}
+        </div>
 
-      <div className="wrap grid gap-10 pb-20 lg:grid-cols-[1fr_340px]">
-        <main id="main" className="min-w-0">
-          <nav className="text-[0.78rem] text-muted" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-green">
-              Home
-            </Link>
-            {" / "}
-            <Link to="/tours" className="hover:text-green">
-              Tours
-            </Link>
-            {" / "}
-            <span className="text-ink">{tour.title}</span>
-          </nav>
+        <div className="wrap grid gap-10 pb-20 lg:grid-cols-[1fr_340px]">
+          <main id="main" className="min-w-0">
+            <nav className="text-[0.78rem] text-muted" aria-label="Breadcrumb">
+              <Link to="/" className="hover:text-green">
+                Home
+              </Link>
+              {" / "}
+              <Link to="/tours" className="hover:text-green">
+                Tours
+              </Link>
+              {" / "}
+              <span className="text-ink">{tour.title}</span>
+            </nav>
 
-          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-            <h1 className="font-display text-[clamp(1.8rem,4vw,2.7rem)] leading-tight text-green">
-              {tour.title}
-            </h1>
-            <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-gold text-ink">
-              <span className="font-display text-xl leading-none font-bold">
-                {tour.durationDays}
-              </span>
-              <span className="text-[0.62rem] font-semibold">Days</span>
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+              <h1 className="font-display text-[clamp(1.8rem,4vw,2.7rem)] leading-tight text-green">
+                {tour.title}
+              </h1>
+              <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-gold text-ink">
+                <span className="font-display text-xl leading-none font-bold">
+                  {tour.durationDays}
+                </span>
+                <span className="text-[0.62rem] font-semibold">Days</span>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-5 h-px bg-rule" />
+            <div className="mt-5 h-px bg-rule" />
 
-          {facts.length ? (
-            <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-              {facts.map(([key, value]) => (
-                <div key={key} className="flex items-start gap-2.5">
-                  <span aria-hidden="true">{TOUR_FACT_META[key].icon}</span>
-                  <div>
-                    <div className="text-[0.68rem] tracking-wide text-muted uppercase">
-                      {TOUR_FACT_META[key].label}
-                    </div>
-                    <div className="text-[0.86rem] font-semibold text-ink">{value}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="sticky top-0 z-20 -mx-1 mt-8 overflow-x-auto border-y border-rule bg-paper/95 backdrop-blur">
-            <div className="flex gap-1 px-1 py-2">
-              {TABS.filter(([id]) => hasSection(tour, id)).map(([id, label]) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className="rounded-full px-4 py-2 text-[0.8rem] font-medium whitespace-nowrap text-muted hover:bg-mint hover:text-green"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-10 flex flex-col gap-12">
-            {tour.overview.length ? (
-              <Section id="overview" title="📜 Trip Overview">
-                {tour.overview.map((p) => (
-                    <p key={p} className="text-[0.92rem] leading-7 text-ink/85">
-                      <FormatText>{p}</FormatText>
-                    </p>
-                ))}
-                {tour.overviewTip ? (
-                    <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
-                      dY' <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
-                    </div>
-                ) : null}
-              </Section>
-            ) : null}
-
-            {tour.highlights.length ? (
-              <Section id="highlights" title="⭐ Trip Highlights">
-                <ul className="flex flex-col gap-2.5">
-                  {tour.highlights.map((h) => (
-                    <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
-                      <span className="mt-0.5 text-green-bright">✓</span>
-                      <FormatText>{h}</FormatText>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            ) : null}
-
-            {tour.glance.length ? (
-              <Section id="glance" title="📍 Journey at a Glance">
-                <ul className="flex flex-col gap-2.5">
-                  {tour.glance.map((g) => (
-                    <li key={g.when} className="text-[0.9rem] leading-6">
-                      <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            ) : null}
-
-            {tour.addons.length ? (
-              <Section id="addons" title="➕ Optional Add-Ons">
-                <div className="flex flex-col gap-3">
-                  {tour.addons.map((a) => (
-                    <div
-                      key={a.title}
-                      className="rounded-xl border border-rule p-4 text-[0.9rem] leading-6"
-                    >
-                      <span aria-hidden="true">{a.icon}</span>{" "}
-                      <strong className="text-green-dark">{a.title}:</strong> <FormatText>{a.detail}</FormatText>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.itinerary.length ? (
-              <Section id="itinerary" title="🗺️ Day-by-Day Itinerary">
-                <ol className="flex flex-col gap-6">
-                  {tour.itinerary.map((day) => (
-                    <li key={day.day} className="flex gap-4">
-                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
-                        {day.day}
-                      </span>
-                      <div>
-                        <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
-                          {day.title}
-                        </h3>
-                        <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
-                          <FormatText>{day.detail}</FormatText>
-                        </p>
+            {facts.length ? (
+              <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+                {facts.map(([key, value]) => (
+                  <div key={key} className="flex items-start gap-2.5">
+                    <span aria-hidden="true">{TOUR_FACT_META[key].icon}</span>
+                    <div>
+                      <div className="text-[0.68rem] tracking-wide text-muted uppercase">
+                        {TOUR_FACT_META[key].label}
                       </div>
-                    </li>
-                  ))}
-                </ol>
-              </Section>
+                      <div className="text-[0.86rem] font-semibold text-ink">{value}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : null}
 
-            {tour.offers.length || tour.priceUsd !== null ? (
-              <Section id="cost" title="💵 Tour Price & Offers">
-                {tour.priceUsd !== null ? (
-                  <p className="text-[0.92rem] leading-7">
-                    <strong className="text-green-dark">
-                      From {formatPrice(tour.priceUsd)} per person
-                    </strong>
-                    {tour.priceNote ? ` ${tour.priceNote}.` : "."} Larger groups reduce the
-                    per-person rate — message us for a group quote.
-                  </p>
-                ) : null}
-                {tour.offers.length ? (
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    {tour.offers.map((offer) => (
+            <div className="sticky top-0 z-20 -mx-1 mt-8 overflow-x-auto border-y border-rule bg-paper/95 backdrop-blur">
+              <div className="flex gap-1 px-1 py-2">
+                {TABS.filter(([id]) => hasSection(tour, id)).map(([id, label]) => (
+                  <a
+                    key={id}
+                    href={`#${id}`}
+                    className="rounded-full px-4 py-2 text-[0.8rem] font-medium whitespace-nowrap text-muted hover:bg-mint hover:text-green"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-10 flex flex-col gap-12">
+              {tour.overview.length ? (
+                <Section id="overview" title="📜 Trip Overview">
+                  {tour.overview.map((p) => (
+                      <p key={p} className="text-[0.92rem] leading-7 text-ink/85">
+                        <FormatText>{p}</FormatText>
+                      </p>
+                  ))}
+                  {tour.overviewTip ? (
+                      <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
+                        dY' <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
+                      </div>
+                  ) : null}
+                </Section>
+              ) : null}
+
+              {tour.highlights.length ? (
+                <Section id="highlights" title="⭐ Trip Highlights">
+                  <ul className="flex flex-col gap-2.5">
+                    {tour.highlights.map((h) => (
+                      <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
+                        <span className="mt-0.5 text-green-bright">✓</span>
+                        <FormatText>{h}</FormatText>
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              ) : null}
+
+              {tour.glance.length ? (
+                <Section id="glance" title="📍 Journey at a Glance">
+                  <ul className="flex flex-col gap-2.5">
+                    {tour.glance.map((g) => (
+                      <li key={g.when} className="text-[0.9rem] leading-6">
+                        <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              ) : null}
+
+              {tour.addons.length ? (
+                <Section id="addons" title="➕ Optional Add-Ons">
+                  <div className="flex flex-col gap-3">
+                    {tour.addons.map((a) => (
                       <div
-                        key={offer.title}
-                        className="rounded-xl border border-rule bg-cream p-5"
+                        key={a.title}
+                        className="rounded-xl border border-rule p-4 text-[0.9rem] leading-6"
                       >
-                        <h4 className="font-display text-[0.98rem] font-bold text-green-dark">
-                          {offer.title}
-                        </h4>
-                        <ul className="mt-3 flex flex-col gap-2 text-[0.82rem] leading-6 text-muted">
-                          {offer.items.map((i) => (
+                        <span aria-hidden="true">{a.icon}</span>{" "}
+                        <strong className="text-green-dark">{a.title}:</strong> <FormatText>{a.detail}</FormatText>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              ) : null}
+
+              {tour.itinerary.length ? (
+                <Section id="itinerary" title="🗺️ Day-by-Day Itinerary">
+                  <ol className="flex flex-col gap-6">
+                    {tour.itinerary.map((day) => (
+                      <li key={day.day} className="flex gap-4">
+                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
+                          {day.day}
+                        </span>
+                        <div>
+                          <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                            {day.title}
+                          </h3>
+                          <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
+                            <FormatText>{day.detail}</FormatText>
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </Section>
+              ) : null}
+
+              {tour.offers.length || tour.priceUsd !== null ? (
+                <Section id="cost" title="💵 Tour Price & Offers">
+                  {tour.priceUsd !== null ? (
+                    <p className="text-[0.92rem] leading-7">
+                      <strong className="text-green-dark">
+                        From {formatPrice(tour.priceUsd)} per person
+                      </strong>
+                      {tour.priceNote ? ` ${tour.priceNote}.` : "."} Larger groups reduce the
+                      per-person rate — message us for a group quote.
+                    </p>
+                  ) : null}
+                  {tour.offers.length ? (
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      {tour.offers.map((offer) => (
+                        <div
+                          key={offer.title}
+                          className="rounded-xl border border-rule bg-cream p-5"
+                        >
+                          <h4 className="font-display text-[0.98rem] font-bold text-green-dark">
+                            {offer.title}
+                          </h4>
+                          <ul className="mt-3 flex flex-col gap-2 text-[0.82rem] leading-6 text-muted">
+                            {offer.items.map((i) => (
+                              <li key={i}>• <FormatText>{i}</FormatText></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </Section>
+              ) : null}
+
+              {tour.inclusions.length || tour.exclusions.length ? (
+                <Section id="inclusions" title="🛑 What's Included">
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="rounded-xl border border-green-bright/40 bg-mint p-5">
+                      <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
+                        ✅ Included
+                      </h3>
+                      <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
+                        {tour.inclusions.map((i) => (
+                          <li key={i}>• <FormatText>{i}</FormatText></li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="rounded-xl border border-rust/30 bg-rust/5 p-5">
+                      <h3 className="font-display text-[0.98rem] font-bold text-rust">
+                        ❌ Not Included
+                      </h3>
+                      <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
+                        {tour.exclusions.map((i) => (
+                          <li key={i}>• <FormatText>{i}</FormatText></li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </Section>
+              ) : null}
+
+              {tour.accessibility.length ? (
+                <Section id="accessibility" title="♿ Accessibility & Special Requests">
+                  <ul className="flex flex-col gap-2.5 rounded-xl bg-cream p-5">
+                    {tour.accessibility.map((a) => (
+                      <li key={a.label} className="text-[0.88rem] leading-6">
+                        <strong className="text-green-dark">{a.label}:</strong> <FormatText>{a.detail}</FormatText>
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              ) : null}
+
+              {tour.advice.length ? (
+                <Section id="advice" title="🎯 Trip Advice & Responsibilities">
+                  <div className="flex flex-col gap-5">
+                    {tour.advice.map((block) => (
+                      <div key={block.title} className="rounded-xl border border-rule p-5">
+                        <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
+                          {block.title}
+                        </h3>
+                        <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
+                          {block.items.map((i) => (
                             <li key={i}>• <FormatText>{i}</FormatText></li>
                           ))}
                         </ul>
                       </div>
                     ))}
                   </div>
-                ) : null}
-              </Section>
-            ) : null}
+                </Section>
+              ) : null}
 
-            {tour.inclusions.length || tour.exclusions.length ? (
-              <Section id="inclusions" title="🛑 What's Included">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="rounded-xl border border-green-bright/40 bg-mint p-5">
-                    <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                      ✅ Included
-                    </h3>
-                    <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                      {tour.inclusions.map((i) => (
-                        <li key={i}>• <FormatText>{i}</FormatText></li>
-                      ))}
-                    </ul>
+              {tour.pledge.length ? (
+                <Section id="pledge" title="🌍 Responsible Travel Pledge">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {tour.pledge.map((p) => (
+                      <div
+                        key={p}
+                        className="rounded-xl bg-mint p-4 text-[0.86rem] leading-6"
+                      >
+                        {p}
+                      </div>
+                    ))}
                   </div>
-                  <div className="rounded-xl border border-rust/30 bg-rust/5 p-5">
-                    <h3 className="font-display text-[0.98rem] font-bold text-rust">
-                      ❌ Not Included
-                    </h3>
-                    <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                      {tour.exclusions.map((i) => (
-                        <li key={i}>• <FormatText>{i}</FormatText></li>
-                      ))}
-                    </ul>
+                </Section>
+              ) : null}
+
+              {tour.faqs.length ? (
+                <Section id="faq" title="❓ Frequently Asked Questions">
+                  <div className="flex flex-col gap-3">
+                    {tour.faqs.map((faq) => (
+                      <details
+                        key={faq.question}
+                        className="group rounded-xl border border-rule p-5"
+                      >
+                        <summary className="cursor-pointer list-none font-display text-[0.98rem] font-bold text-green-dark">
+                          {faq.question}
+                        </summary>
+                        <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
+                          <FormatText>{faq.answer}</FormatText>
+                        </p>
+                      </details>
+                    ))}
                   </div>
-                </div>
-              </Section>
-            ) : null}
+                </Section>
+              ) : null}
 
-            {tour.accessibility.length ? (
-              <Section id="accessibility" title="♿ Accessibility & Special Requests">
-                <ul className="flex flex-col gap-2.5 rounded-xl bg-cream p-5">
-                  {tour.accessibility.map((a) => (
-                    <li key={a.label} className="text-[0.88rem] leading-6">
-                      <strong className="text-green-dark">{a.label}:</strong> <FormatText>{a.detail}</FormatText>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            ) : null}
-
-            {tour.advice.length ? (
-              <Section id="advice" title="🎯 Trip Advice & Responsibilities">
-                <div className="flex flex-col gap-5">
-                  {tour.advice.map((block) => (
-                    <div key={block.title} className="rounded-xl border border-rule p-5">
-                      <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                        {block.title}
-                      </h3>
-                      <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                        {block.items.map((i) => (
-                          <li key={i}>• <FormatText>{i}</FormatText></li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.pledge.length ? (
-              <Section id="pledge" title="🌍 Responsible Travel Pledge">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {tour.pledge.map((p) => (
-                    <div
-                      key={p}
-                      className="rounded-xl bg-mint p-4 text-[0.86rem] leading-6"
-                    >
-                      {p}
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.faqs.length ? (
-              <Section id="faq" title="❓ Frequently Asked Questions">
-                <div className="flex flex-col gap-3">
-                  {tour.faqs.map((faq) => (
-                    <details
-                      key={faq.question}
-                      className="group rounded-xl border border-rule p-5"
-                    >
-                      <summary className="cursor-pointer list-none font-display text-[0.98rem] font-bold text-green-dark">
-                        {faq.question}
-                      </summary>
-                      <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
-                        <FormatText>{faq.answer}</FormatText>
-                      </p>
-                    </details>
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.mapEmbed ? (
-              <Section id="map" title="🗺️ Tour Map">
-                <div className="aspect-video overflow-hidden rounded-xl border border-rule">
-                  <iframe
-                    src={tour.mapEmbed}
-                    title={`${tour.title} route map`}
-                    className="h-full w-full"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.videoUrl ? (
-              <Section id="video" title="📽️ Tour Video">
-                <div className="aspect-video overflow-hidden rounded-xl border border-rule">
-                  <iframe
-                    src={tour.videoUrl}
-                    title={`${tour.title} video`}
-                    className="h-full w-full"
-                    loading="lazy"
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </Section>
-            ) : null}
-
-            {tour.whyItems.length ? (
-              <Section id="why-tour" title="🌟 Why Choose Roam Bengal for This Tour">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {tour.whyItems.map((w) => (
-                    <div
-                      key={w}
-                      className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
-                    >
-                      {w}
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-          </div>
-        </main>
-
-        <aside className="lg:sticky lg:top-6 lg:h-fit">
-          <div className="rounded-2xl border border-rule bg-cream p-6 shadow-sm">
-            <div className="text-[0.72rem] tracking-wide text-muted uppercase">
-              Tour Cost
-            </div>
-            <div className="mt-1 font-display text-[2rem] leading-none font-bold text-green">
-              {formatPrice(tour.discountPriceUsd ?? tour.priceUsd)}
-              <span className="ml-1 text-[0.78rem] font-normal text-muted">
-                / Adult* From
-              </span>
-            </div>
-
-            {tour.childPriceUsd !== null ? (
-              <div className="mt-2 text-[0.86rem] font-semibold text-ink">
-                {formatPrice(tour.discountChildPriceUsd ?? tour.childPriceUsd)}
-                <span className="ml-1 text-[0.75rem] font-normal text-muted">/ Child</span>
-              </div>
-            ) : null}
-
-            {tour.priceBdt !== null ? (
-              <div className="mt-1.5 text-[0.78rem] text-muted">
-                ৳{tour.priceBdt.toLocaleString("en-BD")} for Bangladeshi nationals
-              </div>
-            ) : null}
-
-            <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
-              {PROMISES.map((p) => (
-                <li key={p} className="flex gap-2">
-                  <span className="text-green-bright">✓</span>
-                  <strong className="font-semibold text-ink">{p}</strong>
-                </li>
-              ))}
-            </ul>
-
-            <ButtonLink
-              to="/contact"
-              variant="green-dark"
-              className="mt-6 w-full"
-              search={{ tour: tour.slug }}
-            >
-              Book Now
-            </ButtonLink>
-          </div>
-
-          {related.length ? (
-            <div className="mt-6">
-              <h4 className="mb-3 font-display text-[1rem] font-bold text-green">
-                You Might Also Like
-              </h4>
-              <div className="flex flex-col gap-3">
-                {related.map((r) => (
-                  <Link
-                    key={r.id}
-                    to="/tours/$slug"
-                    params={{ slug: r.slug }}
-                    className="flex gap-3 rounded-xl border border-rule p-2.5 transition-colors hover:border-green"
-                  >
-                    <PhotoFrame
-                      src={r.heroImage ?? r.images[0]}
-                      alt={r.title}
-                      gradient={gradientFor(r.slug)}
-                      className="h-16 w-20 shrink-0 rounded-lg"
+              {tour.mapEmbed ? (
+                <Section id="map" title="🗺️ Tour Map">
+                  <div className="aspect-video overflow-hidden rounded-xl border border-rule">
+                    <iframe
+                      src={tour.mapEmbed}
+                      title={`${tour.title} route map`}
+                      className="h-full w-full"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
                     />
-                    <div className="min-w-0">
-                      <h5 className="truncate font-display text-[0.88rem] font-bold text-green-dark">
-                        {r.title}
-                      </h5>
-                      <span className="block text-[0.72rem] text-muted">
-                        📍 {r.destinationLabel} · {r.durationDays} Days
-                      </span>
-                      <span className="block text-[0.78rem] font-semibold text-orange">
-                        From {formatPrice(r.priceUsd)}
-                      </span>
-                    </div>
-                  </Link>
+                  </div>
+                </Section>
+              ) : null}
+
+              {tour.videoUrl ? (
+                <Section id="video" title="📽️ Tour Video">
+                  <div className="aspect-video overflow-hidden rounded-xl border border-rule">
+                    <iframe
+                      src={tour.videoUrl}
+                      title={`${tour.title} video`}
+                      className="h-full w-full"
+                      loading="lazy"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </Section>
+              ) : null}
+
+              {tour.whyItems.length ? (
+                <Section id="why-tour" title="🌟 Why Choose Roam Bengal for This Tour">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {tour.whyItems.map((w) => (
+                      <div
+                        key={w}
+                        className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
+                      >
+                        {w}
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              ) : null}
+            </div>
+          </main>
+
+          <aside className="lg:sticky lg:top-6 lg:h-fit">
+            <div className="rounded-2xl border border-rule bg-cream p-6 shadow-sm">
+              <div className="text-[0.72rem] tracking-wide text-muted uppercase">
+                Tour Cost
+              </div>
+              <div className="mt-1 font-display text-[2rem] leading-none font-bold text-green">
+                {formatPrice(tour.discountPriceUsd ?? tour.priceUsd)}
+                <span className="ml-1 text-[0.78rem] font-normal text-muted">
+                  / Adult* From
+                </span>
+              </div>
+
+              {tour.childPriceUsd !== null ? (
+                <div className="mt-2 text-[0.86rem] font-semibold text-ink">
+                  {formatPrice(tour.discountChildPriceUsd ?? tour.childPriceUsd)}
+                  <span className="ml-1 text-[0.75rem] font-normal text-muted">/ Child</span>
+                </div>
+              ) : null}
+
+              {tour.priceBdt !== null ? (
+                <div className="mt-1.5 text-[0.78rem] text-muted">
+                  ৳{tour.priceBdt.toLocaleString("en-BD")} for Bangladeshi nationals
+                </div>
+              ) : null}
+
+              <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
+                {PROMISES.map((p) => (
+                  <li key={p} className="flex gap-2">
+                    <span className="text-green-bright">✓</span>
+                    <strong className="font-semibold text-ink">{p}</strong>
+                  </li>
+                ))}
+              </ul>
+
+              <ButtonLink
+                to="/contact"
+                variant="green-dark"
+                className="mt-6 w-full"
+                search={{ tour: tour.slug }}
+              >
+                Book Now
+              </ButtonLink>
+            </div>
+
+            {related.length ? (
+              <div className="mt-6">
+                <h4 className="mb-3 font-display text-[1rem] font-bold text-green">
+                  You Might Also Like
+                </h4>
+                <div className="flex flex-col gap-3">
+                  {related.map((r) => (
+                    <Link
+                      key={r.id}
+                      to="/tours/$slug"
+                      params={{ slug: r.slug }}
+                      className="flex gap-3 rounded-xl border border-rule p-2.5 transition-colors hover:border-green"
+                    >
+                      <PhotoFrame
+                        src={r.heroImage ?? r.images[0]}
+                        alt={r.title}
+                        gradient={gradientFor(r.slug)}
+                        className="h-16 w-20 shrink-0 rounded-lg"
+                      />
+                      <div className="min-w-0">
+                        <h5 className="truncate font-display text-[0.88rem] font-bold text-green-dark">
+                          {r.title}
+                        </h5>
+                        <span className="block text-[0.72rem] text-muted">
+                          📍 {r.destinationLabel} · {r.durationDays} Days
+                        </span>
+                        <span className="block text-[0.78rem] font-semibold text-orange">
+                          From {formatPrice(r.priceUsd)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </div>
+
+        {related.length ? (
+          <section className="bg-cream py-16">
+            <div className="wrap">
+              <h2 className="mb-8 font-display text-[1.6rem] text-green">
+                You Might Also Like
+              </h2>
+              <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((r) => (
+                  <TourCard key={r.id} tour={r} />
                 ))}
               </div>
             </div>
-          ) : null}
-        </aside>
+          </section>
+        ) : null}
       </div>
-
-      {related.length ? (
-        <section className="bg-cream py-16">
-          <div className="wrap">
-            <h2 className="mb-8 font-display text-[1.6rem] text-green">
-              You Might Also Like
-            </h2>
-            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((r) => (
-                <TourCard key={r.id} tour={r} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <SiteFooter />
       <WhatsAppFloat />

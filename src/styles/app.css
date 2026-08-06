@@ -32,6 +32,8 @@
   --color-paper: #ffffff;
   --color-mint: #eaf4ec;
   --color-cream: #fbf7f0;
+  /* Page background for the tour detail pages — a touch pinker than `cream`. */
+  --color-sand: #f9f3ef;
   --color-muted: #6b7770;
   --color-rule: #e7e1d3;
   --color-brown: #8c6a3d;
