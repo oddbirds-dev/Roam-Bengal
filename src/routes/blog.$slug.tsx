@@ -52,133 +52,90 @@ export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
 });
 
-function BlogPost() {
-  const { post, related } = Route.useLoaderData();
+  function BlogPost() {
+  const { post, related, tours } = Route.useLoaderData();
+  const fullUrl = `https://roambengal.com/blog/${post.slug}`; // Could be dynamic, but this is fine for share links
 
   return (
     <>
       <div className="bg-green-dark">
         <SiteHeader />
-        <div className="wrap py-14 text-center">
-          {post.category ? (
-            <span className="text-[0.72rem] font-semibold tracking-[0.2em] text-gold uppercase">
-              {post.category}
-            </span>
-          ) : null}
-          <h1 className="mx-auto mt-3 max-w-3xl font-display text-[clamp(1.8rem,4.4vw,2.9rem)] leading-tight text-white">
-            {post.title}
-          </h1>
-          <div className="mt-5 flex items-center justify-center gap-2.5 text-[0.82rem] text-white/70">
-            {post.authorName ? (
-              <>
-                <InitialAvatar name={post.authorName} className="h-8 w-8" />
-                <span>
-                  <b className="text-white">{post.authorName}</b>
-                  {post.authorRole ? `, ${post.authorRole}` : ""}
-                </span>
-              </>
-            ) : null}
-            {post.dateLabel ? <span>· 📅 {post.dateLabel}</span> : null}
-            {post.readTime ? <span>· {post.readTime}</span> : null}
-          </div>
-          <nav className="mt-5 text-[0.76rem] text-white/60" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-gold">
+        <div className="wrap py-14 text-left">
+          <nav className="mb-4 text-[0.76rem] font-semibold text-white" aria-label="Breadcrumb">
+            <Link to="/" className="hover:text-gold transition-colors">
               Home
             </Link>
-            {" / "}
-            <Link to="/blog" className="hover:text-gold">
-              Journal
+            <span className="mx-2 text-white/50">&raquo;</span>
+            <Link to="/blog" className="hover:text-gold transition-colors">
+              Blogs
             </Link>
+            <span className="mx-2 text-white/50">&raquo;</span>
+            <span className="text-white/80">{post.title}</span>
           </nav>
+          
+          <h1 className="max-w-4xl font-display text-[clamp(1.8rem,4.4vw,2.9rem)] leading-tight text-white">
+            {post.title}
+          </h1>
+          
+          <div className="mt-8 flex items-center justify-between border-t border-white/15 pt-6">
+            <BlogShare url={fullUrl} title={post.title} />
+          </div>
         </div>
       </div>
 
       <main id="main">
-        <div className="wrap max-w-3xl py-12">
-          <PhotoFrame
-            src={post.coverImage}
-            alt={post.title}
-            gradient={gradientFor(post.slug)}
-            priority
-            placeholderLabel={`images/blog-${post.slug}.jpg`}
-            className="aspect-[16/9] w-full rounded-2xl"
-          />
+        <div className="wrap grid gap-10 py-12 lg:grid-cols-[1fr_340px]">
+          <div className="min-w-0">
+            <div className="overflow-hidden rounded-2xl border border-rule bg-paper shadow-sm">
+              <PhotoFrame
+                src={post.coverImage}
+                alt={post.title}
+                gradient={gradientFor(post.slug)}
+                priority
+                placeholderLabel={`images/blog-${post.slug}.jpg`}
+                className="aspect-[16/10] w-full"
+              />
 
-          {post.excerpt ? (
-            <p className="mt-8 font-display text-[1.15rem] leading-8 text-green-dark italic">
-              {post.excerpt}
-            </p>
-          ) : null}
-
-          {post.body.length ? (
-            <article className="mt-8 flex flex-col gap-5">
-              {post.body.map((paragraph, i) => (
-                <p key={i} className="text-[0.98rem] leading-8 text-ink/85">
-                  {paragraph}
-                </p>
-              ))}
-            </article>
-          ) : (
-            <p className="mt-8 rounded-xl border border-dashed border-rule p-8 text-center text-[0.9rem] text-muted">
-              The full story is being written — check back shortly.
-            </p>
-          )}
-
-          <div className="mt-12 rounded-2xl bg-mint p-7 text-center">
-            <h3 className="font-display text-[1.3rem] text-green">
-              Want to see this for yourself?
-            </h3>
-            <p className="mx-auto mt-2 max-w-md text-[0.88rem] leading-6 text-muted">
-              Every trip we run is private and shaped around you. Tell us what caught your
-              eye and we will build an itinerary around it.
-            </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-3">
-              <ButtonLink to="/tours" variant="green-dark">
-                Browse Tours
-              </ButtonLink>
-              <ButtonLink to="/contact" variant="outline-dark">
-                Plan Your Trip
-              </ButtonLink>
-            </div>
-          </div>
-        </div>
-
-        {related.length ? (
-          <section className="bg-cream py-16">
-            <div className="wrap">
-              <h2 className="mb-8 font-display text-[1.5rem] text-green">
-                More From The Journal
-              </h2>
-              <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                {related.map((r) => (
-                  <Link
-                    key={r.id}
-                    to="/blog/$slug"
-                    params={{ slug: r.slug }}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-rule bg-paper transition-shadow hover:shadow-lg"
-                  >
-                    <PhotoFrame
-                      src={r.coverImage}
-                      alt={r.title}
-                      gradient={gradientFor(r.slug)}
-                      className="aspect-[16/10] w-full"
-                    />
-                    <div className="p-5">
-                      <h3 className="font-display text-[1rem] leading-snug font-bold text-green-dark group-hover:text-green">
-                        {r.title}
-                      </h3>
-                      {r.dateLabel ? (
-                        <span className="mt-2 block text-[0.76rem] text-muted">
-                          📅 {r.dateLabel}
-                        </span>
-                      ) : null}
+              <div className="p-6 md:p-10">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-rule pb-5 text-[0.82rem] text-muted">
+                  {post.authorName ? (
+                    <div className="flex items-center gap-2.5">
+                      <InitialAvatar name={post.authorName} className="h-7 w-7 text-[0.7rem]" />
+                      <span>
+                        <b className="font-semibold text-ink">@ {post.authorName}</b>
+                      </span>
                     </div>
-                  </Link>
-                ))}
+                  ) : <div />}
+                  {post.dateLabel ? (
+                    <span className="font-medium">dY". {post.dateLabel}</span>
+                  ) : null}
+                </div>
+
+                {post.excerpt ? (
+                  <p className="mb-8 font-display text-[1.15rem] leading-8 text-green-dark italic">
+                    {post.excerpt}
+                  </p>
+                ) : null}
+
+                {post.body.length ? (
+                  <article className="prose prose-sm md:prose-base max-w-none text-ink/85 prose-headings:font-display prose-headings:font-bold prose-headings:text-green-dark prose-a:text-orange prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-rule prose-th:bg-cream prose-th:p-3 prose-th:text-left prose-td:border prose-td:border-rule prose-td:p-3">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {post.body.join("\n\n")}
+                    </ReactMarkdown>
+                  </article>
+                ) : (
+                  <p className="mt-8 rounded-xl border border-dashed border-rule p-8 text-center text-[0.9rem] text-muted">
+                    The full story is being written ?" check back shortly.
+                  </p>
+                )}
               </div>
             </div>
-          </section>
-        ) : null}
+          </div>
+
+          <aside className="lg:sticky lg:top-6 lg:h-fit">
+            <BlogSidebar relatedBlogs={related} tours={tours} />
+          </aside>
+        </div>
       </main>
 
       <SiteFooter />
