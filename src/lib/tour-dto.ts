@@ -38,6 +38,7 @@ export function toTourDTO(row: TourRowLike): TourDTO {
     childPriceUsd: num(row.child_price_usd),
     discountChildPriceUsd: num(row.discount_child_price_usd),
     priceNote: text(row.price_note),
+    priceTiers: arr(row.price_tiers),
     rating: num(row.rating),
     reviewsCount: intOr(row.reviews_count, 0),
     destinationLabel: text(row.destination_label),

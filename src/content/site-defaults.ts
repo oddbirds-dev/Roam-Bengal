@@ -227,6 +227,47 @@ export const siteDefaults = {
       "No strangers. No shopping detours. Just Bangladesh — appropriately experienced.",
   },
 
+  /**
+   * The pricing block on every tour page. The rates themselves live per-tour in
+   * `tours.price_tiers`; everything here is the wording around them, which is policy copy
+   * and has to read identically on every tour.
+   */
+  tour_pricing: {
+    eyebrow: "Price Details",
+    heading: "Choose Your Perfect Experience",
+    subhead: "Flexible options for every kind of traveller",
+    per_person_label: "USD / person",
+    promises_heading: "Make It Yours — A Custom Itinerary For The Perfect Adventure",
+    promises: [
+      {
+        icon: "shield",
+        title: "Fair Pricing Promise",
+        items: [
+          "**Transparent inclusions:** all entry fees, rickshaw and boat rides are completely covered.",
+          "**No hidden charges:** absolutely no forced “factory” visits or shopping commissions — ever.",
+        ],
+      },
+      {
+        icon: "calendar",
+        title: "Free Rescheduling & Cancellation",
+        items: [
+          "**Easy rescheduling:** change your tour date with zero penalties up to 72 hours before departure.",
+          "**Fair cancellation:** a 100% refund if you cancel 30+ days in advance. See our [cancellation policy](/policies/cancellation).",
+        ],
+      },
+      {
+        icon: "headset",
+        title: "Fixed Departures Or B2B Tours?",
+        items: [
+          "Looking for scheduled group trips or custom corporate packages? Get in touch today and we will design your perfect itinerary.",
+        ],
+      },
+    ],
+    cta_heading: "Ready To Start Your Adventure?",
+    cta_label: "Book This Tour Now",
+    cta_footnote: "Free cancellation · No payment required today",
+  },
+
   blog_page: {
     volume_label: "The Roam Bengal Journal — Vol. 04",
     // *…* renders as the reference masthead's italic orange phrase.

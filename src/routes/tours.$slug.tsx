@@ -6,6 +6,7 @@ import { TourCard, formatPrice } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
+import { TourPricing } from "@/components/tour/tour-pricing";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
@@ -261,9 +262,16 @@ function TourDetail() {
                 </Section>
               ) : null}
 
-              {tour.offers.length || tour.priceUsd !== null ? (
-                <Section id="cost" title="💵 Tour Price & Offers">
-                  {tour.priceUsd !== null ? (
+              {/* Price tiers, promises and the booking CTA. Renders nothing until a tour
+                  has tiers, so the prose fallback below still covers older tours. */}
+              <TourPricing tour={tour} />
+
+              {tour.offers.length || (tour.priceUsd !== null && !tour.priceTiers.length) ? (
+                <Section
+                  id={tour.priceTiers.length ? "offers" : "cost"}
+                  title="💵 Tour Price & Offers"
+                >
+                  {tour.priceUsd !== null && !tour.priceTiers.length ? (
                     <p className="text-[0.92rem] leading-7">
                       <strong className="text-green-dark">
                         From {formatPrice(tour.priceUsd)} per person
@@ -576,8 +584,12 @@ function hasSection(tour: TourDTO, id: string): boolean {
       return tour.highlights.length > 0;
     case "itinerary":
       return tour.itinerary.length > 0;
+    // `#cost` is the pricing block when tiers exist, and the older price/offers prose
+    // otherwise — either way the tab has somewhere to scroll to.
     case "cost":
-      return tour.offers.length > 0 || tour.priceUsd !== null;
+      return (
+        tour.priceTiers.length > 0 || tour.offers.length > 0 || tour.priceUsd !== null
+      );
     case "inclusions":
       return tour.inclusions.length > 0 || tour.exclusions.length > 0;
     case "advice":

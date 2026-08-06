@@ -61,6 +61,13 @@ function emptyTour() {
     child_price_usd: null as number | null,
     discount_child_price_usd: null as number | null,
     price_note: "",
+    price_tiers: [] as {
+      label: string;
+      persons: number | null;
+      price: number | null;
+      note: string;
+      badge: string;
+    }[],
     rating: null as number | null,
     reviews_count: 0,
     destination_label: "",
@@ -385,6 +392,30 @@ function TourEditor() {
                     placeholder="per person for a group of 2"
                   />
                 </div>
+                <RepeaterField
+                  label="Group price tiers"
+                  hint="The cards under “Choose Your Perfect Experience”. Order them as you want them read — cheapest first works best. Leave empty to hide the block."
+                  values={form.price_tiers}
+                  onChange={(v) => set("price_tiers", v)}
+                  blank={() => ({ label: "", persons: null, price: null, note: "", badge: "" })}
+                  title={(row) => (row.label as string) || "New tier"}
+                  columns={[
+                    { key: "label", label: "Title", placeholder: "Four Pax Group", span: 5 },
+                    { key: "persons", label: "People", type: "number", span: 2 },
+                    { key: "price", label: "USD each", type: "number", span: 2 },
+                    {
+                      key: "badge",
+                      label: "Corner ribbon",
+                      placeholder: "Best value",
+                      span: 3,
+                    },
+                    {
+                      key: "note",
+                      label: "Small print under the price",
+                      placeholder: "Per person — best value",
+                    },
+                  ]}
+                />
               </FormSection>
 
               <FormSection
@@ -810,6 +841,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     child_price_usd: numOrNull(row.child_price_usd),
     discount_child_price_usd: numOrNull(row.discount_child_price_usd),
     price_note: text(row.price_note),
+    price_tiers: list(row.price_tiers) as TourForm["price_tiers"],
     rating: numOrNull(row.rating),
     reviews_count: Number(row.reviews_count ?? 0),
     destination_label: text(row.destination_label),

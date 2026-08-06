@@ -518,6 +518,7 @@ export type Database = {
           pledge: string[];
           price_bdt: number | null;
           price_note: string | null;
+          price_tiers: Json;
           price_usd: number | null;
           primary_destination_slug: string | null;
           rating: number | null;
@@ -566,6 +567,7 @@ export type Database = {
           pledge?: string[];
           price_bdt?: number | null;
           price_note?: string | null;
+          price_tiers?: Json;
           price_usd?: number | null;
           primary_destination_slug?: string | null;
           rating?: number | null;
@@ -614,6 +616,7 @@ export type Database = {
           pledge?: string[];
           price_bdt?: number | null;
           price_note?: string | null;
+          price_tiers?: Json;
           price_usd?: number | null;
           primary_destination_slug?: string | null;
           rating?: number | null;

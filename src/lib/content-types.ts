@@ -73,6 +73,21 @@ export interface OfferCard {
   items: string[];
 }
 
+/**
+ * One per-group-size rate in the tour pricing block, in display order.
+ *
+ * Editorial numbers rather than a formula: a solo supplement is not a fixed multiple of
+ * the four-person rate. `badge` doubles as the corner ribbon text, so an empty string
+ * means "no ribbon" and there is no separate boolean to keep in sync.
+ */
+export interface PriceTier {
+  label: string;
+  persons: number | null;
+  price: number | null;
+  note: string;
+  badge: string;
+}
+
 export interface AccessibilityEntry {
   label: string;
   detail: string;
@@ -105,6 +120,7 @@ export interface TourDTO {
   childPriceUsd: number | null;
   discountChildPriceUsd: number | null;
   priceNote: string | null;
+  priceTiers: PriceTier[];
   rating: number | null;
   reviewsCount: number;
   destinationLabel: string | null;

@@ -91,6 +91,15 @@ const OfferCard = z.object({
   items: textArray(400),
 });
 
+/** One per-group-size rate. `badge` empty means no corner ribbon on that card. */
+const PriceTier = z.object({
+  label: z.string().max(80),
+  persons: z.coerce.number().int().min(1).max(99).nullable().default(null),
+  price: z.coerce.number().min(0).max(1_000_000).nullable().default(null),
+  note: z.string().max(160).default(""),
+  badge: z.string().max(40).default(""),
+});
+
 const AccessibilityEntry = z.object({
   label: z.string().max(120),
   detail: z.string().max(1000),
@@ -125,6 +134,7 @@ const TourInput = z.object({
   child_price_usd: z.coerce.number().min(0).max(1_000_000).nullish(),
   discount_child_price_usd: z.coerce.number().min(0).max(1_000_000).nullish(),
   price_note: optionalText(400),
+  price_tiers: z.array(PriceTier).max(8).default([]),
   rating: z.coerce.number().min(0).max(5).nullish(),
   reviews_count: z.coerce.number().int().min(0).default(0),
   destination_label: optionalText(160),

@@ -11,6 +11,7 @@ import {
   TextArea,
   TextField,
   type ContentBlock,
+  type GroupRow,
   type LinkRow,
   type RepeaterColumn,
 } from "@/components/admin/fields";
@@ -62,7 +63,14 @@ export type SettingsField =
     }
   | { kind: "links"; key: string; label: string; hint?: string; addLabel?: string }
   | { kind: "linkGroups"; key: string; label: string; hint?: string }
-  | { kind: "groups"; key: string; label: string; hint?: string }
+  | {
+      kind: "groups";
+      key: string;
+      label: string;
+      hint?: string;
+      /** Offers an icon picker per group. */
+      icons?: readonly { value: string; label: string }[];
+    }
   | { kind: "blocks"; key: string; label: string; hint?: string }
   | {
       kind: "rows";
@@ -102,6 +110,16 @@ const FEATURE_ICONS = [
   { value: "shield", label: "Shield" },
   { value: "card", label: "Payment card" },
   { value: "headset", label: "Headset" },
+  { value: "route", label: "Route map" },
+] as const;
+
+/** Icons offered for the tour pricing promise blocks — see FEATURE_PATHS in art/icons.tsx. */
+const PROMISE_ICONS = [
+  { value: "shield", label: "Shield" },
+  { value: "calendar", label: "Calendar" },
+  { value: "headset", label: "Headset" },
+  { value: "card", label: "Payment card" },
+  { value: "users", label: "People" },
   { value: "route", label: "Route map" },
 ] as const;
 
@@ -504,6 +522,51 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     ],
   },
 
+  tour_pricing: {
+    title: "Tour pricing block",
+    description:
+      "The wording around the price cards on every tour page. The prices themselves are set per tour, under Tours → Pricing.",
+    where: "Every tour page",
+    sections: [
+      {
+        title: "Heading",
+        fields: [
+          { kind: "text", key: "eyebrow", label: "Small label above the heading" },
+          { kind: "text", key: "heading", label: "Heading" },
+          { kind: "text", key: "subhead", label: "Line under the heading" },
+          {
+            kind: "text",
+            key: "per_person_label",
+            label: "Text under each price",
+            hint: "Shown on every price card, e.g. “USD / person”.",
+          },
+        ],
+      },
+      {
+        title: "Promises",
+        description: "The panel of reassurances under the price cards.",
+        fields: [
+          { kind: "text", key: "promises_heading", label: "Panel heading" },
+          {
+            kind: "groups",
+            key: "promises",
+            label: "Promise blocks",
+            hint: "Each block has an icon, a heading and its bullet points. Use **bold** for the lead-in, and the link button to point at a policy page.",
+            icons: PROMISE_ICONS,
+          },
+        ],
+      },
+      {
+        title: "Booking call to action",
+        fields: [
+          { kind: "text", key: "cta_heading", label: "Heading" },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_footnote", label: "Reassurance under the button" },
+        ],
+      },
+    ],
+  },
+
   blog_page: {
     title: "Blog page",
     description: "Headings on the blog index and the newsletter box.",
@@ -855,12 +918,16 @@ const asBlocks = (v: unknown): ContentBlock[] =>
       })
     : [];
 
-const asGroups = (v: unknown): { title: string; items: string[] }[] =>
+// `icon` is carried through rather than dropped: this coercion runs on load, so anything
+// it discards is discarded again on the next save.
+const asGroups = (v: unknown): GroupRow[] =>
   Array.isArray(v)
-    ? v.map((row) => ({
-        title: asText(asObject(row).title),
-        items: asTextList(asObject(row).items),
-      }))
+    ? v.map((row) => {
+        const o = asObject(row);
+        const group: GroupRow = { title: asText(o.title), items: asTextList(o.items) };
+        if (typeof o.icon === "string") group.icon = o.icon;
+        return group;
+      })
     : [];
 
 /**
@@ -1012,6 +1079,7 @@ function FieldControl({
         <GroupedListField
           label={field.label}
           hint={field.hint}
+          icons={field.icons}
           values={asGroups(value)}
           onChange={onChange}
         />

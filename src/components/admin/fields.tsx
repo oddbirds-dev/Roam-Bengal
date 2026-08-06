@@ -871,18 +871,28 @@ export function LinkGroupField({
 }
 
 /** Array of { title, items[] } — offer cards and advice blocks. */
+/** A heading plus its bullet list. `icon` is only present where `icons` is offered. */
+export interface GroupRow {
+  title: string;
+  items: string[];
+  icon?: string;
+}
+
 export function GroupedListField({
   label,
   values,
   onChange,
   hint,
+  icons,
 }: {
   label: string;
-  values: { title: string; items: string[] }[];
-  onChange: (v: { title: string; items: string[] }[]) => void;
+  values: GroupRow[];
+  onChange: (v: GroupRow[]) => void;
   hint?: string;
+  /** When given, each group also picks an icon — used by the tour pricing promises. */
+  icons?: readonly { value: string; label: string }[];
 }) {
-  const setGroup = (i: number, patch: Partial<{ title: string; items: string[] }>) =>
+  const setGroup = (i: number, patch: Partial<GroupRow>) =>
     onChange(values.map((g, idx) => (idx === i ? { ...g, ...patch } : g)));
 
   return (
@@ -892,6 +902,20 @@ export function GroupedListField({
         {values.map((group, i) => (
           <div key={i} className="rounded-xl border border-rule bg-cream p-4">
             <div className="mb-3 flex items-center gap-2">
+              {icons ? (
+                <select
+                  aria-label="Icon"
+                  value={group.icon ?? icons[0]?.value ?? ""}
+                  onChange={(e) => setGroup(i, { icon: e.target.value })}
+                  className={`${inputBase} w-auto shrink-0`}
+                >
+                  {icons.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               <input
                 type="text"
                 value={group.title}
@@ -913,7 +937,12 @@ export function GroupedListField({
           </div>
         ))}
         <AddButton
-          onClick={() => onChange([...values, { title: "", items: [] }])}
+          onClick={() =>
+            onChange([
+              ...values,
+              { title: "", items: [], ...(icons ? { icon: icons[0]?.value ?? "" } : {}) },
+            ])
+          }
           label={`Add ${singular(label)}`}
         />
       </div>
