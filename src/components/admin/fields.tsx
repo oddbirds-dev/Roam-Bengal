@@ -52,6 +52,33 @@ function MarkdownTextarea({
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
+  const applyClass = (cls: string) => {
+    if (!ref.current) return;
+    const textarea = ref.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    if (!selected) {
+      alert("Please select some text first to apply formatting.");
+      return;
+    }
+
+    const wrap = `<span class="${cls}">${selected}</span>`;
+    const newValue = before + wrap + after;
+    
+    onChange(newValue);
+    setTimeout(() => {
+      if (ref.current) {
+        const newStart = start + wrap.indexOf(selected);
+        ref.current.setSelectionRange(newStart, newStart + selected.length);
+        ref.current.focus();
+      }
+    }, 0);
+  };
+
   const handleBold = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!ref.current) return;
@@ -91,16 +118,63 @@ function MarkdownTextarea({
   };
 
   return (
-    <div className="relative">
-      <div className="absolute right-2 top-2 z-[2]">
+    <div className="flex flex-col rounded-[10px] border border-rule bg-paper overflow-hidden transition-colors focus-within:border-green focus-within:ring-2 focus-within:ring-green/15">
+      <div className="flex items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
         <button
           type="button"
           onClick={handleBold}
           title="Bold text"
-          className="flex h-6 w-6 items-center justify-center rounded bg-cream text-ink hover:bg-rule"
+          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
         >
           <AdminIcon name="bold" className="h-[14px] w-[14px]" />
         </button>
+        <div className="h-4 w-px bg-rule" />
+        <select
+          title="Text Color"
+          onChange={(e) => {
+            if (e.target.value) applyClass(e.target.value);
+            e.target.value = "";
+          }}
+          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+        >
+          <option value="">Color</option>
+          <option value="text-green">Green</option>
+          <option value="text-green-dark">Dark Green</option>
+          <option value="text-gold">Gold</option>
+          <option value="text-rust">Rust</option>
+          <option value="text-orange">Orange</option>
+        </select>
+        <div className="h-4 w-px bg-rule" />
+        <select
+          title="Text Size"
+          onChange={(e) => {
+            if (e.target.value) applyClass(e.target.value);
+            e.target.value = "";
+          }}
+          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+        >
+          <option value="">Size</option>
+          <option value="text-sm">Small</option>
+          <option value="text-[1.05rem]">Large</option>
+          <option value="text-[1.2rem]">Huge</option>
+        </select>
+        <div className="h-4 w-px bg-rule" />
+        <select
+          title="Text Font"
+          onChange={(e) => {
+            if (e.target.value) applyClass(e.target.value);
+            e.target.value = "";
+          }}
+          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+        >
+          <option value="">Font</option>
+          <option value="font-display">Display (Playfair)</option>
+          <option value="font-body">Body (Poppins)</option>
+          <option value="font-script">Script (Caveat)</option>
+          <option value="font-marker">Marker</option>
+          <option value="font-kalam">Kalam</option>
+          <option value="font-custom">Custom</option>
+        </select>
       </div>
       <textarea
         ref={ref}
@@ -109,7 +183,7 @@ function MarkdownTextarea({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={`${inputBase} pr-9`}
+        className="w-full bg-transparent px-3.5 py-2.5 text-[0.88rem] outline-none disabled:bg-cream disabled:text-muted"
       />
     </div>
   );

@@ -121,6 +121,30 @@ const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode =>
 // ---------------------------------------------------------------------------
 
 export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
+  custom_fonts: {
+    title: "Custom Font",
+    description: "Load an external font, e.g., from Google Fonts.",
+    where: "Available in text formatting options",
+    sections: [
+      {
+        title: "Font Settings",
+        fields: [
+          {
+            kind: "text",
+            key: "font_url",
+            label: "Stylesheet URL",
+            hint: "Example: https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap",
+          },
+          {
+            kind: "text",
+            key: "font_family",
+            label: "Font Family Name",
+            hint: "Example: 'Roboto', sans-serif",
+          },
+        ],
+      },
+    ],
+  },
   header: {
     title: "Header & menu",
     description: "Your logo, the menu across the top, and the button beside it.",
@@ -772,6 +796,7 @@ for (const slug of INFO_SLUGS) {
 
 /** Display order on the settings index — grouped by where it appears, not alphabetically. */
 export const SETTINGS_ORDER = [
+  "custom_fonts",
   "header",
   "footer",
   "hero",
@@ -779,7 +804,6 @@ export const SETTINGS_ORDER = [
   "gallery",
   "tours_page",
   "blog_page",
-  "reviews",
   "about",
   "contact",
   "whatsapp",

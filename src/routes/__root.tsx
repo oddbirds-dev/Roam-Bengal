@@ -10,6 +10,7 @@ import appCss from "@/styles/app.css?url";
 import { NotFound } from "@/components/not-found";
 import { ErrorPage } from "@/components/error-page";
 import { getAllSettings } from "@/lib/site-content.functions";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export const Route = createRootRoute({
   // Header and footer copy lives in `site_settings`, so every page needs it. Loading it
@@ -43,10 +44,15 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  const { custom_fonts } = useSiteSettings();
   return (
     <html lang="en">
       <head>
         <HeadContent />
+        {custom_fonts?.font_url ? <link rel="stylesheet" href={custom_fonts.font_url} /> : null}
+        {custom_fonts?.font_family ? (
+          <style dangerouslySetInnerHTML={{ __html: `.font-custom { font-family: ${custom_fonts.font_family}; }` }} />
+        ) : null}
       </head>
       <body>
         <a href="#main" className="sr-only-focusable">

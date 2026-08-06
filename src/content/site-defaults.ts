@@ -16,6 +16,10 @@ export interface NavLink {
 }
 
 export const siteDefaults = {
+  custom_fonts: {
+    font_url: "",
+    font_family: "",
+  },
   header: {
     logo_url: "",
     logo_alt: "Roam Bengal",
