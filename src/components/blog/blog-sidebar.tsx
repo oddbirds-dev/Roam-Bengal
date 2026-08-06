@@ -62,16 +62,16 @@ export function BlogSidebar({
                 </h4>
                 <div className="my-3 grid grid-cols-2 gap-2 text-[0.75rem] text-muted">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-lg leading-none">dY?</span> {tour.durationDays} {tour.durationDays === 1 ? "Day" : "Days"}
+                    <span className="text-lg leading-none">🕐</span> {tour.durationDays} {tour.durationDays === 1 ? "Day" : "Days"}
                   </div>
                   {tour.activitiesCount ? (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-lg leading-none">dYs</span> {tour.activitiesCount}+ Activities
+                      <span className="text-lg leading-none">🚶</span> {tour.activitiesCount}+ Activities
                     </div>
                   ) : null}
                   {tour.groupSizeMax ? (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-lg leading-none">dY`</span> {tour.groupSizeMax} People
+                      <span className="text-lg leading-none">👥</span> {tour.groupSizeMax} People
                     </div>
                   ) : null}
                 </div>
@@ -87,7 +87,7 @@ export function BlogSidebar({
                     variant="green"
                     className="px-4 py-1.5 text-[0.75rem] min-h-0"
                   >
-                    View Details +'
+                    View Details →
                   </ButtonLink>
                 </div>
               </div>

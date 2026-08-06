@@ -193,7 +193,7 @@ function TourDetail() {
                   ))}
                   {tour.overviewTip ? (
                       <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
-                        dY' <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
+                        💡 <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
                       </div>
                   ) : null}
                 </Section>

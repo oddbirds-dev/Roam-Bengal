@@ -73,7 +73,10 @@ export const Route = createFileRoute("/blog/$slug")({
     <>
       <div className="bg-green-dark">
         <SiteHeader />
-        <div className="wrap py-14 text-left">
+        {/* The extra bottom padding is the runway the article card is pulled up into —
+            it has to exceed the negative margin below or the card would clear the banner
+            entirely and the overlap would collapse. */}
+        <div className="wrap pt-14 pb-24 text-left md:pb-28">
           <nav className="mb-4 text-[0.76rem] font-semibold text-white" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-gold transition-colors">
               Home
@@ -97,9 +100,11 @@ export const Route = createFileRoute("/blog/$slug")({
       </div>
 
       <main id="main">
-        <div className="wrap grid gap-10 py-12 lg:grid-cols-[1fr_340px]">
+        {/* `z-10` keeps the card above the banner's background but below the header's
+            `z-30`, so the mobile nav drawer still opens over the article. */}
+        <div className="wrap relative z-10 -mt-14 grid gap-10 pb-12 lg:grid-cols-[1fr_340px] md:-mt-20">
           <div className="min-w-0">
-            <div className="overflow-hidden rounded-2xl border border-rule bg-paper shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-rule bg-paper shadow-lg">
               <PhotoFrame
                 src={post.coverImage}
                 alt={post.title}
@@ -120,7 +125,7 @@ export const Route = createFileRoute("/blog/$slug")({
                     </div>
                   ) : <div />}
                   {post.dateLabel ? (
-                    <span className="font-medium">dY". {post.dateLabel}</span>
+                    <span className="font-medium">📅 {post.dateLabel}</span>
                   ) : null}
                 </div>
 
@@ -136,14 +141,16 @@ export const Route = createFileRoute("/blog/$slug")({
                   </article>
                 ) : (
                   <p className="mt-8 rounded-xl border border-dashed border-rule p-8 text-center text-[0.9rem] text-muted">
-                    The full story is being written ?" check back shortly.
+                    The full story is being written — check back shortly.
                   </p>
                 )}
               </div>
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-6 lg:h-fit">
+          {/* Cancels the grid's pull-up so only the article card laps onto the banner.
+              Below `lg` this column stacks under the article, where it never applied. */}
+          <aside className="lg:sticky lg:top-6 lg:mt-20 lg:h-fit">
             <BlogSidebar relatedBlogs={related} tours={tours} />
           </aside>
         </div>

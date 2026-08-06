@@ -260,7 +260,7 @@ function Home() {
 
             {homepage.faith_callouts.map((c) => (
                 <div key={c.lead} className="mb-[18px] flex items-start gap-3">
-                  <span className="mt-0.5 shrink-0 text-[1.1rem] font-bold text-gold">+'</span>
+                  <span className="mt-0.5 shrink-0 text-[1.1rem] font-bold text-gold">→</span>
                   <p className="text-[0.88rem] leading-[1.6] text-muted">
                     <strong className="text-ink"><FormatText>{c.lead}</FormatText></strong> <FormatText>{c.text}</FormatText>
                   </p>
