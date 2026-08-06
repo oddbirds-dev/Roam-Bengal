@@ -5,6 +5,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { TourCard, formatPrice } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
@@ -178,14 +179,14 @@ function TourDetail() {
             {tour.overview.length ? (
               <Section id="overview" title="📜 Trip Overview">
                 {tour.overview.map((p) => (
-                  <p key={p} className="text-[0.92rem] leading-7 text-ink/85">
-                    {p}
-                  </p>
+                    <p key={p} className="text-[0.92rem] leading-7 text-ink/85">
+                      <FormatText>{p}</FormatText>
+                    </p>
                 ))}
                 {tour.overviewTip ? (
-                  <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
-                    💡 <strong>Good to know:</strong> {tour.overviewTip}
-                  </div>
+                    <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
+                      dY' <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
+                    </div>
                 ) : null}
               </Section>
             ) : null}
@@ -196,7 +197,7 @@ function TourDetail() {
                   {tour.highlights.map((h) => (
                     <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
                       <span className="mt-0.5 text-green-bright">✓</span>
-                      {h}
+                      <FormatText>{h}</FormatText>
                     </li>
                   ))}
                 </ul>
@@ -208,7 +209,7 @@ function TourDetail() {
                 <ul className="flex flex-col gap-2.5">
                   {tour.glance.map((g) => (
                     <li key={g.when} className="text-[0.9rem] leading-6">
-                      <strong className="text-green-dark">{g.when}</strong> — {g.detail}
+                      <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
                     </li>
                   ))}
                 </ul>
@@ -224,7 +225,7 @@ function TourDetail() {
                       className="rounded-xl border border-rule p-4 text-[0.9rem] leading-6"
                     >
                       <span aria-hidden="true">{a.icon}</span>{" "}
-                      <strong className="text-green-dark">{a.title}:</strong> {a.detail}
+                      <strong className="text-green-dark">{a.title}:</strong> <FormatText>{a.detail}</FormatText>
                     </div>
                   ))}
                 </div>
@@ -244,7 +245,7 @@ function TourDetail() {
                           {day.title}
                         </h3>
                         <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
-                          {day.detail}
+                          <FormatText>{day.detail}</FormatText>
                         </p>
                       </div>
                     </li>
@@ -276,7 +277,7 @@ function TourDetail() {
                         </h4>
                         <ul className="mt-3 flex flex-col gap-2 text-[0.82rem] leading-6 text-muted">
                           {offer.items.map((i) => (
-                            <li key={i}>• {i}</li>
+                            <li key={i}>• <FormatText>{i}</FormatText></li>
                           ))}
                         </ul>
                       </div>
@@ -295,7 +296,7 @@ function TourDetail() {
                     </h3>
                     <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
                       {tour.inclusions.map((i) => (
-                        <li key={i}>• {i}</li>
+                        <li key={i}>• <FormatText>{i}</FormatText></li>
                       ))}
                     </ul>
                   </div>
@@ -305,7 +306,7 @@ function TourDetail() {
                     </h3>
                     <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
                       {tour.exclusions.map((i) => (
-                        <li key={i}>• {i}</li>
+                        <li key={i}>• <FormatText>{i}</FormatText></li>
                       ))}
                     </ul>
                   </div>
@@ -318,7 +319,7 @@ function TourDetail() {
                 <ul className="flex flex-col gap-2.5 rounded-xl bg-cream p-5">
                   {tour.accessibility.map((a) => (
                     <li key={a.label} className="text-[0.88rem] leading-6">
-                      <strong className="text-green-dark">{a.label}:</strong> {a.detail}
+                      <strong className="text-green-dark">{a.label}:</strong> <FormatText>{a.detail}</FormatText>
                     </li>
                   ))}
                 </ul>
@@ -335,7 +336,7 @@ function TourDetail() {
                       </h3>
                       <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
                         {block.items.map((i) => (
-                          <li key={i}>• {i}</li>
+                          <li key={i}>• <FormatText>{i}</FormatText></li>
                         ))}
                       </ul>
                     </div>
@@ -371,7 +372,7 @@ function TourDetail() {
                         {faq.question}
                       </summary>
                       <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
-                        {faq.answer}
+                        <FormatText>{faq.answer}</FormatText>
                       </p>
                     </details>
                   ))}

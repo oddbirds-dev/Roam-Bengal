@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
+import { FormatText } from "@/components/ui/format-text";
 import type { PolicyPage } from "@/content/policy-defaults";
 
 /** Shared by /policies/:slug and the standalone info pages. */
@@ -39,7 +40,7 @@ export function PolicyLayout({ page }: { page: PolicyPage }) {
               <h2 className="font-display text-[1.25rem] text-green">{block.heading}</h2>
               {block.paragraphs?.map((p) => (
                 <p key={p} className="mt-3 text-[0.94rem] leading-8 text-ink/85">
-                  {p}
+                  <FormatText>{p}</FormatText>
                 </p>
               ))}
               {block.items?.length ? (
@@ -50,7 +51,7 @@ export function PolicyLayout({ page }: { page: PolicyPage }) {
                       className="flex gap-3 text-[0.92rem] leading-7 text-ink/85"
                     >
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                      {item}
+                      <FormatText>{item}</FormatText>
                     </li>
                   ))}
                 </ul>

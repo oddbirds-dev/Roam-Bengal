@@ -6,6 +6,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { TourCard } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
@@ -116,11 +117,11 @@ function ToursIndex() {
               <br />
               <span className="text-orange">{tours_page.intro_heading_2}</span>
             </h2>
-            {tours_page.intro_paragraphs.map((p) => (
-              <p key={p} className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] text-ink">
-                {p}
-              </p>
-            ))}
+              {tours_page.intro_paragraphs.map((p) => (
+                <p key={p} className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] text-ink">
+                  <FormatText>{p}</FormatText>
+                </p>
+              ))}
             <p className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] font-bold text-ink">
               {tours_page.intro_bold}
             </p>
@@ -196,14 +197,14 @@ function ToursIndex() {
                 <br />
                 About <span className="text-gold">{homepage.cta_heading_2}</span>
               </h2>
-              {homepage.cta_paragraphs.map((p) => (
-                <p
-                  key={p}
-                  className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink"
-                >
-                  {p}
-                </p>
-              ))}
+                {homepage.cta_paragraphs.map((p) => (
+                  <p
+                    key={p}
+                    className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink"
+                  >
+                    <FormatText>{p}</FormatText>
+                  </p>
+                ))}
               <ButtonLink to={homepage.cta_link} variant="green-dark">
                 {homepage.cta_label}
               </ButtonLink>

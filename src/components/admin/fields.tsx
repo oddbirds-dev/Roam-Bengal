@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { AdminIcon } from "@/components/admin/icons";
 
 /**
  * Form primitives for the admin editors.
@@ -30,9 +31,87 @@ export function Label({
         {children} {required ? <span className="text-rust">*</span> : null}
       </span>
       {hint ? (
-        <span className="mt-0.5 block text-[0.73rem] text-muted/85">{hint}</span>
+        <span className="mt-0.5 block text-[0.8rem] text-muted">{hint}</span>
       ) : null}
     </label>
+  );
+}
+
+function MarkdownTextarea({
+  id,
+  rows = 4,
+  value,
+  placeholder,
+  onChange,
+}: {
+  id?: string;
+  rows?: number;
+  value: string;
+  placeholder?: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const handleBold = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!ref.current) return;
+    const textarea = ref.current;
+    // Get current selection bounds right now from the DOM
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    let newValue = "";
+    let newStart = start;
+    let newEnd = end;
+
+    if (before.endsWith("**") && after.startsWith("**")) {
+      newValue = before.substring(0, before.length - 2) + selected + after.substring(2);
+      newStart = start - 2;
+      newEnd = end - 2;
+    } else if (selected.startsWith("**") && selected.endsWith("**") && selected.length >= 4) {
+      newValue = before + selected.substring(2, selected.length - 2) + after;
+      newStart = start;
+      newEnd = end - 4;
+    } else {
+      newValue = before + "**" + selected + "**" + after;
+      newStart = start + 2;
+      newEnd = end + 2;
+    }
+    
+    onChange(newValue);
+    setTimeout(() => {
+      if (ref.current) {
+        ref.current.setSelectionRange(newStart, newEnd);
+        ref.current.focus();
+      }
+    }, 0);
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute right-2 top-2 z-[2]">
+        <button
+          type="button"
+          onClick={handleBold}
+          title="Bold text"
+          className="flex h-6 w-6 items-center justify-center rounded bg-cream text-ink hover:bg-rule"
+        >
+          <AdminIcon name="bold" className="h-[14px] w-[14px]" />
+        </button>
+      </div>
+      <textarea
+        ref={ref}
+        id={id}
+        rows={rows}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${inputBase} pr-9`}
+      />
+    </div>
   );
 }
 
@@ -94,13 +173,12 @@ export function TextArea({
       <Label htmlFor={id} hint={hint}>
         {label}
       </Label>
-      <textarea
+      <MarkdownTextarea
         id={id}
         rows={rows}
         value={value}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className={inputBase}
+        onChange={onChange}
       />
     </div>
   );
@@ -231,21 +309,22 @@ export function StringListField({
   return (
     <div>
       <Label hint={hint}>{label}</Label>
-      <div className="flex flex-col gap-2">
-        {values.map((value, i) => (
-          <div key={i} className="flex items-start gap-2">
-            {multiline ? (
-              <textarea
-                rows={3}
-                value={value}
-                placeholder={placeholder}
-                onChange={(e) => set(i, e.target.value)}
-                className={inputBase}
-              />
-            ) : (
-              <input
-                type="text"
-                value={value}
+        <div className="flex flex-col gap-2">
+          {values.map((value, i) => (
+            <div key={i} className="flex items-start gap-2">
+              {multiline ? (
+                <div className="grow">
+                  <MarkdownTextarea
+                    rows={3}
+                    value={value}
+                    placeholder={placeholder}
+                    onChange={(v) => set(i, v)}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={value}
                 placeholder={placeholder}
                 onChange={(e) => set(i, e.target.value)}
                 className={inputBase}
@@ -328,15 +407,14 @@ export function RepeaterField<T extends Record<string, unknown>>({
                   </span>
                   {col.render ? (
                     col.render(row[col.key], (v) => setField(i, col.key, v))
-                  ) : col.type === "textarea" ? (
-                    <textarea
-                      rows={3}
-                      value={String(row[col.key] ?? "")}
-                      placeholder={col.placeholder}
-                      onChange={(e) => setField(i, col.key, e.target.value)}
-                      className={inputBase}
-                    />
-                  ) : col.type === "select" ? (
+                    ) : col.type === "textarea" ? (
+                      <MarkdownTextarea
+                        rows={3}
+                        value={String(row[col.key] ?? "")}
+                        placeholder={col.placeholder}
+                        onChange={(v) => setField(i, col.key, v)}
+                      />
+                    ) : col.type === "select" ? (
                     <select
                       value={String(row[col.key] ?? "")}
                       onChange={(e) => setField(i, col.key, e.target.value)}

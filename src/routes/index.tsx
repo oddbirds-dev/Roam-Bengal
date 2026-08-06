@@ -6,6 +6,7 @@ import { TourCard } from "@/components/tour-card";
 import { SectionHead, Eyebrow } from "@/components/sections";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
   listPublishedPosts,
@@ -184,10 +185,10 @@ function Home() {
               <br />
               <span className="text-gold">{gallery.heading_2}</span>
             </h2>
-            <p className="max-w-[520px] text-[0.92rem] text-muted">{gallery.blurb}</p>
-            <p className="mt-2 max-w-[520px] text-[0.92rem] font-bold text-ink">
-              {gallery.bold}
-            </p>
+              <p className="max-w-[520px] text-[0.92rem] text-muted"><FormatText>{gallery.blurb}</FormatText></p>
+              <p className="mt-2 max-w-[520px] text-[0.92rem] font-bold text-ink">
+                <FormatText>{gallery.bold}</FormatText>
+              </p>
           </div>
           <ButtonLink to={gallery.cta_link} variant="green-dark" className="whitespace-nowrap">
             {gallery.cta_label}
@@ -247,23 +248,23 @@ function Home() {
 
             <ul className="mb-[30px] flex flex-col gap-3">
               {homepage.faith_list.map((item) => (
-                <li
-                  key={item}
-                  className="relative pl-[26px] text-[0.92rem] leading-[1.5] text-ink"
-                >
-                  <span className="absolute top-px left-0 font-bold text-green">✓</span>
-                  {item}
-                </li>
+                  <li
+                    key={item}
+                    className="relative pl-[26px] text-[0.92rem] leading-[1.5] text-ink"
+                  >
+                    <span className="absolute top-px left-0 font-bold text-green">o"</span>
+                    <FormatText>{item}</FormatText>
+                  </li>
               ))}
             </ul>
 
             {homepage.faith_callouts.map((c) => (
-              <div key={c.lead} className="mb-[18px] flex items-start gap-3">
-                <span className="mt-0.5 shrink-0 text-[1.1rem] font-bold text-gold">→</span>
-                <p className="text-[0.88rem] leading-[1.6] text-muted">
-                  <strong className="text-ink">{c.lead}</strong> {c.text}
-                </p>
-              </div>
+                <div key={c.lead} className="mb-[18px] flex items-start gap-3">
+                  <span className="mt-0.5 shrink-0 text-[1.1rem] font-bold text-gold">+'</span>
+                  <p className="text-[0.88rem] leading-[1.6] text-muted">
+                    <strong className="text-ink"><FormatText>{c.lead}</FormatText></strong> <FormatText>{c.text}</FormatText>
+                  </p>
+                </div>
             ))}
           </div>
         </div>
@@ -437,22 +438,22 @@ function Home() {
             <h2 className="mb-[18px] font-display text-[clamp(2rem,3.6vw,2.7rem)] leading-[1.15] font-bold text-ink">
               Why You Choose <span className="text-orange">Our Company</span>
             </h2>
-            <p className="mb-[30px] max-w-[480px] text-[0.95rem] text-muted">
-              {homepage.why_intro}
-            </p>
-            <div className="flex flex-col gap-[26px]">
-              {homepage.why_items.map((item) => (
-                <div key={item.title} className="flex items-start gap-[18px]">
-                  <WhyIcon name={item.icon} />
-                  <div>
-                    <h3 className="mb-1 font-display text-[1.1rem] font-bold text-ink">
-                      {item.title}
-                    </h3>
-                    <p className="max-w-[420px] text-[0.86rem] text-muted">{item.text}</p>
+              <p className="mb-[30px] max-w-[480px] text-[0.95rem] text-muted">
+                <FormatText>{homepage.why_intro}</FormatText>
+              </p>
+              <div className="flex flex-col gap-[26px]">
+                {homepage.why_items.map((item) => (
+                  <div key={item.title} className="flex items-start gap-[18px]">
+                    <WhyIcon name={item.icon} />
+                    <div>
+                      <h3 className="mb-1 font-display text-[1.1rem] font-bold text-ink">
+                        {item.title}
+                      </h3>
+                      <p className="max-w-[420px] text-[0.86rem] text-muted"><FormatText>{item.text}</FormatText></p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
           </div>
 
           <PhotoFrame
@@ -475,13 +476,13 @@ function Home() {
               About <span className="text-gold">{homepage.cta_heading_2}</span>
             </h2>
             {homepage.cta_paragraphs.map((p) => (
-              <p
-                key={p}
-                className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink"
-              >
-                {p}
-              </p>
-            ))}
+                <p
+                  key={p}
+                  className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink"
+                >
+                  <FormatText>{p}</FormatText>
+                </p>
+              ))}
             <ButtonLink to={homepage.cta_link} variant="green-dark">
               {homepage.cta_label}
             </ButtonLink>

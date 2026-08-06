@@ -23,6 +23,7 @@ const PATHS: Record<string, string> = {
   eye: "M2 12c0 0 4-8 10-8s10 8 10 8-4 8-10 8-10-8-10-8ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
   eyeOff: "M10.4 10.4a3 3 0 1 0 4.2 4.2M2 12c0 0 4-8 10-8s10 8 10 8-4 8-10 8-10-8-10-8ZM3 3l18 18",
   chevron: "M9 6l6 6-6 6",
+  bold: "M14 12a4 4 0 0 0 0-8H6v8 M15 20a4 4 0 0 0 0-8H6v8Z",
 };
 
 export function AdminIcon({
