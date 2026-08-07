@@ -4,6 +4,35 @@ import { AdminIcon } from "@/components/admin/icons";
 
 /** Shared chrome and interaction helpers for the admin screens. */
 
+const SIDEBAR_COLLAPSE_KEY = "admin:sidebar-collapsed";
+const SIDEBAR_COLLAPSE_EVENT = "admin:sidebar-collapse-change";
+
+/**
+ * Mirrors the admin shell's collapsed-sidebar preference outside the shell itself — for
+ * pages like the tour editor that render their own `fixed` layout and must reserve the
+ * same left offset the sidebar actually occupies.
+ *
+ * Starts expanded so SSR and first paint agree; the stored preference (and any change made
+ * elsewhere in the same tab, via `setSidebarCollapsed`) is applied after mount.
+ */
+export function useSidebarCollapsed(): boolean {
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    const sync = () => setCollapsed(localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "1");
+    sync();
+    window.addEventListener(SIDEBAR_COLLAPSE_EVENT, sync);
+    return () => window.removeEventListener(SIDEBAR_COLLAPSE_EVENT, sync);
+  }, []);
+  return collapsed;
+}
+
+/** Persists the sidebar's collapsed state and notifies other mounted `useSidebarCollapsed`
+ *  consumers in the same tab — a plain `storage` event only fires in *other* tabs. */
+export function setSidebarCollapsed(collapsed: boolean) {
+  localStorage.setItem(SIDEBAR_COLLAPSE_KEY, collapsed ? "1" : "0");
+  window.dispatchEvent(new Event(SIDEBAR_COLLAPSE_EVENT));
+}
+
 export function PageHeader({
   title,
   subtitle,

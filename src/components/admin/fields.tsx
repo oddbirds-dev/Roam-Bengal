@@ -43,6 +43,14 @@ export function Label({
   );
 }
 
+/** Font size of a selection is stored as an inline `font-size: Npx` style rather than a
+ *  fixed class, so the toolbar can offer a continuous +/- stepper and a typed value like a
+ *  word processor, instead of a handful of preset sizes. */
+const BASE_FONT_PX = 16;
+const MIN_FONT_PX = 8;
+const MAX_FONT_PX = 96;
+const SIZE_OPEN_RE = /<span style="font-size: (\d+)px">$/;
+
 function MarkdownTextarea({
   id,
   rows = 4,
@@ -59,6 +67,7 @@ function MarkdownTextarea({
   const ref = useRef<HTMLTextAreaElement>(null);
   const [hint, setHint] = useState<string | null>(null);
   const [picker, setPicker] = useState<PickerState | null>(null);
+  const [sizeValue, setSizeValue] = useState(BASE_FONT_PX);
 
   /** Inline, non-blocking replacement for `alert()`, which stole the very selection the
    *  editor was about to format. */
@@ -172,9 +181,163 @@ function MarkdownTextarea({
     reselect(newStart, newEnd);
   };
 
+  const handleItalic = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!ref.current) return;
+    const textarea = ref.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    let newValue: string;
+    let newStart = start;
+    let newEnd = end;
+
+    if (before.endsWith("*") && !before.endsWith("**") && after.startsWith("*") && !after.startsWith("**")) {
+      newValue = before.slice(0, -1) + selected + after.slice(1);
+      newStart = start - 1;
+      newEnd = end - 1;
+    } else if (
+      selected.startsWith("*") && !selected.startsWith("**") &&
+      selected.endsWith("*") && !selected.endsWith("**") &&
+      selected.length >= 2
+    ) {
+      newValue = before + selected.slice(1, -1) + after;
+      newEnd = end - 2;
+    } else {
+      newValue = before + "*" + selected + "*" + after;
+      newStart = start + 1;
+      newEnd = end + 1;
+    }
+
+    onChange(newValue);
+    reselect(newStart, newEnd);
+  };
+
+  const handleUnderline = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!ref.current) return;
+    const textarea = ref.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    let newValue: string;
+    let newStart = start;
+    let newEnd = end;
+
+    if (before.endsWith("<u>") && after.startsWith("</u>")) {
+      newValue = before.slice(0, -3) + selected + after.slice(4);
+      newStart = start - 3;
+      newEnd = end - 3;
+    } else if (selected.startsWith("<u>") && selected.endsWith("</u>") && selected.length >= 7) {
+      newValue = before + selected.slice(3, -4) + after;
+      newEnd = end - 7;
+    } else {
+      newValue = before + "<u>" + selected + "</u>" + after;
+      newStart = start + 3;
+      newEnd = end + 3;
+    }
+
+    onChange(newValue);
+    reselect(newStart, newEnd);
+  };
+
+  /** Reflects the size of whatever's currently selected in the "px" field, so the toolbar
+   *  shows the selection's real size rather than staying pinned at the default. */
+  const syncSizeFromSelection = () => {
+    if (!ref.current) return;
+    const textarea = ref.current;
+    const before = textarea.value.substring(0, textarea.selectionStart);
+    const after = textarea.value.substring(textarea.selectionEnd);
+    const match = before.match(SIZE_OPEN_RE);
+    setSizeValue(match && after.startsWith("</span>") ? Number(match[1]) : BASE_FONT_PX);
+  };
+
+  const applySize = (rawNext: number) => {
+    if (!ref.current || !Number.isFinite(rawNext)) return;
+    const textarea = ref.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+
+    if (!selected) {
+      flash("Select some text first, then adjust its size.");
+      return;
+    }
+
+    const next = Math.min(MAX_FONT_PX, Math.max(MIN_FONT_PX, Math.round(rawNext)));
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    const openMatch = before.match(SIZE_OPEN_RE);
+    const wrapped = openMatch && after.startsWith("</span>");
+    const strippedBefore = wrapped ? before.slice(0, before.length - openMatch![0].length) : before;
+    const strippedAfter = wrapped ? after.slice("</span>".length) : after;
+
+    const openTag = next === BASE_FONT_PX ? "" : `<span style="font-size: ${next}px">`;
+    const closeTag = next === BASE_FONT_PX ? "" : "</span>";
+
+    onChange(strippedBefore + openTag + selected + closeTag + strippedAfter);
+    const newStart = strippedBefore.length + openTag.length;
+    reselect(newStart, newStart + selected.length);
+    setSizeValue(next);
+  };
+
   return (
     <div className="flex flex-col rounded-[10px] border border-rule bg-paper overflow-hidden transition-colors focus-within:border-green focus-within:ring-2 focus-within:ring-green/15">
-      <div className="flex items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
+      <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
+        <select
+          title="Text Font"
+          onChange={(e) => {
+            if (e.target.value) applyClass(e.target.value);
+            e.target.value = "";
+          }}
+          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+        >
+          <option value="">Font</option>
+          <option value="font-display">Display (Playfair)</option>
+          <option value="font-body">Body (Poppins)</option>
+          <option value="font-script">Script (Caveat)</option>
+          <option value="font-marker">Marker</option>
+          <option value="font-kalam">Kalam</option>
+          <option value="font-custom">Custom</option>
+        </select>
+        <div className="h-4 w-px bg-rule" />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applySize(sizeValue - 1)}
+            title="Decrease text size"
+            className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          >
+            <AdminIcon name="minus" className="h-[14px] w-[14px]" />
+          </button>
+          <input
+            type="number"
+            value={sizeValue}
+            min={MIN_FONT_PX}
+            max={MAX_FONT_PX}
+            title="Text size (px)"
+            onChange={(e) => applySize(e.target.valueAsNumber)}
+            className="w-11 rounded border border-rule bg-paper px-1 py-0.5 text-center text-[0.72rem] font-medium text-ink outline-none focus:border-green"
+          />
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applySize(sizeValue + 1)}
+            title="Increase text size"
+            className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          >
+            <AdminIcon name="plus" className="h-[14px] w-[14px]" />
+          </button>
+        </div>
+        <div className="h-4 w-px bg-rule" />
         <button
           type="button"
           // Mousedown, not click: the browser clears the textarea's selection when focus
@@ -189,11 +352,20 @@ function MarkdownTextarea({
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={openLinkPicker}
-          title="Insert or edit a link"
+          onClick={handleItalic}
+          title="Italic text"
           className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
         >
-          <AdminIcon name="link" className="h-[14px] w-[14px]" />
+          <AdminIcon name="italic" className="h-[14px] w-[14px]" />
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleUnderline}
+          title="Underline text"
+          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+        >
+          <AdminIcon name="underline" className="h-[14px] w-[14px]" />
         </button>
         <div className="h-4 w-px bg-rule" />
         <select
@@ -212,36 +384,15 @@ function MarkdownTextarea({
           <option value="text-orange">Orange</option>
         </select>
         <div className="h-4 w-px bg-rule" />
-        <select
-          title="Text Size"
-          onChange={(e) => {
-            if (e.target.value) applyClass(e.target.value);
-            e.target.value = "";
-          }}
-          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={openLinkPicker}
+          title="Insert or edit a link"
+          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
         >
-          <option value="">Size</option>
-          <option value="text-sm">Small</option>
-          <option value="text-[1.05rem]">Large</option>
-          <option value="text-[1.2rem]">Huge</option>
-        </select>
-        <div className="h-4 w-px bg-rule" />
-        <select
-          title="Text Font"
-          onChange={(e) => {
-            if (e.target.value) applyClass(e.target.value);
-            e.target.value = "";
-          }}
-          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
-        >
-          <option value="">Font</option>
-          <option value="font-display">Display (Playfair)</option>
-          <option value="font-body">Body (Poppins)</option>
-          <option value="font-script">Script (Caveat)</option>
-          <option value="font-marker">Marker</option>
-          <option value="font-kalam">Kalam</option>
-          <option value="font-custom">Custom</option>
-        </select>
+          <AdminIcon name="link" className="h-[14px] w-[14px]" />
+        </button>
         {hint ? (
           <span role="status" className="ml-auto truncate text-[0.72rem] font-medium text-rust">
             {hint}
@@ -255,6 +406,9 @@ function MarkdownTextarea({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
+        onSelect={syncSizeFromSelection}
+        onClick={syncSizeFromSelection}
+        onKeyUp={syncSizeFromSelection}
         className="w-full bg-transparent px-3.5 py-2.5 text-[0.88rem] outline-none disabled:bg-cream disabled:text-muted"
       />
       {/* Mounted only while open. The tour editor renders ~20 of these textareas, and an

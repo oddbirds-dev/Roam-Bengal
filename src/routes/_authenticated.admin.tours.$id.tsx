@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { AdminButton, ErrorBanner, useAction } from "@/components/admin/admin-ui";
+import {
+  AdminButton,
+  ErrorBanner,
+  useAction,
+  useSidebarCollapsed,
+} from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import {
   GroupedListField,
@@ -120,6 +125,10 @@ function TourEditor() {
   const { tour, activities, destinations, themes, isNew } = Route.useLoaderData();
   const navigate = useNavigate();
   const { run, busy, error, saved } = useAction();
+  // Fixed positioning takes this pane out of the shell's padded main column, so the
+  // sidebar's collapsed state — set from within the shell — has to be read independently
+  // to keep the left offset from leaving a gap (or clipping) against the actual rail width.
+  const sidebarCollapsed = useSidebarCollapsed();
 
   const [form, setForm] = useState<TourForm>(() => ({
     ...emptyTour(),
@@ -231,7 +240,11 @@ function TourEditor() {
   }
 
   return (
-    <div className="fixed inset-0 top-[68px] z-10 flex flex-col bg-[#F6F8F6] lg:left-[260px]">
+    <div
+      className={`fixed inset-0 top-[68px] z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
+        sidebarCollapsed ? "lg:left-19" : "lg:left-[260px]"
+      }`}
+    >
       <div
         ref={splitRef}
         className="flex min-h-0 flex-1 flex-col lg:flex-row"

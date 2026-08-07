@@ -7,6 +7,7 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
+import { setSidebarCollapsed, useSidebarCollapsed } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import { supabase } from "@/integrations/supabase/client";
 import { whoAmI } from "@/lib/admin.functions";
@@ -41,28 +42,18 @@ const NAV = [
   { label: "Links", to: "/admin/links", icon: "search" },
 ] as const;
 
-const COLLAPSE_KEY = "admin:sidebar-collapsed";
-
 function AdminShell() {
   const me = Route.useLoaderData();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
-  // Desktop-only rail toggle. Starts expanded so SSR and first paint agree;
-  // the stored preference is applied after mount.
-  const [collapsed, setCollapsed] = useState(false);
+  // Desktop-only rail toggle, mirrored via useSidebarCollapsed for pages outside the shell.
+  const collapsed = useSidebarCollapsed();
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
-  useEffect(() => {
-    if (localStorage.getItem(COLLAPSE_KEY) === "1") setCollapsed(true);
-  }, []);
-
   function toggleCollapsed() {
-    setCollapsed((prev) => {
-      localStorage.setItem(COLLAPSE_KEY, prev ? "0" : "1");
-      return !prev;
-    });
+    setSidebarCollapsed(!collapsed);
   }
 
   async function signOut() {

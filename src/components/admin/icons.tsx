@@ -28,6 +28,9 @@ const PATHS: Record<string, string> = {
   unlink: "M10.5 13.5a4 4 0 0 0 5.7 0l2.8-2.8a4 4 0 1 0-5.7-5.7l-1.4 1.4 M13.5 10.5a4 4 0 0 0-5.7 0l-2.8 2.8a4 4 0 1 0 5.7 5.7l1.4-1.4 M3 3l18 18",
   close: "M6 6l12 12M18 6L6 18",
   plus: "M12 5v14M5 12h14",
+  minus: "M5 12h14",
+  italic: "M19 4h-9 M14 20H5 M15 4L9 20",
+  underline: "M6 3v7a6 6 0 0 0 12 0V3 M4 21h16",
 };
 
 export function AdminIcon({
