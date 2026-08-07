@@ -163,6 +163,51 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
       },
     ],
   },
+  integrations: {
+    title: "Google tools",
+    description: "Connect Google Tag Manager, AdSense, and Search Console — no code or redeploy needed.",
+    where: "Every page, in the page <head>",
+    sections: [
+      {
+        title: "Google Tag Manager",
+        description:
+          "Add GA4 and Google Ads tags inside the GTM container itself once this ID is saved — no further changes needed here.",
+        fields: [
+          {
+            kind: "text",
+            key: "gtm_container_id",
+            label: "Container ID",
+            placeholder: "GTM-XXXXXXX",
+            hint: "From tagmanager.google.com, top right of your container.",
+          },
+        ],
+      },
+      {
+        title: "AdSense",
+        fields: [
+          {
+            kind: "text",
+            key: "adsense_client_id",
+            label: "Publisher ID",
+            placeholder: "ca-pub-XXXXXXXXXXXXXXXX",
+            hint: "From your AdSense account. Also update the numeric ID in public/ads.txt to match.",
+          },
+        ],
+      },
+      {
+        title: "Search Console",
+        fields: [
+          {
+            kind: "text",
+            key: "google_site_verification",
+            label: "HTML tag verification token",
+            hint: "In Search Console: Settings → Ownership verification → HTML tag. Paste just the content= value, not the whole tag.",
+          },
+        ],
+      },
+    ],
+  },
+
   header: {
     title: "Header & menu",
     description: "Your logo, the menu across the top, and the button beside it.",
@@ -860,6 +905,7 @@ for (const slug of INFO_SLUGS) {
 /** Display order on the settings index — grouped by where it appears, not alphabetically. */
 export const SETTINGS_ORDER = [
   "custom_fonts",
+  "integrations",
   "header",
   "footer",
   "hero",

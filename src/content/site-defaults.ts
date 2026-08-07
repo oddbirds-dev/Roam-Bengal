@@ -20,6 +20,13 @@ export const siteDefaults = {
     font_url: "",
     font_family: "",
   },
+
+  integrations: {
+    gtm_container_id: "",
+    adsense_client_id: "",
+    google_site_verification: "",
+  },
+
   header: {
     logo_url: "",
     logo_alt: "Roam Bengal",
