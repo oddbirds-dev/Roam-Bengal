@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
-import { LogoMark } from "@/components/art/logo-mark";
 import { isExternal } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
@@ -17,13 +16,7 @@ export function SiteFooter() {
         style={{ "--foot-cols": footer.columns.length } as CSSProperties}
       >
         <div className="col-span-2 nav:col-span-1">
-          <span className="flex items-center gap-2.5 leading-none">
-            <LogoMark className="h-[38px] w-[38px] shrink-0" />
-            <span className="font-kalam text-[1.6rem] leading-none font-bold tracking-[-0.01em]">
-              <span className="text-white">Roam</span>
-              <span className="ml-[5px] text-orange">Bengal</span>
-            </span>
-          </span>
+          <img src="/logo.png" alt="Roam Bengal" className="h-11 w-auto rounded bg-white/95 px-2 py-1.5" />
           <p className="mt-3.5 max-w-[260px] text-[0.85rem] opacity-70">{footer.intro}</p>
         </div>
 

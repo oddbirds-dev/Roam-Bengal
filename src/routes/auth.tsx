@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogoMark } from "@/components/art/logo-mark";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -58,11 +57,7 @@ function AuthPage() {
     >
       <div className="w-full max-w-md rounded-2xl bg-paper p-8 shadow-2xl">
         <div className="flex flex-col items-center text-center">
-          <LogoMark className="h-14 w-14" />
-          <span className="mt-3 font-display text-2xl font-bold">
-            <span className="text-green-dark">Roam</span>
-            <span className="text-orange">Bengal</span>
-          </span>
+          <img src="/logo.png" alt="Roam Bengal" className="h-12 w-auto" />
           <h1 className="mt-4 font-display text-[1.4rem] text-green">Staff Sign In</h1>
           <p className="mt-1 text-[0.84rem] text-muted">
             Accounts are provisioned by the site administrator.

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LogoMark } from "@/components/art/logo-mark";
 import { ButtonLink } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
@@ -48,22 +47,11 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
     >
       <nav className="wrap flex items-center justify-between gap-6 py-[22px]">
         <Link to="/" className="block leading-none" aria-label={header.logo_alt}>
-          <span className="flex items-center gap-2.5">
-            <LogoMark className="h-[38px] w-[38px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.25)]" />
-            <span className="font-kalam text-[1.6rem] leading-none font-bold tracking-[-0.01em]">
-              <span className={onDark ? "text-white" : "text-ink"}>
-                {header.wordmark_1}
-              </span>
-              <span className="ml-[5px] text-orange">{header.wordmark_2}</span>
-            </span>
-          </span>
-          <span
-            className={`mt-[5px] ml-[48px] block text-[0.48rem] font-bold tracking-[0.1em] whitespace-nowrap ${
-              onDark ? "text-white/75" : "text-muted"
-            }`}
-          >
-            {header.tagline}
-          </span>
+          <img
+            src="/logo.png"
+            alt={header.logo_alt}
+            className="h-[52px] w-auto shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.25)]"
+          />
         </Link>
 
         <div className="hidden items-center gap-[30px] text-[0.9rem] font-medium nav:flex">
