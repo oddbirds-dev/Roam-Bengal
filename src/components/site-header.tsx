@@ -13,7 +13,13 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
  * replacement — the site was unnavigable on a phone (PRD §16). The drawer below is new
  * work, built to match the existing visual language.
  */
-export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
+export function SiteHeader({
+  variant = "overlay",
+  logoSrc = "/logo.png",
+}: {
+  variant?: "overlay" | "solid";
+  logoSrc?: string;
+}) {
   const settings = useSiteSettings();
   const { header } = settings;
   const [open, setOpen] = useState(false);
@@ -48,7 +54,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
       <nav className="wrap flex items-center justify-between gap-6 py-[22px]">
         <Link to="/" className="block leading-none" aria-label={header.logo_alt}>
           <img
-            src="/logo.png"
+            src={logoSrc}
             alt={header.logo_alt}
             className="h-[52px] w-auto shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.25)]"
           />
