@@ -243,9 +243,15 @@ function TourDetail() {
               {tour.itinerary.length ? (
                 <Section id="itinerary" title="🗺️ Day-by-Day Itinerary">
                   <ol className="flex flex-col gap-6">
-                    {tour.itinerary.map((day) => (
-                      <li key={day.day} className="flex gap-4">
-                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
+                    {tour.itinerary.map((day, i) => (
+                      <li key={day.day} className="relative flex gap-4">
+                        {i < tour.itinerary.length - 1 ? (
+                          <span
+                            aria-hidden="true"
+                            className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
+                          />
+                        ) : null}
+                        <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
                           {day.day}
                         </span>
                         <div>
