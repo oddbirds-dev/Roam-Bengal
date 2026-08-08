@@ -169,7 +169,7 @@ function TourDetail() {
               </div>
             ) : null}
 
-            <div className="sticky top-0 z-20 -mx-1 mt-8 overflow-x-auto border-y border-rule bg-paper/95 backdrop-blur">
+            <div className="sticky top-0 z-20 -mx-1 mt-8 overflow-x-auto border-y border-rule bg-sand/95 backdrop-blur">
               <div className="flex gap-1 px-1 py-2">
                 {TABS.filter(([id]) => hasSection(tour, id)).map(([id, label]) => (
                   <a
