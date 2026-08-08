@@ -99,7 +99,7 @@ function ToursIndex() {
         />
         <div className="absolute inset-0 z-[1]" style={{ background: BANNER_OVERLAY }} />
 
-        <SiteHeader logoSrc="/logo-white.jpg" />
+        <SiteHeader logoSrc="/logo-white.png" />
 
         <div className="relative z-[2] flex flex-1 items-center justify-center p-10">
           <h1 className="max-w-[900px] text-center font-body text-[clamp(1.5rem,3.4vw,2.4rem)] font-light tracking-[0.06em] uppercase [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]">
