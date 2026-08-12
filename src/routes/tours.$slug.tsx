@@ -22,7 +22,7 @@ import {
 export const Route = createFileRoute("/tours/$slug")({
   /**
    * `?preview=1` puts the page in admin-preview mode: it takes its content from the
-   * editor over postMessage instead of the database. Nothing else on the site links
+   * editor ver postMessage instead of the database. Nothing else on the site links
    * here with a search param, so anything unrecognised is simply dropped.
    */
   // The router JSON-parses search values, so `?preview=1` arrives as the number 1.
