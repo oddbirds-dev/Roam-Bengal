@@ -88,7 +88,9 @@ function TourDetail() {
     (entry): entry is readonly [TourFactKey, string] => Boolean(entry[1]),
   );
 
-  const gallery = tour.images.length ? tour.images : [null, null, null, null];
+  // No gallery yet: show the hero image in the main tile rather than leaving every
+  // tile blank, mirroring how tour cards fall back to heroImage elsewhere.
+  const gallery = tour.images.length ? tour.images : [tour.heroImage, null, null, null];
 
   return (
     <>
