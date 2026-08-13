@@ -19,6 +19,7 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${toursBg})`, opacity: 1 }}
       />
+      <div aria-hidden className="absolute inset-0 bg-black/60" />
 
       <div className="relative z-10">
         <SectionHead kicker={homepage.popular_kicker}>{homepage.popular_heading}</SectionHead>
