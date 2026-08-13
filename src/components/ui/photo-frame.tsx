@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ImageOff } from "lucide-react";
 
 /**
  * Every image in reference design/ is a placeholder: a gradient-filled frame, a visible
@@ -6,7 +7,9 @@ import { useState } from "react";
  *
  * This reproduces that behaviour with two differences the PRD calls for (§12):
  *   - `alt` is required, not optional
- *   - the "📷 path" debug label renders in development only
+ *   - the empty-state renders in development only, styled as an intentional "no image
+ *     yet" card (icon + friendly copy) rather than a raw debug label, with the expected
+ *     file path shown small underneath for content-ops reference
  */
 
 export const FRAME_GRADIENTS = {
@@ -67,10 +70,16 @@ export function PhotoFrame({
       className={`${positioned ? "" : "relative"} overflow-hidden ${className}`}
       style={{ background: gradientCss ?? FRAME_GRADIENTS[gradient], ...style }}
     >
-      {import.meta.env.DEV && !showImage && placeholderLabel ? (
-        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-3 text-center text-[0.66rem] font-medium tracking-wide text-white/80">
-          📷 {placeholderLabel}
-        </span>
+      {import.meta.env.DEV && !showImage ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-3 text-center text-white/80">
+          <ImageOff className="h-5 w-5 opacity-70" strokeWidth={1.5} />
+          <span className="text-[0.7rem] font-medium tracking-wide">No image yet</span>
+          {placeholderLabel ? (
+            <span className="text-[0.6rem] font-normal tracking-wide text-white/50">
+              {placeholderLabel}
+            </span>
+          ) : null}
+        </div>
       ) : null}
 
       {showImage ? (
