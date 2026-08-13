@@ -20,11 +20,14 @@ import {
   Toggle,
 } from "@/components/admin/fields";
 import { GalleryField, ImageField } from "@/components/admin/image-upload";
+import { EmbeddedPreview } from "@/components/admin/preview-pane";
 import {
   adminDeleteTestimonial,
   adminListTestimonials,
   adminUpsertTestimonial,
 } from "@/lib/admin-content.functions";
+import { testimonialPreviewChannel } from "@/lib/testimonial-preview";
+import { toTestimonialDTO } from "@/lib/testimonial-dto";
 
 export const Route = createFileRoute("/_authenticated/admin/testimonials")({
   loader: () => adminListTestimonials(),
@@ -84,7 +87,7 @@ function TestimonialsScreen() {
       <ErrorBanner error={error} />
 
       {editing ? (
-        <div className="mb-6">
+        <div className="mb-6 grid gap-6 xl:grid-cols-2">
           <Card title={editing.id ? "Edit review" : "New review"}>
             <div className="grid gap-5 sm:grid-cols-2">
               <TextField
@@ -184,6 +187,14 @@ function TestimonialsScreen() {
               <SavedNote show={saved && !error} />
             </div>
           </Card>
+
+          <EmbeddedPreview
+            channel={testimonialPreviewChannel}
+            draft={toTestimonialDTO({ ...editing.form, id: editing.id ?? "preview" })}
+            path="/reviews"
+            label="Preview · /reviews"
+            height="700px"
+          />
         </div>
       ) : null}
 

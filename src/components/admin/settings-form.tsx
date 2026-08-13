@@ -96,6 +96,12 @@ export interface SettingsSchema {
   description: string;
   /** Public page this content appears on, for the "where does this show?" line. */
   where: string;
+  /**
+   * Route path to open a live preview against, e.g. `/reviews`. Omitted for keys with no
+   * single sensible page — header/footer/whatsapp affect every page at once, and
+   * custom_fonts/integrations don't render visibly at all.
+   */
+  previewPath?: string;
   sections: SettingsSection[];
 }
 
@@ -290,6 +296,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Homepage banner",
     description: "The large photo and headline visitors see first.",
     where: "Top of the homepage",
+    previewPath: "/",
     sections: [
       {
         title: "Background",
@@ -337,6 +344,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Homepage sections",
     description: "Every block on the homepage below the banner.",
     where: "Homepage",
+    previewPath: "/",
     sections: [
       {
         title: "Feature strip",
@@ -453,6 +461,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Photo gallery block",
     description: "The photo strip and its wording.",
     where: "Homepage",
+    previewPath: "/",
     sections: [
       {
         title: "Wording",
@@ -488,6 +497,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Reviews page",
     description: "Star scores, review platforms, and the page wording.",
     where: "/reviews",
+    previewPath: "/reviews",
     sections: [
       {
         title: "Overall score",
@@ -544,6 +554,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Tours page",
     description: "The banner and introduction above the tour list.",
     where: "/tours",
+    previewPath: "/tours",
     sections: [
       {
         title: "Banner",
@@ -616,6 +627,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Blog page",
     description: "Headings on the blog index and the newsletter box.",
     where: "/blog",
+    previewPath: "/blog",
     sections: [
       {
         title: "Masthead",
@@ -657,6 +669,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "Contact page",
     description: "Your contact details and the wording around the enquiry form.",
     where: "/contact",
+    previewPath: "/contact",
     sections: [
       {
         title: "Page wording",
@@ -715,6 +728,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     title: "About page",
     description: "Your story, the numbers you show off, and why people travel with you.",
     where: "/about",
+    previewPath: "/about",
     sections: [
       {
         title: "Opening",

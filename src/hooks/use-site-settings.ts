@@ -1,8 +1,25 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { siteDefaults, type SiteDefaults } from "@/content/site-defaults";
 import type { SettingsMap } from "@/lib/content-types";
+import { HOME_LAYOUT_KEY, resolveHomeLayout, type HomeLayout } from "@/lib/home-layout";
+import { createDraftChannel } from "@/lib/preview";
 
 const rootRoute = getRouteApi("__root__");
+
+interface SettingsDraft {
+  key: string;
+  value: unknown;
+}
+
+/**
+ * The settings admin editor only ever has one section open at a time, so unlike a tour or
+ * post preview there is no page/slug to gate this on — being embedded in an iframe at all
+ * (`useDraft`'s own `window.parent === window` check) is exactly the signal that a preview
+ * is live. Every public page already calls `useSiteSettings()`, so wiring the channel in
+ * here, once, reaches all of them for free instead of threading `?preview=1` through six
+ * different routes.
+ */
+export const settingsPreviewChannel = createDraftChannel<SettingsDraft>("settings");
 
 /**
  * Deep-merges stored `site_settings` JSON over the code defaults.
@@ -33,5 +50,20 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  */
 export function useSiteSettings(): SiteDefaults {
   const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
-  return mergeSettings(siteDefaults, stored ?? {});
+  const draft = settingsPreviewChannel.useDraft(true);
+  const withDraft = draft ? { ...stored, [draft.key]: draft.value } : stored;
+  return mergeSettings(siteDefaults, withDraft ?? {});
+}
+
+/**
+ * Homepage section order + visibility, from the `homepage_layout` row.
+ *
+ * Deliberately separate from `useSiteSettings()`/`mergeSettings`: `mergeSettings` replaces
+ * arrays wholesale, which is the wrong fallback semantic for a reorderable section list —
+ * `resolveHomeLayout` already dedupes, drops unknown ids, and appends any section the stored
+ * layout has never seen, so it needs no entry in `site-defaults.ts`.
+ */
+export function useHomeLayout(): HomeLayout {
+  const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
+  return resolveHomeLayout(stored?.[HOME_LAYOUT_KEY]);
 }

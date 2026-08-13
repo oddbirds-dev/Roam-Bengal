@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
+import { testimonialPreviewChannel } from "@/lib/testimonial-preview";
 
 export const Route = createFileRoute("/reviews")({
   validateSearch: z.object({ tour: z.string().optional() }),
@@ -37,10 +38,19 @@ const PHOTO_FRAMES = [
 ];
 
 function Reviews() {
-  const testimonials = Route.useLoaderData();
+  const saved = Route.useLoaderData();
   const { tour } = Route.useSearch();
   const navigate = useNavigate({ from: "/reviews" });
   const { reviews } = useSiteSettings();
+
+  // No `?preview=1` needed here, unlike tours/posts: reviews has no per-item detail
+  // route to 404 on, so being embedded in an iframe at all (the draft channel's own
+  // check) is a sufficient signal. A previewed testimonial is spliced to the front of
+  // the real list, replacing any saved row with the same id.
+  const draft = testimonialPreviewChannel.useDraft(true);
+  const testimonials = draft
+    ? [draft, ...saved.filter((t) => t.id !== draft.id)]
+    : saved;
 
   // The rail filters on the tour a review is attached to, shortened to the name
   // before the em dash ("Sundarbans Wildlife Tour — 4 Days" → "Sundarbans Wildlife Tour").

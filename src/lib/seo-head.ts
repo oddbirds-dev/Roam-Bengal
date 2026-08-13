@@ -23,7 +23,7 @@ function getSiteUrl(): string {
   if (typeof process !== "undefined" && process.env && process.env.VITE_SITE_URL) {
     return process.env.VITE_SITE_URL;
   }
-  return "https://bangla-quest-dreams.lovable.app";
+  return "https://roambengal.com";
 }
 
 export const SITE_URL = getSiteUrl();

@@ -1,0 +1,45 @@
+import type { TestimonialDTO } from "@/lib/content-types";
+
+/**
+ * Row → DTO for a `testimonials` record.
+ *
+ * Lives outside `site-content.functions.ts`, same reason as `tour-dto.ts`: the admin
+ * testimonial editor's live preview maps unsaved form state through this exact function,
+ * so the preview cannot drift from what the public page renders from a saved row.
+ */
+export type TestimonialRowLike = Record<string, unknown>;
+
+export function toTestimonialDTO(row: TestimonialRowLike): TestimonialDTO {
+  return {
+    id: str(row.id),
+    author: str(row.author),
+    location: text(row.location),
+    headline: text(row.headline),
+    quote: str(row.quote),
+    tourLabel: text(row.tour_label),
+    platform: text(row.platform),
+    avatarUrl: text(row.avatar_url),
+    images: strArr(row.images),
+    rating: num(row.rating),
+    isFeatured: Boolean(row.is_featured),
+  };
+}
+
+function str(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+/** Empty strings collapse to null so the page falls back instead of rendering a blank. */
+function text(value: unknown): string | null {
+  return typeof value === "string" && value.trim() !== "" ? value : null;
+}
+
+function strArr(value: unknown): string[] {
+  return Array.isArray(value) ? (value as string[]) : [];
+}
+
+function num(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}

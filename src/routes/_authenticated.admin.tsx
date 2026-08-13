@@ -40,6 +40,7 @@ const NAV = [
   { label: "FAQs", to: "/admin/faqs", icon: "help" },
   { label: "Site content", to: "/admin/settings", icon: "gear" },
   { label: "Links", to: "/admin/links", icon: "search" },
+  { label: "SEO", to: "/admin/seo", icon: "external" },
 ] as const;
 
 function AdminShell() {

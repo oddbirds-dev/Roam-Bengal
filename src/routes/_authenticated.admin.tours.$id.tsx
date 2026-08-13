@@ -21,6 +21,7 @@ import {
 } from "@/components/admin/fields";
 import { GalleryField, ImageField } from "@/components/admin/image-upload";
 import { invalidateLinkTargets } from "@/components/admin/link-picker";
+import { PreviewDivider, PreviewPane, type DeviceId } from "@/components/admin/preview-pane";
 import {
   adminGetTour,
   adminListActivities,
@@ -112,14 +113,6 @@ interface EditorState {
   form: TourForm;
   themeIds: string[];
 }
-
-const DEVICES = [
-  { id: "desktop", label: "Desktop", icon: "desktop", width: "100%" },
-  { id: "tablet", label: "Tablet", icon: "tablet", width: "834px" },
-  { id: "mobile", label: "Mobile", icon: "mobile", width: "390px" },
-] as const;
-
-type DeviceId = (typeof DEVICES)[number]["id"];
 
 function TourEditor() {
   const { tour, activities, destinations, themes, isNew } = Route.useLoaderData();
@@ -684,91 +677,26 @@ function TourEditor() {
           </div>
         </div>
 
-        {/* Divider */}
+        {previewOpen ? <PreviewDivider onPointerDown={startResize} /> : null}
+
         {previewOpen ? (
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize preview"
-            onPointerDown={startResize}
-            className="group hidden w-3 shrink-0 cursor-col-resize items-center justify-center border-x border-rule bg-paper transition-colors hover:bg-mint lg:flex"
-          >
-            <span className="flex flex-col gap-[3px]" aria-hidden="true">
-              {[0, 1, 2].map((dot) => (
-                <span
-                  key={dot}
-                  className="h-[3px] w-[3px] rounded-full bg-muted/50 group-hover:bg-green"
-                />
-              ))}
-            </span>
-          </div>
-        ) : null}
-
-        {/* Preview pane */}
-        {previewOpen ? (
-          <div className="hidden min-h-0 min-w-0 flex-1 flex-col lg:flex">
-            <div className="flex h-12 shrink-0 items-center justify-between border-b border-rule bg-paper px-4">
-              <span className="truncate text-[0.65rem] font-bold tracking-widest text-muted uppercase">
-                Preview · /tours/{form.slug || slugify(form.title) || "new"}
-              </span>
-              <div className="flex items-center gap-1 text-muted">
-                {DEVICES.map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    aria-label={d.label}
-                    aria-pressed={device === d.id}
-                    title={d.label}
-                    onClick={() => setDevice(d.id)}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                      device === d.id ? "bg-mint text-green" : "hover:text-ink"
-                    }`}
-                  >
-                    <AdminIcon name={d.icon} className="h-[17px] w-[17px]" />
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={reloadPreview}
-                  aria-label="Reload preview"
-                  title="Reload preview"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:text-ink"
-                >
-                  <AdminIcon name="refresh" className="h-[17px] w-[17px]" />
-                </button>
-                <a
-                  href={`/tours/${form.slug || slugify(form.title)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Open the live page"
-                  title="Open the live page"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:text-ink"
-                >
-                  <AdminIcon name="external" className="h-[17px] w-[17px]" />
-                </a>
-              </div>
-            </div>
-
-            <div className="flex min-h-0 flex-1 justify-center overflow-hidden p-4">
-              <div
-                className="h-full w-full overflow-hidden rounded-xl border border-rule bg-white shadow-sm"
-                style={{ maxWidth: DEVICES.find((d) => d.id === device)?.width }}
-              >
-                <iframe
-                  key={frameKey}
-                  ref={frameRef}
-                  src={`/tours/${frameSlug}?preview=1`}
-                  title="Tour preview"
-                  // A dragged pointer must not disappear into the iframe's document.
-                  className={`h-full w-full border-none ${dragging ? "pointer-events-none" : ""}`}
-                />
-              </div>
-            </div>
-
-            <p className="shrink-0 border-t border-rule bg-paper px-4 py-2.5 text-[0.76rem] text-muted">
-              This is a preview of your unsaved changes. Nothing is live until you press Save.
-            </p>
-          </div>
+          <PreviewPane
+            path={`/tours/${frameSlug}`}
+            label={`Preview · /tours/${form.slug || slugify(form.title) || "new"}`}
+            pane={{
+              open: previewOpen,
+              setOpen: setPreviewOpen,
+              device,
+              setDevice,
+              dragging,
+              frameKey,
+              frameRef,
+              splitRef,
+              startResize,
+              reload: reloadPreview,
+              splitValue: previewOpen ? `${split}%` : "100%",
+            }}
+          />
         ) : null}
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AdminButton,
   Card,
@@ -21,6 +21,9 @@ import {
 import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminListSettings, adminSaveSetting } from "@/lib/admin-content.functions";
+import { HOME_LAYOUT_KEY } from "@/lib/home-layout";
+import { EmbeddedPreview } from "@/components/admin/preview-pane";
+import { settingsPreviewChannel } from "@/hooks/use-site-settings";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   loader: () => adminListSettings(),
@@ -55,7 +58,9 @@ function SettingsScreen() {
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   const rows = new Map(settings.map((row) => [row.key, row]));
-  const extras = settings.filter((row) => !(row.key in SETTINGS_SCHEMA));
+  // homepage_layout has its own reorder-focused builder below, not a schema form or the raw
+  // JSON fallback — keep it out of "Other content" so there's exactly one place to edit it.
+  const extras = settings.filter((row) => !(row.key in SETTINGS_SCHEMA) && row.key !== HOME_LAYOUT_KEY);
 
   if (openKey) {
     const schema = SETTINGS_SCHEMA[openKey];
@@ -83,6 +88,25 @@ function SettingsScreen() {
         title="Site content"
         subtitle="Pick a part of the website to change its wording, photos, and links. Everything here is public — never put a password or private note in it."
       />
+
+      <Link
+        to="/admin/settings/homepage-sections"
+        className="mb-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rule bg-paper p-5 transition-colors hover:border-green"
+      >
+        <div>
+          <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+            Homepage sections
+          </h3>
+          <p className="mt-1 text-[0.82rem] text-muted">
+            Reorder or hide whole blocks of the homepage — the feature strip, popular tours,
+            gallery, and the rest.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 text-[0.8rem] font-semibold text-green">
+          Open builder
+          <AdminIcon name="chevron" className="h-4 w-4" />
+        </span>
+      </Link>
 
       <SectionGrid
         heading="Around the site"
@@ -200,6 +224,7 @@ function SectionEditor({
 }) {
   const { run, busy, error, saved } = useAction();
   const [draft, setDraft] = useState(() => hydrateSetting(defaultsFor(settingKey), stored));
+  const [previewOpen, setPreviewOpen] = useState(true);
 
   async function save() {
     const ok = await run(() =>
@@ -212,6 +237,11 @@ function SectionEditor({
 
   const actions = (
     <>
+      {schema.previewPath ? (
+        <AdminButton variant="secondary" onClick={() => setPreviewOpen((v) => !v)}>
+          {previewOpen ? "Hide preview" : "Show preview"}
+        </AdminButton>
+      ) : null}
       <AdminButton variant="secondary" onClick={onClose}>
         Cancel
       </AdminButton>
@@ -234,6 +264,17 @@ function SectionEditor({
       <PageHeader title={schema.title} subtitle={schema.description} actions={actions} />
 
       <ErrorBanner error={error} />
+
+      {schema.previewPath && previewOpen ? (
+        <div className="mb-6">
+          <EmbeddedPreview
+            channel={settingsPreviewChannel}
+            draft={{ key: settingKey, value: draft }}
+            path={schema.previewPath}
+            label={`Preview · ${schema.previewPath}`}
+          />
+        </div>
+      ) : null}
 
       <SettingsSections schema={schema} value={draft} onChange={setDraft} />
 

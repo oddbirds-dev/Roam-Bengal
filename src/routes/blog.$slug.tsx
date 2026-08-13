@@ -12,6 +12,8 @@ import { buildSeoMeta } from "@/lib/seo-head";
 import { BlogShare } from "@/components/blog/blog-share";
 import { BlogSidebar } from "@/components/blog/blog-sidebar";
 import { FormatDocument } from "@/components/ui/format-text";
+import { postPreviewChannel } from "@/lib/post-preview";
+import { toPostDTO } from "@/lib/post-dto";
 import type { BlogPostDTO } from "@/lib/content-types";
 
 /**
@@ -22,6 +24,11 @@ import type { BlogPostDTO } from "@/lib/content-types";
  */
 /** Curated `relatedSlugs` win; otherwise fall back to the other posts in sort order.
  *  Mirrors `resolveRelated` in tours.$slug.tsx. */
+/** Empty shell for preview mode, replaced the moment the editor's draft arrives. */
+function blankPost(slug: string): BlogPostDTO {
+  return toPostDTO({ slug, title: "Untitled post" });
+}
+
 function resolveRelated(post: BlogPostDTO, all: BlogPostDTO[]): BlogPostDTO[] {
   const others = all.filter((p) => p.slug !== post.slug);
   if (post.relatedSlugs.length) {
@@ -34,21 +41,39 @@ function resolveRelated(post: BlogPostDTO, all: BlogPostDTO[]): BlogPostDTO[] {
 }
 
 export const Route = createFileRoute("/blog/$slug")({
-  loader: async ({ params }) => {
+  /**
+   * `?preview=1` puts the page in admin-preview mode: it takes its content from the
+   * editor's postMessage instead of the database. Mirrors tours.$slug.tsx.
+   */
+  validateSearch: (search: Record<string, unknown>): { preview?: true } => {
+    const raw = search.preview;
+    const on = raw === 1 || raw === "1" || raw === true || raw === "true";
+    return on ? { preview: true } : {};
+  },
+  loaderDeps: ({ search }) => ({ preview: search.preview === true }),
+  loader: async ({ params, deps }) => {
     const [post, all, tours] = await Promise.all([
       getPostBySlug({ data: { slug: params.slug } }),
       listPublishedPosts(),
       listPublishedTours(),
     ]);
-    if (!post) throw notFound();
-    
+    // A previewed post is usually a draft, and a brand-new one has no row at all — in
+    // preview mode the real content arrives from the parent window, so an empty shell is
+    // the correct starting state rather than a 404.
+    if (!post) {
+      if (deps.preview) {
+        return { post: blankPost(params.slug), related: [], seoMeta: null, tours: tours.slice(0, 5) };
+      }
+      throw notFound();
+    }
+
     const seoMeta = await getSeoMeta({ data: { entity_type: "blog", entity_id: post.id } });
-    
-    return { 
-      post, 
+
+    return {
+      post,
       related: resolveRelated(post, all),
       seoMeta,
-      tours: tours.slice(0, 5) 
+      tours: tours.slice(0, 5)
     };
   },
   head: ({ loaderData }) => {
@@ -66,7 +91,10 @@ export const Route = createFileRoute("/blog/$slug")({
 });
 
   function BlogPost() {
-  const { post, related, tours } = Route.useLoaderData();
+  const { post: saved, related, tours } = Route.useLoaderData();
+  const { preview } = Route.useSearch();
+  const draft = postPreviewChannel.useDraft(preview === true);
+  const post = draft ?? saved;
   const fullUrl = `https://roambengal.com/blog/${post.slug}`; // Could be dynamic, but this is fine for share links
 
   return (

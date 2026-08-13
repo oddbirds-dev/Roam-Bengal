@@ -22,11 +22,14 @@ import {
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
 import { invalidateLinkTargets } from "@/components/admin/link-picker";
+import { EmbeddedPreview } from "@/components/admin/preview-pane";
 import {
   adminDeletePost,
   adminListPosts,
   adminUpsertPost,
 } from "@/lib/admin-content.functions";
+import { postPreviewChannel } from "@/lib/post-preview";
+import { toPostDTO } from "@/lib/post-dto";
 
 export const Route = createFileRoute("/_authenticated/admin/posts")({
   loader: () => adminListPosts(),
@@ -86,7 +89,7 @@ function PostsScreen() {
       <ErrorBanner error={error} />
 
       {editing ? (
-        <div className="mb-6">
+        <div className="mb-6 grid gap-6 xl:grid-cols-2">
           <Card title={editing.id ? "Edit post" : "New post"}>
             <div className="grid gap-5 sm:grid-cols-2">
               <TextField
@@ -209,6 +212,14 @@ function PostsScreen() {
               <SavedNote show={saved && !error} />
             </div>
           </Card>
+
+          <EmbeddedPreview
+            channel={postPreviewChannel}
+            draft={toPostDTO({ ...editing.form, id: editing.id ?? "preview" })}
+            path={`/blog/${editing.form.slug.trim() || slugify(editing.form.title) || "new"}`}
+            label={`Preview · /blog/${editing.form.slug.trim() || "new"}`}
+            height="700px"
+          />
         </div>
       ) : null}
 

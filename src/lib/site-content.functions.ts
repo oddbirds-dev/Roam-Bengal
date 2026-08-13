@@ -3,6 +3,8 @@ import { z } from "zod";
 import { serverClient } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { toTourDTO } from "@/lib/tour-dto";
+import { toPostDTO } from "@/lib/post-dto";
+import { toTestimonialDTO } from "@/lib/testimonial-dto";
 import type {
   ActivityDTO,
   BlogPostDTO,
@@ -19,63 +21,13 @@ type TestimonialRow = Database["public"]["Tables"]["testimonials"]["Row"];
 type FaqRow = Database["public"]["Tables"]["faqs"]["Row"];
 type ActivityRow = Database["public"]["Tables"]["activities"]["Row"];
 
-/**
- * Postgres `numeric` arrives over the wire as a string, and a column from a migration
- * that has not been applied comes back `undefined` — which slips past a plain
- * `!== null` guard and becomes NaN. Treat both `undefined` and non-finite as "no value"
- * so the UI falls back instead of rendering NaN.
- */
-function num(value: unknown): number | null {
-  if (value === null || value === undefined) return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
-function arr<T>(value: unknown): T[] {
-  return Array.isArray(value) ? (value as T[]) : [];
-}
-
-function strArr(value: unknown): string[] {
-  return Array.isArray(value) ? (value as string[]) : [];
-}
-
 /** Tours map through the shared mapper — the admin preview runs the same code. */
 const toTour = (row: TourRow): TourDTO => toTourDTO(row);
 
-function toPost(row: PostRow): BlogPostDTO {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    excerpt: row.excerpt,
-    body: arr<string>(row.body),
-    category: row.category,
-    dateLabel: row.date_label,
-    readTime: row.read_time,
-    coverImage: row.cover_image,
-    authorName: row.author_name,
-    authorRole: row.author_role,
-    authorAvatar: row.author_avatar,
-    isFeatured: Boolean(row.is_featured),
-    relatedSlugs: strArr(row.related_slugs),
-  };
-}
-
-function toTestimonial(row: TestimonialRow): TestimonialDTO {
-  return {
-    id: row.id,
-    author: row.author,
-    location: row.location,
-    headline: row.headline,
-    quote: row.quote,
-    tourLabel: row.tour_label,
-    platform: row.platform,
-    avatarUrl: row.avatar_url,
-    images: strArr(row.images),
-    rating: num(row.rating),
-    isFeatured: Boolean(row.is_featured),
-  };
-}
+/** Posts and testimonials map through the shared mappers — the admin preview runs the
+ *  same code. See tour-dto.ts's header comment for why this indirection exists. */
+const toPost = (row: PostRow): BlogPostDTO => toPostDTO(row);
+const toTestimonial = (row: TestimonialRow): TestimonialDTO => toTestimonialDTO(row);
 
 function toFaq(row: FaqRow): FaqDTO {
   return {
