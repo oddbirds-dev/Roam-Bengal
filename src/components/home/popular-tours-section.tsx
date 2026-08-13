@@ -13,27 +13,27 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
     .slice(0, 3);
 
   return (
-    <section
-      id="packages"
-      className="shell pt-20 pb-[60px] text-center"
-      style={{
-        backgroundImage: `linear-gradient(120deg, rgba(234,244,236,0.9), rgba(253,240,228,0.9)), url(${toursBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <SectionHead kicker={homepage.popular_kicker}>{homepage.popular_heading}</SectionHead>
+    <section id="packages" className="shell relative overflow-hidden pt-20 pb-[60px] text-center">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${toursBg})`, opacity: 1 }}
+      />
 
-      <div className="wide grid gap-[26px] text-left nav:grid-cols-3">
-        {featuredTours.map((tour, i) => (
-          <TourCard key={tour.id} tour={tour} gradientCss={TOUR_FRAMES[i % 3]} />
-        ))}
-      </div>
+      <div className="relative z-10">
+        <SectionHead kicker={homepage.popular_kicker}>{homepage.popular_heading}</SectionHead>
 
-      <div className="mt-11 mb-[90px]">
-        <ButtonLink to="/tours" variant="outline-dark">
-          View All Tours →
-        </ButtonLink>
+        <div className="wide grid gap-[26px] text-left nav:grid-cols-3">
+          {featuredTours.map((tour, i) => (
+            <TourCard key={tour.id} tour={tour} gradientCss={TOUR_FRAMES[i % 3]} />
+          ))}
+        </div>
+
+        <div className="mt-11 mb-[90px]">
+          <ButtonLink to="/tours" variant="outline-dark">
+            View All Tours →
+          </ButtonLink>
+        </div>
       </div>
     </section>
   );

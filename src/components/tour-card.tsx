@@ -24,7 +24,7 @@ export function TourCard({
   const [saved, setSaved] = useState(false);
 
   return (
-    <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_10px_28px_rgba(0,0,0,0.08)] transition-transform duration-250 hover:-translate-y-1.5">
+    <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_20px_45px_rgba(0,0,0,0.28)] transition-transform duration-250 hover:-translate-y-1.5 hover:shadow-[0_26px_55px_rgba(0,0,0,0.34)]">
       <PhotoFrame
         src={tour.heroImage ?? tour.images[0]}
         alt={tour.title}
