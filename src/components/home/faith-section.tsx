@@ -12,14 +12,14 @@ export function FaithSection(_props: HomeSectionProps) {
         <div className="relative mx-auto min-h-[340px] w-full max-w-[340px] nav:mx-0 nav:min-h-[440px] nav:max-w-none">
           <div className="absolute -top-5 -left-[30px] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle,rgba(34,181,122,0.18),transparent_70%)]" />
           <PhotoFrame
-            src=""
+            src={homepage.faith_image_1}
             alt="Bird native to the Sundarbans wetlands"
             gradientCss="linear-gradient(150deg,#3E7A6E,#123D30)"
             placeholderLabel="images/wildlife-1.jpg"
             className="absolute top-0 left-0 z-[1] aspect-[4/4.6] w-[78%] rotate-[-3deg] rounded-[22px] shadow-[0_18px_40px_rgba(0,0,0,0.14)]"
           />
           <PhotoFrame
-            src=""
+            src={homepage.faith_image_2}
             alt="Royal Bengal tiger in the Sundarbans"
             gradientCss="linear-gradient(150deg,#F0791E,#8C3D0C)"
             placeholderLabel="images/wildlife-2.jpg"

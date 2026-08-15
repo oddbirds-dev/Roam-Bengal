@@ -149,7 +149,8 @@ export function PreviewPane({
   /** Shown in the toolbar, e.g. `Preview · /blog/my-post`. */
   label: ReactNode;
   pane: ReturnType<typeof usePreviewPane<unknown>>;
-  footnote?: string;
+  /** Pass `null` when the caller shows this disclaimer somewhere else (e.g. a fixed action bar). */
+  footnote?: string | null;
 }) {
   return (
     <div className="hidden min-h-0 min-w-0 flex-1 flex-col lg:flex">
@@ -211,9 +212,11 @@ export function PreviewPane({
         </div>
       </div>
 
-      <p className="shrink-0 border-t border-rule bg-paper px-4 py-2.5 text-[0.76rem] text-muted">
-        {footnote}
-      </p>
+      {footnote ? (
+        <p className="shrink-0 border-t border-rule bg-paper px-4 py-2.5 text-[0.76rem] text-muted">
+          {footnote}
+        </p>
+      ) : null}
     </div>
   );
 }

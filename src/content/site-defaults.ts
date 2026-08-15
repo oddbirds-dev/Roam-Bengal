@@ -132,6 +132,8 @@ export const siteDefaults = {
     faith_heading_1: "Why Travellers Keep Faith",
     faith_heading_2: "In Roam Bengal",
     faith_pin: "📍 Sundarbans",
+    faith_image_1: "",
+    faith_image_2: "",
     faith_list: [
       "Fully private, customizable itineraries — never a fixed group tour",
       "Vetted 4★ / 5★ stays and homestays with genuinely upscale comfort",

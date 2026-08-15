@@ -24,7 +24,7 @@ import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminListSettings, adminSaveSetting } from "@/lib/admin-content.functions";
 import { HOME_LAYOUT_KEY } from "@/lib/home-layout";
-import { usePreviewPane, PreviewPane } from "@/components/admin/preview-pane";
+import { usePreviewPane, PreviewDivider, PreviewPane } from "@/components/admin/preview-pane";
 import { settingsPreviewChannel } from "@/hooks/use-site-settings";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
@@ -248,11 +248,15 @@ function SectionEditor({
         sidebarCollapsed ? "lg:left-19" : "lg:left-55"
       }`}
     >
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <div
+        ref={pane.splitRef}
+        className="flex min-h-0 flex-1 flex-col lg:flex-row"
+        style={{ ["--form-split" as string]: pane.splitValue }}
+      >
         {/* Form pane — the only part of this screen that scrolls */}
         <div
           className={`min-h-0 w-full flex-1 overflow-y-auto ${
-            schema.previewPath && pane.open ? "lg:w-[54%] lg:flex-none" : ""
+            schema.previewPath && pane.open ? "lg:w-[var(--form-split)] lg:flex-none" : ""
           }`}
         >
           <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
@@ -282,34 +286,40 @@ function SectionEditor({
           </div>
         </div>
 
+        {schema.previewPath && pane.open ? <PreviewDivider onPointerDown={pane.startResize} /> : null}
+
         {schema.previewPath && pane.open ? (
-          <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">
-            <PreviewPane
-              path={schema.previewPath}
-              label={`Preview · ${schema.previewPath}`}
-              pane={pane}
-              footnote="This is a preview of your unsaved changes. Nothing is live until you press Save changes."
-            />
-          </div>
+          <PreviewPane
+            path={schema.previewPath}
+            label={`Preview · ${schema.previewPath}`}
+            pane={pane}
+            footnote={null}
+          />
         ) : null}
       </div>
 
       {/* Action bar — always visible, never scrolls away */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-t border-rule bg-white px-5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] sm:px-6">
-        <div className="flex items-center gap-5 text-[0.85rem] text-muted">
+      <div className="flex h-16 shrink-0 items-center justify-between gap-4 border-t border-rule bg-white px-5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] sm:px-6">
+        <div className="flex min-w-0 items-center gap-5 text-[0.85rem] text-muted">
           <SavedNote show={saved && !error} />
           {schema.previewPath ? (
             <button
               type="button"
               onClick={() => pane.setOpen((v) => !v)}
-              className="hidden items-center gap-1.5 transition-colors hover:text-ink lg:flex"
+              className="hidden shrink-0 items-center gap-1.5 transition-colors hover:text-ink lg:flex"
             >
               <AdminIcon name={pane.open ? "eyeOff" : "eye"} className="h-4 w-4" />
               {pane.open ? "Hide preview" : "Show preview"}
             </button>
           ) : null}
+          {schema.previewPath && pane.open ? (
+            <span className="hidden truncate text-[0.78rem] text-muted lg:inline">
+              This is a preview of your unsaved changes. Nothing is live until you press Save
+              changes.
+            </span>
+          ) : null}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <AdminButton variant="secondary" onClick={onClose}>
             Cancel
           </AdminButton>

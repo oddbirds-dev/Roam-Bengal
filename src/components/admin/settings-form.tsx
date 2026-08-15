@@ -387,6 +387,8 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             label: "Location tag on the photo",
             placeholder: "📍 Sundarbans",
           },
+          { kind: "image", key: "faith_image_1", label: "Back photo (larger, green)" },
+          { kind: "image", key: "faith_image_2", label: "Front photo (smaller, orange)" },
           {
             kind: "list",
             key: "faith_list",
