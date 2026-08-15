@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { z } from "zod";
 import {
   AdminButton,
   Card,
@@ -22,10 +23,13 @@ import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminListSettings, adminSaveSetting } from "@/lib/admin-content.functions";
 import { HOME_LAYOUT_KEY } from "@/lib/home-layout";
-import { EmbeddedPreview } from "@/components/admin/preview-pane";
+import { usePreviewPane, PreviewPane } from "@/components/admin/preview-pane";
 import { settingsPreviewChannel } from "@/hooks/use-site-settings";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
+  // Lets other admin pages (the homepage-sections builder) deep-link straight into a
+  // section's editor instead of only reaching it by clicking through the grid.
+  validateSearch: z.object({ key: z.string().optional() }),
   loader: () => adminListSettings(),
   component: SettingsScreen,
 });
@@ -55,7 +59,8 @@ function defaultsFor(key: string): unknown {
  */
 function SettingsScreen() {
   const settings = Route.useLoaderData() as SettingsRow[];
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const search = Route.useSearch();
+  const [openKey, setOpenKey] = useState<string | null>(search.key ?? null);
 
   const rows = new Map(settings.map((row) => [row.key, row]));
   // homepage_layout has its own reorder-focused builder below, not a schema form or the raw
@@ -224,7 +229,7 @@ function SectionEditor({
 }) {
   const { run, busy, error, saved } = useAction();
   const [draft, setDraft] = useState(() => hydrateSetting(defaultsFor(settingKey), stored));
-  const [previewOpen, setPreviewOpen] = useState(true);
+  const pane = usePreviewPane(settingsPreviewChannel, { key: settingKey, value: draft });
 
   async function save() {
     const ok = await run(() =>
@@ -238,8 +243,8 @@ function SectionEditor({
   const actions = (
     <>
       {schema.previewPath ? (
-        <AdminButton variant="secondary" onClick={() => setPreviewOpen((v) => !v)}>
-          {previewOpen ? "Hide preview" : "Show preview"}
+        <AdminButton variant="secondary" onClick={() => pane.setOpen((v) => !v)}>
+          {pane.open ? "Hide preview" : "Show preview"}
         </AdminButton>
       ) : null}
       <AdminButton variant="secondary" onClick={onClose}>
@@ -252,7 +257,7 @@ function SectionEditor({
   );
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col">
       <button
         type="button"
         onClick={onClose}
@@ -265,33 +270,39 @@ function SectionEditor({
 
       <ErrorBanner error={error} />
 
-      {schema.previewPath && previewOpen ? (
-        <div className="mb-6">
-          <EmbeddedPreview
-            channel={settingsPreviewChannel}
-            draft={{ key: settingKey, value: draft }}
-            path={schema.previewPath}
-            label={`Preview · ${schema.previewPath}`}
-          />
+      <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="min-w-0 w-full lg:flex-1">
+          <SettingsSections schema={schema} value={draft} onChange={setDraft} />
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-rule pt-6">
+            {actions}
+            <SavedNote show={saved && !error} />
+            <span className="ml-auto flex items-center gap-3">
+              <span className="text-[0.78rem] text-muted">Want the wording it came with?</span>
+              <AdminButton
+                variant="secondary"
+                onClick={() => setDraft(hydrateSetting(defaultsFor(settingKey), {}))}
+              >
+                Restore original wording
+              </AdminButton>
+            </span>
+          </div>
         </div>
-      ) : null}
 
-      <SettingsSections schema={schema} value={draft} onChange={setDraft} />
-
-      <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-rule pt-6">
-        {actions}
-        <SavedNote show={saved && !error} />
-        <span className="ml-auto flex items-center gap-3">
-          <span className="text-[0.78rem] text-muted">Want the wording it came with?</span>
-          <AdminButton
-            variant="secondary"
-            onClick={() => setDraft(hydrateSetting(defaultsFor(settingKey), {}))}
-          >
-            Restore original wording
-          </AdminButton>
-        </span>
+        {schema.previewPath && pane.open ? (
+          <div className="hidden min-h-0 w-full lg:block lg:w-[46%]">
+            <div className="h-full min-h-[600px] overflow-hidden rounded-2xl border border-rule bg-paper">
+              <PreviewPane
+                path={schema.previewPath}
+                label={`Preview · ${schema.previewPath}`}
+                pane={pane}
+                footnote="This is a preview of your unsaved changes. Nothing is live until you press Save changes."
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
-    </>
+    </div>
   );
 }
 

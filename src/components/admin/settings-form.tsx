@@ -130,9 +130,14 @@ const PROMISE_ICONS = [
 ] as const;
 
 const WHY_ICONS = [
-  { value: "globe", label: "Globe (green)" },
-  { value: "coin", label: "Coin (orange)" },
-  { value: "shield", label: "Shield (dark green)" },
+  { value: "globe", label: "Globe" },
+  { value: "lock", label: "Lock" },
+  { value: "coin", label: "Coin" },
+  { value: "compass", label: "Compass" },
+  { value: "ban", label: "Ban" },
+  { value: "sparkles", label: "Sparkles" },
+  { value: "shield", label: "Shield" },
+  { value: "chat", label: "Chat" },
 ] as const;
 
 /** Image cell for repeaters — see the `render` note on RepeaterColumn. */

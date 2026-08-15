@@ -234,8 +234,8 @@ function TourEditor() {
 
   return (
     <div
-      className={`fixed inset-0 top-[68px] z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
-        sidebarCollapsed ? "lg:left-19" : "lg:left-[260px]"
+      className={`fixed inset-0 top-14 z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
+        sidebarCollapsed ? "lg:left-19" : "lg:left-55"
       }`}
     >
       <div

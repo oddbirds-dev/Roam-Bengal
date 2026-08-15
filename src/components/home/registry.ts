@@ -86,6 +86,22 @@ export const HOME_SECTIONS: Record<HomeSectionId, HomeSectionMeta> = {
 
 export const DEFAULT_HOME_ORDER: HomeSectionId[] = [...HOME_SECTION_IDS];
 
+/**
+ * Which `site_settings` key's editor a section's wording/photos live under — for the
+ * homepage-sections builder's per-row "Edit" link. Most sections share the `homepage` key;
+ * gallery and reviews have their own.
+ */
+export const HOME_SECTION_SETTINGS_KEY: Record<HomeSectionId, string> = {
+  features: "homepage",
+  popularTours: "homepage",
+  gallery: "gallery",
+  faith: "homepage",
+  journal: "homepage",
+  reviews: "reviews",
+  whyChooseUs: "homepage",
+  dreamCta: "homepage",
+};
+
 export function isHomeSectionId(value: unknown): value is HomeSectionId {
   return typeof value === "string" && (HOME_SECTION_IDS as readonly string[]).includes(value);
 }

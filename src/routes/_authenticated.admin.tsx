@@ -66,17 +66,17 @@ function AdminShell() {
     <div className="min-h-screen bg-[#F6F8F6]">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-rule bg-paper transition-[transform,width] lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-55 flex-col border-r border-rule bg-paper transition-[transform,width] lg:translate-x-0 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         } ${collapsed ? "lg:w-19" : ""}`}
       >
         <div
-          className={`flex h-[68px] shrink-0 items-center gap-2 border-b border-rule px-6 ${
+          className={`flex h-14 shrink-0 items-center gap-2 border-b border-rule px-5 ${
             collapsed ? "lg:justify-center lg:px-0" : ""
           }`}
         >
           <span
-            className={`font-display flex-1 text-[1.25rem] font-bold text-ink ${
+            className={`font-display flex-1 text-[1.1rem] font-bold text-ink ${
               collapsed ? "lg:hidden" : ""
             }`}
           >
@@ -88,11 +88,11 @@ function AdminShell() {
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!collapsed}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="hidden h-9 w-9 items-center justify-center rounded-lg border border-rule text-ink/70 transition-colors hover:border-green hover:text-green lg:inline-flex"
+            className="hidden h-8 w-8 items-center justify-center rounded-lg border border-rule text-ink/70 transition-colors hover:border-green hover:text-green lg:inline-flex"
           >
             <svg
-              width="18"
-              height="18"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -107,9 +107,9 @@ function AdminShell() {
           </button>
         </div>
 
-        <nav className={`flex-1 overflow-y-auto px-3 py-5 ${collapsed ? "lg:px-2" : ""}`}>
+        <nav className={`flex-1 overflow-y-auto px-3 py-4 ${collapsed ? "lg:px-2" : ""}`}>
           <span
-            className={`mb-2 block px-3 text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase ${
+            className={`mb-2 block px-3 text-[0.6rem] font-semibold tracking-[0.18em] text-muted uppercase ${
               collapsed ? "lg:hidden" : ""
             }`}
           >
@@ -122,7 +122,7 @@ function AdminShell() {
                 to={item.to}
                 activeOptions={{ exact: item.to === "/admin" }}
                 title={collapsed ? item.label : undefined}
-                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green ${
+                className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green ${
                   collapsed ? "lg:justify-center lg:px-0" : ""
                 }`}
                 activeProps={{ className: "bg-mint text-green font-semibold" }}
@@ -144,12 +144,12 @@ function AdminShell() {
           </div>
         </nav>
 
-        <div className={`shrink-0 border-t border-rule px-3 py-4 ${collapsed ? "lg:px-2" : ""}`}>
+        <div className={`shrink-0 border-t border-rule px-3 py-3 ${collapsed ? "lg:px-2" : ""}`}>
           <button
             type="button"
             onClick={signOut}
             title={collapsed ? "Sign out" : undefined}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9rem] font-medium text-ink/70 transition-colors hover:bg-rust/5 hover:text-rust ${
+            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium text-ink/70 transition-colors hover:bg-rust/5 hover:text-rust ${
               collapsed ? "lg:justify-center lg:px-0" : ""
             }`}
           >
@@ -157,7 +157,7 @@ function AdminShell() {
             <span className={collapsed ? "lg:hidden" : ""}>Sign out</span>
           </button>
           <p
-            className={`mt-2 truncate px-3 text-[0.72rem] text-muted ${
+            className={`mt-2 truncate px-3 text-[0.7rem] text-muted ${
               collapsed ? "lg:hidden" : ""
             }`}
             title={me.email ?? ""}
@@ -177,8 +177,8 @@ function AdminShell() {
       ) : null}
 
       {/* Main column */}
-      <div className={`transition-[padding] ${collapsed ? "lg:pl-19" : "lg:pl-[260px]"}`}>
-        <header className="flex h-[68px] items-center justify-between border-b border-rule bg-paper px-5 sm:px-8">
+      <div className={`transition-[padding] ${collapsed ? "lg:pl-19" : "lg:pl-55"}`}>
+        <header className="flex h-14 items-center justify-between border-b border-rule bg-paper px-5 sm:px-8">
           <button
             type="button"
             onClick={() => setMenuOpen(true)}

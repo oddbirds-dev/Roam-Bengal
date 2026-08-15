@@ -108,6 +108,37 @@ export function AdminButton({
   );
 }
 
+/** Pill switch — for a single on/off flag inline in a list row (as opposed to `Toggle` in
+ *  fields.tsx, which pairs a checkbox with a label for form use). */
+export function SwitchToggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+        checked ? "bg-green-dark" : "bg-rule"
+      }`}
+    >
+      <span
+        className={`inline-block h-[18px] w-[18px] transform rounded-full bg-white shadow-sm transition-transform ${
+          checked ? "translate-x-[22px]" : "translate-x-[3px]"
+        }`}
+      />
+    </button>
+  );
+}
+
 export function Badge({
   children,
   tone = "neutral",

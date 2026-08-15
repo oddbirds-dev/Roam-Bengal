@@ -34,18 +34,43 @@ export function FeatureIcon({ name }: { name: string }) {
 const WHY_STYLES: Record<string, { bg: string; fg: string; d: string }> = {
   globe: {
     bg: "#DCEFE0",
-    fg: "#22B57A",
+    fg: "#1E5F3B",
     d: "M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0ZM3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9Z",
   },
   coin: {
-    bg: "#FCEBD8",
-    fg: "#F0791E",
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
     d: "M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0ZM12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5",
   },
   shield: {
     bg: "#DCEFE0",
     fg: "#1E5F3B",
     d: "M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11Z",
+  },
+  lock: {
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
+    d: "M6 11V8a6 6 0 1 1 12 0v3M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z",
+  },
+  compass: {
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
+    d: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM15.5 8.5l-2 5-5 2 2-5 5-2Z",
+  },
+  ban: {
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
+    d: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM5.6 5.6l12.8 12.8",
+  },
+  sparkles: {
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
+    d: "M12 3l1.6 4.8L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.2L12 3ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z",
+  },
+  chat: {
+    bg: "#DCEFE0",
+    fg: "#1E5F3B",
+    d: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2V6Z",
   },
 };
 
