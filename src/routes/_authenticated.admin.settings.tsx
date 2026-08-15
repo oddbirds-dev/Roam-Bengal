@@ -8,6 +8,7 @@ import {
   PageHeader,
   SavedNote,
   useAction,
+  useSidebarCollapsed,
 } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import {
@@ -227,6 +228,7 @@ function SectionEditor({
   stored: unknown;
   onClose: () => void;
 }) {
+  const sidebarCollapsed = useSidebarCollapsed();
   const { run, busy, error, saved } = useAction();
   const [draft, setDraft] = useState(() => hydrateSetting(defaultsFor(settingKey), stored));
   const pane = usePreviewPane(settingsPreviewChannel, { key: settingKey, value: draft });
@@ -240,44 +242,35 @@ function SectionEditor({
     if (ok) onClose();
   }
 
-  const actions = (
-    <>
-      {schema.previewPath ? (
-        <AdminButton variant="secondary" onClick={() => pane.setOpen((v) => !v)}>
-          {pane.open ? "Hide preview" : "Show preview"}
-        </AdminButton>
-      ) : null}
-      <AdminButton variant="secondary" onClick={onClose}>
-        Cancel
-      </AdminButton>
-      <AdminButton onClick={save} disabled={busy}>
-        {busy ? "Saving…" : "Save changes"}
-      </AdminButton>
-    </>
-  );
-
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <button
-        type="button"
-        onClick={onClose}
-        className="mb-4 inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green"
-      >
-        ← All site content
-      </button>
+    <div
+      className={`fixed inset-0 top-14 z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
+        sidebarCollapsed ? "lg:left-19" : "lg:left-55"
+      }`}
+    >
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Form pane — the only part of this screen that scrolls */}
+        <div
+          className={`min-h-0 w-full flex-1 overflow-y-auto ${
+            schema.previewPath && pane.open ? "lg:w-[54%] lg:flex-none" : ""
+          }`}
+        >
+          <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green"
+            >
+              ← All site content
+            </button>
 
-      <PageHeader title={schema.title} subtitle={schema.description} actions={actions} />
+            <PageHeader title={schema.title} subtitle={schema.description} />
 
-      <ErrorBanner error={error} />
+            <ErrorBanner error={error} />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="min-w-0 w-full lg:flex-1">
-          <SettingsSections schema={schema} value={draft} onChange={setDraft} />
+            <SettingsSections schema={schema} value={draft} onChange={setDraft} />
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-rule pt-6">
-            {actions}
-            <SavedNote show={saved && !error} />
-            <span className="ml-auto flex items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-rule pt-6 pb-10">
               <span className="text-[0.78rem] text-muted">Want the wording it came with?</span>
               <AdminButton
                 variant="secondary"
@@ -285,22 +278,45 @@ function SectionEditor({
               >
                 Restore original wording
               </AdminButton>
-            </span>
+            </div>
           </div>
         </div>
 
         {schema.previewPath && pane.open ? (
-          <div className="hidden min-h-0 w-full lg:block lg:w-[46%]">
-            <div className="h-full min-h-[600px] overflow-hidden rounded-2xl border border-rule bg-paper">
-              <PreviewPane
-                path={schema.previewPath}
-                label={`Preview · ${schema.previewPath}`}
-                pane={pane}
-                footnote="This is a preview of your unsaved changes. Nothing is live until you press Save changes."
-              />
-            </div>
+          <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">
+            <PreviewPane
+              path={schema.previewPath}
+              label={`Preview · ${schema.previewPath}`}
+              pane={pane}
+              footnote="This is a preview of your unsaved changes. Nothing is live until you press Save changes."
+            />
           </div>
         ) : null}
+      </div>
+
+      {/* Action bar — always visible, never scrolls away */}
+      <div className="flex h-16 shrink-0 items-center justify-between border-t border-rule bg-white px-5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] sm:px-6">
+        <div className="flex items-center gap-5 text-[0.85rem] text-muted">
+          <SavedNote show={saved && !error} />
+          {schema.previewPath ? (
+            <button
+              type="button"
+              onClick={() => pane.setOpen((v) => !v)}
+              className="hidden items-center gap-1.5 transition-colors hover:text-ink lg:flex"
+            >
+              <AdminIcon name={pane.open ? "eyeOff" : "eye"} className="h-4 w-4" />
+              {pane.open ? "Hide preview" : "Show preview"}
+            </button>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <AdminButton variant="secondary" onClick={onClose}>
+            Cancel
+          </AdminButton>
+          <AdminButton onClick={save} disabled={busy}>
+            {busy ? "Saving…" : "Save changes"}
+          </AdminButton>
+        </div>
       </div>
     </div>
   );
