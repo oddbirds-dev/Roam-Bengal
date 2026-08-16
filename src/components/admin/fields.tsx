@@ -984,25 +984,23 @@ export function DraggableRepeaterField<T extends Record<string, unknown>>({
           {values.map((row, i) => (
             <SortableRow key={ids[i]!} id={ids[i]!}>
               {(handle) => (
-                <div className="flex items-stretch gap-2">
-                  <div className="flex w-11 shrink-0 items-center justify-center rounded-xl border border-rule bg-paper">
-                    {handle}
-                  </div>
-                  <div className="min-w-0 flex-1 rounded-xl border border-rule bg-cream p-4">
-                    <div className="mb-3 flex items-center justify-between">
+                <div className="rounded-xl border border-rule bg-cream p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {handle}
                       <span className="text-[0.78rem] font-semibold text-muted">
                         {title ? title(row, i) : `${singular(label)} ${i + 1}`}
                       </span>
-                      <IconButton onClick={() => remove(i)} label={`Remove ${singular(label)}`} danger>
-                        ✕
-                      </IconButton>
                     </div>
-                    <RepeaterColumnsGrid
-                      row={row}
-                      columns={columns}
-                      onFieldChange={(key, v) => setField(i, key, v)}
-                    />
+                    <IconButton onClick={() => remove(i)} label={`Remove ${singular(label)}`} danger>
+                      ✕
+                    </IconButton>
                   </div>
+                  <RepeaterColumnsGrid
+                    row={row}
+                    columns={columns}
+                    onFieldChange={(key, v) => setField(i, key, v)}
+                  />
                 </div>
               )}
             </SortableRow>

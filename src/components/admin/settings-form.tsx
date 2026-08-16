@@ -16,6 +16,7 @@ import {
   type RepeaterColumn,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import type { HomeSectionId } from "@/components/home/registry";
 import {
   INFO_SLUGS,
   POLICY_SLUGS,
@@ -345,80 +346,20 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     ],
   },
 
+  // Per-section wording (Feature strip, Popular tours, Faith, Journal, Why choose us,
+  // Closing invitation) lives in `HOMEPAGE_SECTION_FIELDS` below, not here — the homepage
+  // builder (`/admin/settings/homepage-sections`) edits those inline, scoped to each block's
+  // own row, instead of one long page covering every block at once. What's left here is
+  // "Reviews block": two homepage-only fields (`reviews_heading_1/2`, `reviews_cta_*`) that
+  // the reviews *section* reads alongside the separate `reviews` settings row — not moved
+  // into `HOMEPAGE_SECTION_FIELDS` because the homepage builder's "Reviews" row already
+  // links to that separate `reviews` group instead of expanding inline.
   homepage: {
-    title: "Homepage sections",
-    description: "Every block on the homepage below the banner.",
+    title: "Homepage — reviews block wording",
+    description: "The heading and button above the reviews carousel on the homepage.",
     where: "Homepage",
     previewPath: "/",
     sections: [
-      {
-        title: "Feature strip",
-        description: "The row of small icons and promises under the banner.",
-        fields: [
-          {
-            kind: "rows",
-            key: "features",
-            label: "Features",
-            columns: [
-              { key: "icon", label: "Icon", type: "select", options: FEATURE_ICONS, span: 4 },
-              { key: "title", label: "Title", span: 8 },
-              { key: "text", label: "One-line description" },
-            ],
-            blank: { icon: "box", title: "", text: "" },
-          },
-        ],
-      },
-      {
-        title: "Popular tours",
-        fields: [
-          { kind: "text", key: "popular_kicker", label: "Small label above the heading" },
-          { kind: "text", key: "popular_heading", label: "Heading" },
-          { kind: "image", key: "popular_bg_image", label: "Background photo" },
-        ],
-      },
-      {
-        title: "Why travellers keep faith",
-        fields: [
-          { kind: "text", key: "faith_kicker", label: "Small label above the heading" },
-          { kind: "text", key: "faith_heading_1", label: "Heading — first line" },
-          { kind: "text", key: "faith_heading_2", label: "Heading — second line" },
-          {
-            kind: "text",
-            key: "faith_pin",
-            label: "Location tag on the photo",
-            placeholder: "📍 Sundarbans",
-          },
-          { kind: "image", key: "faith_image_1", label: "Back photo (larger, green)" },
-          { kind: "image", key: "faith_image_2", label: "Front photo (smaller, orange)" },
-          {
-            kind: "list",
-            key: "faith_list",
-            label: "Tick-list points",
-            hint: "One reason per line.",
-          },
-          {
-            kind: "rows",
-            key: "faith_callouts",
-            label: "Comparison notes",
-            columns: [
-              {
-                key: "lead",
-                label: "Bold opening",
-                placeholder: "Roam Bengal vs. Local Operators —",
-              },
-              { key: "text", label: "Rest of the sentence", type: "textarea" },
-            ],
-            blank: { lead: "", text: "" },
-          },
-        ],
-      },
-      {
-        title: "From the journal",
-        fields: [
-          { kind: "text", key: "journal_kicker", label: "Small label above the heading" },
-          { kind: "text", key: "journal_heading", label: "Heading" },
-        ],
-      },
       {
         title: "Reviews block",
         fields: [
@@ -426,41 +367,6 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
           { kind: "text", key: "reviews_heading_2", label: "Heading — second line" },
           { kind: "text", key: "reviews_cta_label", label: "Button text" },
           { kind: "text", key: "reviews_cta_link", label: "Button goes to" },
-        ],
-      },
-      {
-        title: "Why choose our company",
-        fields: [
-          { kind: "text", key: "why_heading", label: "Heading" },
-          { kind: "textarea", key: "why_intro", label: "Paragraph under the heading", rows: 3 },
-          { kind: "image", key: "why_image", label: "Photo" },
-          {
-            kind: "rows",
-            key: "why_items",
-            label: "Reasons",
-            columns: [
-              { key: "icon", label: "Icon", type: "select", options: WHY_ICONS, span: 4 },
-              { key: "title", label: "Title", span: 8 },
-              { key: "text", label: "Description", type: "textarea" },
-            ],
-            blank: { icon: "globe", title: "", text: "" },
-          },
-        ],
-      },
-      {
-        title: "Closing invitation",
-        fields: [
-          { kind: "text", key: "cta_heading_1", label: "Heading — first line" },
-          { kind: "text", key: "cta_heading_2", label: "Heading — second line" },
-          {
-            kind: "list",
-            key: "cta_paragraphs",
-            label: "Paragraphs",
-            multiline: true,
-            hint: "Each box is one paragraph.",
-          },
-          { kind: "text", key: "cta_label", label: "Button text" },
-          { kind: "text", key: "cta_link", label: "Button goes to" },
         ],
       },
     ],
@@ -854,6 +760,101 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
 };
 
 // ---------------------------------------------------------------------------
+// Per-homepage-section fields
+//
+// The homepage builder (`/admin/settings/homepage-sections`) expands a section's own
+// fields inline, in its own row, instead of sending the owner to one long page covering
+// every homepage block at once. All of these fields live in the single `homepage`
+// settings row — this just regroups the same field definitions by which block reads them.
+// `gallery` and `whyChooseUs`'s sibling `reviews` block aren't here: `gallery`/`reviews`
+// are their own settings rows, so the builder links those two straight to
+// `/admin/settings/$group` instead of expanding them inline.
+// ---------------------------------------------------------------------------
+
+export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsField[]>> = {
+  features: [
+    {
+      kind: "rows",
+      key: "features",
+      label: "Features",
+      columns: [
+        { key: "icon", label: "Icon", type: "select", options: FEATURE_ICONS, span: 4 },
+        { key: "title", label: "Title", span: 8 },
+        { key: "text", label: "One-line description" },
+      ],
+      blank: { icon: "box", title: "", text: "" },
+    },
+  ],
+  popularTours: [
+    { kind: "text", key: "popular_kicker", label: "Small label above the heading" },
+    { kind: "text", key: "popular_heading", label: "Heading" },
+    { kind: "image", key: "popular_bg_image", label: "Background photo" },
+  ],
+  faith: [
+    { kind: "text", key: "faith_kicker", label: "Small label above the heading" },
+    { kind: "text", key: "faith_heading_1", label: "Heading — first line" },
+    { kind: "text", key: "faith_heading_2", label: "Heading — second line" },
+    {
+      kind: "text",
+      key: "faith_pin",
+      label: "Location tag on the photo",
+      placeholder: "📍 Sundarbans",
+    },
+    { kind: "image", key: "faith_image_1", label: "Back photo (larger, green)" },
+    { kind: "image", key: "faith_image_2", label: "Front photo (smaller, orange)" },
+    {
+      kind: "list",
+      key: "faith_list",
+      label: "Tick-list points",
+      hint: "One reason per line.",
+    },
+    {
+      kind: "rows",
+      key: "faith_callouts",
+      label: "Comparison notes",
+      columns: [
+        { key: "lead", label: "Bold opening", placeholder: "Roam Bengal vs. Local Operators —" },
+        { key: "text", label: "Rest of the sentence", type: "textarea" },
+      ],
+      blank: { lead: "", text: "" },
+    },
+  ],
+  journal: [
+    { kind: "text", key: "journal_kicker", label: "Small label above the heading" },
+    { kind: "text", key: "journal_heading", label: "Heading" },
+  ],
+  whyChooseUs: [
+    { kind: "text", key: "why_heading", label: "Heading" },
+    { kind: "textarea", key: "why_intro", label: "Paragraph under the heading", rows: 3 },
+    { kind: "image", key: "why_image", label: "Photo" },
+    {
+      kind: "rows",
+      key: "why_items",
+      label: "Reasons",
+      columns: [
+        { key: "icon", label: "Icon", type: "select", options: WHY_ICONS, span: 4 },
+        { key: "title", label: "Title", span: 8 },
+        { key: "text", label: "Description", type: "textarea" },
+      ],
+      blank: { icon: "globe", title: "", text: "" },
+    },
+  ],
+  dreamCta: [
+    { kind: "text", key: "cta_heading_1", label: "Heading — first line" },
+    { kind: "text", key: "cta_heading_2", label: "Heading — second line" },
+    {
+      kind: "list",
+      key: "cta_paragraphs",
+      label: "Paragraphs",
+      multiline: true,
+      hint: "Each box is one paragraph.",
+    },
+    { kind: "text", key: "cta_label", label: "Button text" },
+    { kind: "text", key: "cta_link", label: "Button goes to" },
+  ],
+};
+
+// ---------------------------------------------------------------------------
 // Policy and info pages
 //
 // Every one of these shares the `PolicyPage` shape from src/content/policy-defaults.ts
@@ -1047,7 +1048,7 @@ export function SettingsSections({
   );
 }
 
-function FieldControl({
+export function FieldControl({
   field,
   value,
   onChange,

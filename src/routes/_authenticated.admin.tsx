@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { setSidebarCollapsed, useSidebarCollapsed } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
+import { SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/components/admin/settings-form";
 import { supabase } from "@/integrations/supabase/client";
 import { whoAmI } from "@/lib/admin.functions";
 
@@ -28,20 +29,50 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminShell,
 });
 
-const NAV = [
-  { label: "Dashboard", to: "/admin", icon: "dashboard" },
-  { label: "Inquiries", to: "/admin/inquiries", icon: "inbox" },
-  { label: "Tours", to: "/admin/tours", icon: "map" },
-  // No Destinations entry: the table exists but no destination pages ship in v1
-  // (PRD §16), so editing them would produce content with nowhere to appear.
-  { label: "Activities", to: "/admin/activities", icon: "activity" },
-  { label: "Blogs", to: "/admin/posts", icon: "news" },
-  { label: "Reviews", to: "/admin/testimonials", icon: "star" },
-  { label: "FAQs", to: "/admin/faqs", icon: "help" },
-  { label: "Site content", to: "/admin/settings", icon: "gear" },
-  { label: "Links", to: "/admin/links", icon: "search" },
-  { label: "SEO", to: "/admin/seo", icon: "external" },
-] as const;
+type NavItem = { label: string; to: string; icon: string };
+type NavGroup = { heading: string; items: readonly NavItem[] };
+
+// Grouped so the person using this can tell "things people sent me" apart from "things I
+// publish" and "how the website itself reads".
+const NAV: readonly NavGroup[] = [
+  {
+    heading: "Overview",
+    items: [
+      { label: "Dashboard", to: "/admin", icon: "dashboard" },
+      { label: "Inquiries", to: "/admin/inquiries", icon: "inbox" },
+    ],
+  },
+  {
+    heading: "Your content",
+    items: [
+      { label: "Tours", to: "/admin/tours", icon: "map" },
+      // No Destinations entry: the table exists but no destination pages ship in v1
+      // (PRD §16), so editing them would produce content with nowhere to appear.
+      { label: "Activities", to: "/admin/activities", icon: "activity" },
+      { label: "Blogs", to: "/admin/posts", icon: "news" },
+      { label: "Reviews", to: "/admin/testimonials", icon: "star" },
+      { label: "FAQs", to: "/admin/faqs", icon: "help" },
+    ],
+  },
+  {
+    heading: "Your website",
+    items: [
+      { label: "Site content", to: "/admin/settings", icon: "gear" },
+      { label: "Links", to: "/admin/links", icon: "search" },
+      { label: "SEO", to: "/admin/seo", icon: "external" },
+    ],
+  },
+];
+
+// The sub-nav mirrors the Site content hub, so it reads like the page it links to rather
+// than listing raw database keys.
+const CONTENT_LINKS = [
+  { to: "/admin/settings/homepage-sections", label: "Homepage sections" },
+  ...SETTINGS_ORDER.map((key) => ({
+    to: `/admin/settings/${key}`,
+    label: SETTINGS_SCHEMA[key]?.title ?? key,
+  })),
+];
 
 function AdminShell() {
   const me = Route.useLoaderData();
@@ -108,40 +139,67 @@ function AdminShell() {
         </div>
 
         <nav className={`flex-1 overflow-y-auto px-3 py-4 ${collapsed ? "lg:px-2" : ""}`}>
-          <span
-            className={`mb-2 block px-3 text-[0.6rem] font-semibold tracking-[0.18em] text-muted uppercase ${
-              collapsed ? "lg:hidden" : ""
-            }`}
-          >
-            Management
-          </span>
-          <div className="flex flex-col gap-0.5">
-            {NAV.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                activeOptions={{ exact: item.to === "/admin" }}
-                title={collapsed ? item.label : undefined}
-                className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium text-ink/70 transition-colors hover:bg-mint/60 hover:text-green ${
-                  collapsed ? "lg:justify-center lg:px-0" : ""
-                }`}
-                activeProps={{ className: "bg-mint text-green font-semibold" }}
-              >
-                {({ isActive }) => (
-                  <>
-                    <AdminIcon name={item.icon} />
-                    <span className={`flex-1 ${collapsed ? "lg:hidden" : ""}`}>{item.label}</span>
-                    {isActive ? (
-                      <AdminIcon
-                        name="chevron"
-                        className={`h-4 w-4 opacity-70 ${collapsed ? "lg:hidden" : ""}`}
-                      />
-                    ) : null}
-                  </>
-                )}
-              </Link>
-            ))}
-          </div>
+          {NAV.map((group) => (
+            <div key={group.heading} className="mb-5 last:mb-0">
+              {collapsed ? (
+                // A heading can't be read at this width, so the groups are separated by a
+                // rule instead — except the first, which already sits against the header.
+                <div className="mb-2 border-t border-rule first:hidden" />
+              ) : (
+                <span className="mb-2 block px-3 text-[0.6rem] font-semibold tracking-[0.18em] text-muted uppercase">
+                  {group.heading}
+                </span>
+              )}
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const exact = item.to === "/admin";
+                  const active = exact ? pathname === item.to : pathname.startsWith(item.to);
+                  const subNav = item.to === "/admin/settings" && active && !collapsed;
+                  return (
+                    <div key={item.to}>
+                      <Link
+                        to={item.to}
+                        activeOptions={{ exact }}
+                        title={collapsed ? item.label : undefined}
+                        className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors ${
+                          active
+                            ? "bg-mint font-semibold text-green"
+                            : "text-ink/70 hover:bg-mint/60 hover:text-green"
+                        } ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
+                      >
+                        <AdminIcon name={item.icon} />
+                        <span className={`flex-1 ${collapsed ? "lg:hidden" : ""}`}>
+                          {item.label}
+                        </span>
+                        {active && !subNav ? (
+                          <AdminIcon
+                            name="chevron"
+                            className={`h-4 w-4 opacity-70 ${collapsed ? "lg:hidden" : ""}`}
+                          />
+                        ) : null}
+                      </Link>
+
+                      {subNav ? (
+                        <div className="mt-0.5 mb-1 ml-5 flex flex-col gap-px border-l border-rule pl-2">
+                          {CONTENT_LINKS.map((link) => (
+                            <Link
+                              key={link.to}
+                              to={link.to as never}
+                              className={`truncate rounded px-2 py-1 text-[0.78rem] transition-colors hover:bg-mint/60 hover:text-green ${
+                                pathname === link.to ? "font-semibold text-green" : "text-ink/70"
+                              }`}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className={`shrink-0 border-t border-rule px-3 py-3 ${collapsed ? "lg:px-2" : ""}`}>

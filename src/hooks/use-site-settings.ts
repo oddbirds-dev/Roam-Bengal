@@ -6,20 +6,23 @@ import { createDraftChannel } from "@/lib/preview";
 
 const rootRoute = getRouteApi("__root__");
 
-interface SettingsDraft {
-  key: string;
-  value: unknown;
-}
+/**
+ * `site_settings` key → unsaved edited value. A map rather than a single `{key,value}` pair
+ * because one editor screen (the homepage builder) can have two rows open for edit at once —
+ * the section copy (`homepage`) and the section order (`home_layout`) — and the preview needs
+ * both applied together.
+ */
+type SettingsDraftMap = Record<string, unknown>;
 
 /**
- * The settings admin editor only ever has one section open at a time, so unlike a tour or
+ * The settings admin editor only ever has one screen open at a time, so unlike a tour or
  * post preview there is no page/slug to gate this on — being embedded in an iframe at all
  * (`useDraft`'s own `window.parent === window` check) is exactly the signal that a preview
  * is live. Every public page already calls `useSiteSettings()`, so wiring the channel in
  * here, once, reaches all of them for free instead of threading `?preview=1` through six
  * different routes.
  */
-export const settingsPreviewChannel = createDraftChannel<SettingsDraft>("settings");
+export const settingsPreviewChannel = createDraftChannel<SettingsDraftMap>("settings");
 
 /**
  * Deep-merges stored `site_settings` JSON over the code defaults.
@@ -51,7 +54,7 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 export function useSiteSettings(): SiteDefaults {
   const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
   const draft = settingsPreviewChannel.useDraft(true);
-  const withDraft = draft ? { ...stored, [draft.key]: draft.value } : stored;
+  const withDraft = draft ? { ...stored, ...draft } : stored;
   return mergeSettings(siteDefaults, withDraft ?? {});
 }
 
@@ -65,5 +68,6 @@ export function useSiteSettings(): SiteDefaults {
  */
 export function useHomeLayout(): HomeLayout {
   const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
-  return resolveHomeLayout(stored?.[HOME_LAYOUT_KEY]);
+  const draft = settingsPreviewChannel.useDraft(true);
+  return resolveHomeLayout(draft?.[HOME_LAYOUT_KEY] ?? stored?.[HOME_LAYOUT_KEY]);
 }
