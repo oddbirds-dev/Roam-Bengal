@@ -76,7 +76,7 @@ function Contact() {
           <h1 className="mb-4 font-display text-[clamp(2rem,4.2vw,2.8rem)] leading-[1.2] font-bold">
             {contact.banner_title}
           </h1>
-          <p className="text-[1rem] leading-[1.7] text-muted">{contact.hero_intro}</p>
+          <p className="text-center text-[1rem] leading-[1.7] text-muted">{contact.hero_intro}</p>
         </div>
 
         {/* Info cards */}
@@ -103,7 +103,7 @@ function Contact() {
                 <h3 className="mt-2 font-display text-[1.2rem] font-bold text-green">
                   Message received.
                 </h3>
-                <p className="mt-2 text-[0.9rem] leading-7 text-muted">
+                <p className="mt-2 text-center text-[0.9rem] leading-7 text-muted">
                   We reply to every message personally — usually the same day. If it is
                   urgent, WhatsApp is faster.
                 </p>

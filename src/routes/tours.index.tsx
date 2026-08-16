@@ -166,10 +166,10 @@ function ToursIndex() {
         ) : (
           <div className="wide px-5 pb-[60px] nav:px-10 nav:pb-[90px]">
             <div className="rounded-[18px] border border-dashed border-rule py-20 text-center">
-              <p className="font-display text-xl font-bold text-green">
+              <p className="text-center font-display text-xl font-bold text-green">
                 No tours in this category yet.
               </p>
-              <p className="mt-2 text-[0.9rem] text-muted">
+              <p className="mt-2 text-center text-[0.9rem] text-muted">
                 Try another theme, or tell us what you have in mind and we will build it.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">

@@ -14,7 +14,7 @@ export function FeaturesSection(_props: HomeSectionProps) {
               <FeatureIcon name={f.icon} />
             </span>
             <h4 className="mb-1 font-body text-[0.85rem] font-semibold">{f.title}</h4>
-            <p className="text-[0.72rem] text-muted">{f.text}</p>
+            <p className="text-center text-[0.72rem] text-muted">{f.text}</p>
           </div>
         ))}
       </div>

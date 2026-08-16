@@ -69,7 +69,7 @@ export function PolicyLayout({ page }: { page: PolicyPage }) {
 
         <div className="mt-12 rounded-2xl bg-mint p-7 text-center">
           <h3 className="font-display text-[1.2rem] text-green">{page.contact_heading}</h3>
-          <p className="mx-auto mt-2 max-w-md text-[0.9rem] leading-7 text-muted">
+          <p className="mx-auto mt-2 max-w-md text-center text-[0.9rem] leading-7 text-muted">
             {page.contact_body}
           </p>
           <div className="mt-5">

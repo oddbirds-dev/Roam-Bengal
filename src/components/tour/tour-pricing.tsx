@@ -86,7 +86,7 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
             {copy.heading}
           </h2>
           {copy.subhead ? (
-            <p className="mt-2 text-[0.92rem] text-muted">{copy.subhead}</p>
+            <p className="mt-2 text-center text-[0.92rem] text-muted">{copy.subhead}</p>
           ) : null}
           {/* Reference ornament: rule, dot, rule. */}
           <span aria-hidden="true" className="mt-5 flex items-center justify-center gap-2">
@@ -163,7 +163,7 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
             {copy.cta_label} →
           </ButtonLink>
           {copy.cta_footnote ? (
-            <p className="mt-4 text-[0.8rem] text-white/75">{copy.cta_footnote}</p>
+            <p className="mt-4 text-center text-[0.8rem] text-white/75">{copy.cta_footnote}</p>
           ) : null}
         </div>
       </div>
@@ -213,21 +213,23 @@ function TierCard({
 
       <h3 className="mt-2.5 font-display text-[1rem] font-bold text-ink">{tier.label}</h3>
       {people !== null ? (
-        <p className="mt-1 text-[0.82rem] text-muted">
+        <p className="mt-1 text-center text-[0.82rem] text-muted">
           {people} {people === 1 ? "person" : "persons"}
         </p>
       ) : null}
 
-      <p className={`mt-3 font-display text-[2rem] leading-none font-bold ${accent.price}`}>
+      <p
+        className={`mt-3 text-center font-display text-[2rem] leading-none font-bold ${accent.price}`}
+      >
         {formatPrice(tier.price)}
       </p>
       {perPersonLabel ? (
-        <p className="mt-1.5 text-[0.76rem] text-muted">{perPersonLabel}</p>
+        <p className="mt-1.5 text-center text-[0.76rem] text-muted">{perPersonLabel}</p>
       ) : null}
 
       {tier.note ? (
         <p
-          className={`mt-4 w-full rounded-lg px-3 py-1.5 text-[0.74rem] font-medium ${accent.noteBg} ${accent.noteText}`}
+          className={`mt-4 w-full rounded-lg px-3 py-1.5 text-center text-[0.74rem] font-medium ${accent.noteBg} ${accent.noteText}`}
         >
           {tier.note}
         </p>

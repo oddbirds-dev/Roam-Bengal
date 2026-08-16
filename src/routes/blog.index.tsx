@@ -64,7 +64,9 @@ function BlogIndex() {
           <h1 className="mx-auto mb-[18px] max-w-[820px] font-display text-[clamp(2.4rem,5vw,3.6rem)] leading-[1.08] font-bold">
             <Emphasised text={blog_page.heading} />
           </h1>
-          <p className="mx-auto max-w-[520px] text-[1rem] text-muted">{blog_page.subtext}</p>
+          <p className="mx-auto max-w-[520px] text-center text-[1rem] text-muted">
+            {blog_page.subtext}
+          </p>
         </section>
 
         {/* Category rail */}

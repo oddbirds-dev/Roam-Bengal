@@ -6,7 +6,7 @@ export function ErrorPage({ error }: ErrorComponentProps) {
     <div className="wrap flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">
       <span className="mb-3 font-script text-4xl text-orange">Well, that went sideways</span>
       <h1 className="mb-4 font-display text-4xl text-green">Something Went Wrong</h1>
-      <p className="mb-8 max-w-md text-muted">
+      <p className="mb-8 max-w-md text-center text-muted">
         We hit an unexpected error loading this page. Try again, or message us on WhatsApp
         and we will sort it out.
       </p>

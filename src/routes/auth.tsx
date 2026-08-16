@@ -59,7 +59,7 @@ function AuthPage() {
         <div className="flex flex-col items-center text-center">
           <img src="/logo.png" alt="Roam Bengal" className="h-12 w-auto" />
           <h1 className="mt-4 font-display text-[1.4rem] text-green">Staff Sign In</h1>
-          <p className="mt-1 text-[0.84rem] text-muted">
+          <p className="mt-1 text-center text-[0.84rem] text-muted">
             Accounts are provisioned by the site administrator.
           </p>
         </div>

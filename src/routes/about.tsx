@@ -102,7 +102,7 @@ function About() {
                   <h3 className="mt-3 font-display text-[1.15rem] font-bold text-green-dark">
                     {p.title}
                   </h3>
-                  <p className="mt-2 text-[0.88rem] leading-7 text-muted">{p.text}</p>
+                  <p className="mt-2 text-center text-[0.88rem] leading-7 text-muted">{p.text}</p>
                 </div>
               ))}
             </div>
