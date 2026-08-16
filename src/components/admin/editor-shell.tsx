@@ -115,12 +115,19 @@ export function EditorShell({
             </ResizablePanel>
             <ResizableHandle withHandle onPointerDown={() => setDragging(true)} />
             <ResizablePanel defaultSize="55" minSize="25">
-              <PreviewPane
-                path={previewPath}
-                label={`Preview · ${previewPath}`}
-                pane={{ ...pane, dragging }}
-                footnote={null}
-              />
+              {/* `PreviewPane`'s own root is a flex *item* (`flex-1`) that expects a flex
+                  container parent with a definite height — true of every other place it's
+                  used, but `Panel`'s internal wrapper div isn't `display:flex`, so without
+                  this wrapper `flex-1` is inert and the iframe collapses to the browser's
+                  ~150px default iframe height. */}
+              <div className="flex h-full flex-col">
+                <PreviewPane
+                  path={previewPath}
+                  label={`Preview · ${previewPath}`}
+                  pane={{ ...pane, dragging }}
+                  footnote={null}
+                />
+              </div>
             </ResizablePanel>
           </ResizablePanelGroup>
         ) : (
