@@ -29,6 +29,7 @@ export const siteDefaults = {
 
   header: {
     logo_url: "",
+    logo_url_light: "",
     logo_alt: "Roam Bengal",
     wordmark_1: "Roam",
     wordmark_2: "Bengal",
@@ -228,6 +229,7 @@ export const siteDefaults = {
 
   tours_page: {
     banner_title: "Signature Private Tours of Bangladesh",
+    banner_image: "",
     intro_heading_1: "Explore Bangladesh",
     intro_heading_2: "Beyond The Obvious",
     intro_paragraphs: [

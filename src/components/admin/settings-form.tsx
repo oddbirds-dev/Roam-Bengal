@@ -232,7 +232,13 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             kind: "image",
             key: "logo_url",
             label: "Logo image",
-            hint: "Leave empty to show the written name instead of a picture.",
+            hint: "Leave empty to use the default logo.",
+          },
+          {
+            kind: "image",
+            key: "logo_url_light",
+            label: "Logo image (light)",
+            hint: "Used on pages with a photo banner behind the header, e.g. Tours. Leave empty to reuse the default light logo.",
           },
           {
             kind: "text",
@@ -473,7 +479,10 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     sections: [
       {
         title: "Banner",
-        fields: [{ kind: "text", key: "banner_title", label: "Banner title" }],
+        fields: [
+          { kind: "text", key: "banner_title", label: "Banner title" },
+          { kind: "image", key: "banner_image", label: "Banner photo" },
+        ],
       },
       {
         title: "Introduction",

@@ -15,13 +15,18 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
  */
 export function SiteHeader({
   variant = "overlay",
-  logoSrc = "/logo.png",
+  logo = "default",
 }: {
   variant?: "overlay" | "solid";
-  logoSrc?: string;
+  /** "light" is for pages with a photo banner behind the header, e.g. Tours. */
+  logo?: "default" | "light";
 }) {
   const settings = useSiteSettings();
   const { header } = settings;
+  const logoSrc =
+    logo === "light"
+      ? header.logo_url_light || "/logo-white.png"
+      : header.logo_url || "/logo.png";
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 

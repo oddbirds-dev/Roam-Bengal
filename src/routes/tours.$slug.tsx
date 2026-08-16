@@ -95,7 +95,7 @@ function TourDetail() {
   return (
     <>
       <div className="bg-green-dark">
-        <SiteHeader logoSrc="/logo-white.png" />
+        <SiteHeader logo="light" />
       </div>
 
       {/* Everything between the header and the footer sits on the sand page background. */}

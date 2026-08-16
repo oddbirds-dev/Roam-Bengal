@@ -4,7 +4,7 @@ import { isExternal } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function SiteFooter() {
-  const { footer } = useSiteSettings();
+  const { footer, header } = useSiteSettings();
 
   return (
     <footer
@@ -16,7 +16,11 @@ export function SiteFooter() {
         style={{ "--foot-cols": footer.columns.length } as CSSProperties}
       >
         <div className="col-span-2 nav:col-span-1">
-          <img src="/logo.png" alt="Roam Bengal" className="h-11 w-auto rounded bg-white/95 px-2 py-1.5" />
+          <img
+            src={header.logo_url || "/logo.png"}
+            alt="Roam Bengal"
+            className="h-11 w-auto rounded bg-white/95 px-2 py-1.5"
+          />
           <p className="mt-3.5 max-w-[260px] text-[0.85rem] opacity-70">{footer.intro}</p>
         </div>
 
