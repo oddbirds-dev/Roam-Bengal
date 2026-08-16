@@ -159,7 +159,8 @@ export const siteDefaults = {
     reviews_heading_2: "Customers Say It Best",
     reviews_cta_label: "View All Testimonials",
     reviews_cta_link: "/reviews",
-    why_heading: "Why You Choose Our Company",
+    why_heading_1: "Why Choose",
+    why_heading_2: "Panorama Bangladesh",
     why_intro:
       "From our handpicked destinations to our expert guides and personalized service, discover why travellers choose us for their dream Bangladesh vacation.",
     why_image: "",

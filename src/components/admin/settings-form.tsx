@@ -833,7 +833,8 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
     { kind: "text", key: "journal_heading", label: "Heading" },
   ],
   whyChooseUs: [
-    { kind: "text", key: "why_heading", label: "Heading" },
+    { kind: "text", key: "why_heading_1", label: "Heading — first line" },
+    { kind: "text", key: "why_heading_2", label: "Heading — second line" },
     { kind: "textarea", key: "why_intro", label: "Paragraph under the heading", rows: 3 },
     { kind: "image", key: "why_image", label: "Photo" },
     {
