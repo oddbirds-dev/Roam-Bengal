@@ -128,6 +128,7 @@ export const siteDefaults = {
     ],
     popular_kicker: "Popular Tours",
     popular_heading: "Handpicked Experiences for You",
+    popular_bg_image: "",
     faith_kicker: "The Roam Bengal Difference",
     faith_heading_1: "Why Travellers Keep Faith",
     faith_heading_2: "In Roam Bengal",
@@ -160,6 +161,7 @@ export const siteDefaults = {
     why_heading: "Why You Choose Our Company",
     why_intro:
       "From our handpicked destinations to our expert guides and personalized service, discover why travellers choose us for their dream Bangladesh vacation.",
+    why_image: "",
     why_items: [
       {
         icon: "globe",

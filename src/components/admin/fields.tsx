@@ -5,6 +5,7 @@ import {
   useLinkTargets,
   type LinkPickResult,
 } from "@/components/admin/link-picker";
+import { SortableList, SortableRow } from "@/components/admin/sortable-list";
 import type { LinkTargetKind } from "@/lib/link-targets";
 
 /**
@@ -838,76 +839,187 @@ export function RepeaterField<T extends Record<string, unknown>>({
                 onRemove={() => remove(i)}
               />
             </div>
-            <div className="grid grid-cols-12 gap-3">
-              {columns.map((col) => (
-                <div key={col.key} style={{ gridColumn: `span ${col.span ?? 12}` }}>
-                  <span className="mb-1 block text-[0.72rem] font-medium text-muted">
-                    {col.label}
-                  </span>
-                  {col.render ? (
-                    col.render(row[col.key], (v) => setField(i, col.key, v))
-                    ) : col.type === "textarea" ? (
-                      <MarkdownTextarea
-                        rows={3}
-                        value={String(row[col.key] ?? "")}
-                        placeholder={col.placeholder}
-                        onChange={(v) => setField(i, col.key, v)}
-                      />
-                    ) : col.type === "select" ? (
-                    <select
-                      value={String(row[col.key] ?? "")}
-                      onChange={(e) => setField(i, col.key, e.target.value)}
-                      className={inputBase}
-                    >
-                      {(col.options ?? []).map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : col.type === "color" ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={/^#[0-9a-f]{6}$/i.test(String(row[col.key] ?? ""))
-                          ? String(row[col.key])
-                          : "#000000"}
-                        onChange={(e) => setField(i, col.key, e.target.value)}
-                        aria-label={col.label}
-                        className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border-[1.5px] border-rule bg-paper p-1"
-                      />
-                      <input
-                        type="text"
-                        value={String(row[col.key] ?? "")}
-                        placeholder="#1E5F3B"
-                        onChange={(e) => setField(i, col.key, e.target.value)}
-                        className={`${inputBase} font-mono text-[0.8rem]`}
-                      />
-                    </div>
-                  ) : (
-                    <input
-                      type={col.type === "number" ? "number" : "text"}
-                      value={String(row[col.key] ?? "")}
-                      placeholder={col.placeholder}
-                      onChange={(e) =>
-                        setField(
-                          i,
-                          col.key,
-                          col.type === "number" ? Number(e.target.value) : e.target.value,
-                        )
-                      }
-                      className={inputBase}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+            <RepeaterColumnsGrid
+              row={row}
+              columns={columns}
+              onFieldChange={(key, v) => setField(i, key, v)}
+            />
           </div>
         ))}
         <AddButton onClick={() => onChange([...values, blank()])} label={`Add ${singular(label)}`} />
       </div>
     </div>
   );
+}
+
+/** The column grid a repeater row renders — shared by the arrow-reorder and drag-reorder variants. */
+function RepeaterColumnsGrid<T extends Record<string, unknown>>({
+  row,
+  columns,
+  onFieldChange,
+}: {
+  row: T;
+  columns: RepeaterColumn<T>[];
+  onFieldChange: (key: string, v: unknown) => void;
+}) {
+  return (
+    <div className="grid grid-cols-12 gap-3">
+      {columns.map((col) => (
+        <div key={col.key} style={{ gridColumn: `span ${col.span ?? 12}` }}>
+          <span className="mb-1 block text-[0.72rem] font-medium text-muted">{col.label}</span>
+          {col.render ? (
+            col.render(row[col.key], (v) => onFieldChange(col.key, v))
+          ) : col.type === "textarea" ? (
+            <MarkdownTextarea
+              rows={3}
+              value={String(row[col.key] ?? "")}
+              placeholder={col.placeholder}
+              onChange={(v) => onFieldChange(col.key, v)}
+            />
+          ) : col.type === "select" ? (
+            <select
+              value={String(row[col.key] ?? "")}
+              onChange={(e) => onFieldChange(col.key, e.target.value)}
+              className={inputBase}
+            >
+              {(col.options ?? []).map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          ) : col.type === "color" ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={
+                  /^#[0-9a-f]{6}$/i.test(String(row[col.key] ?? ""))
+                    ? String(row[col.key])
+                    : "#000000"
+                }
+                onChange={(e) => onFieldChange(col.key, e.target.value)}
+                aria-label={col.label}
+                className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border-[1.5px] border-rule bg-paper p-1"
+              />
+              <input
+                type="text"
+                value={String(row[col.key] ?? "")}
+                placeholder="#1E5F3B"
+                onChange={(e) => onFieldChange(col.key, e.target.value)}
+                className={`${inputBase} font-mono text-[0.8rem]`}
+              />
+            </div>
+          ) : (
+            <input
+              type={col.type === "number" ? "number" : "text"}
+              value={String(row[col.key] ?? "")}
+              placeholder={col.placeholder}
+              onChange={(e) =>
+                onFieldChange(col.key, col.type === "number" ? Number(e.target.value) : e.target.value)
+              }
+              className={inputBase}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Same shape as `RepeaterField`, reordered by dragging a handle instead of ↑/↓ buttons.
+ * Rows have no inherent id, so each gets one generated on first render and carried through
+ * add/remove/reorder in `keysRef` rather than being re-derived from `values` every render.
+ */
+export function DraggableRepeaterField<T extends Record<string, unknown>>({
+  label,
+  values,
+  columns,
+  blank,
+  onChange,
+  hint,
+  title,
+}: {
+  label: string;
+  values: T[];
+  columns: RepeaterColumn<T>[];
+  blank: () => T;
+  onChange: (v: T[]) => void;
+  hint?: string;
+  /** Row heading, e.g. day number. */
+  title?: (row: T, index: number) => string;
+}) {
+  const keysRef = useRef<string[]>(values.map(() => makeRowKey()));
+  if (keysRef.current.length !== values.length) {
+    const next = keysRef.current.slice(0, values.length);
+    while (next.length < values.length) next.push(makeRowKey());
+    keysRef.current = next;
+  }
+  const ids = keysRef.current;
+
+  const setField = (i: number, key: string, v: unknown) =>
+    onChange(values.map((row, idx) => (idx === i ? { ...row, [key]: v } : row)));
+
+  const remove = (i: number) => {
+    keysRef.current = keysRef.current.filter((_, idx) => idx !== i);
+    onChange(values.filter((_, idx) => idx !== i));
+  };
+
+  const add = () => {
+    keysRef.current = [...keysRef.current, makeRowKey()];
+    onChange([...values, blank()]);
+  };
+
+  function handleReorder(nextIds: string[]) {
+    const byId = new Map(ids.map((id, idx) => [id, values[idx]]));
+    keysRef.current = nextIds;
+    onChange(nextIds.map((id) => byId.get(id)!));
+  }
+
+  return (
+    <div>
+      <Label hint={hint}>{label}</Label>
+      <SortableList ids={ids} onReorder={handleReorder}>
+        <div className="flex flex-col gap-3">
+          {values.map((row, i) => (
+            <SortableRow key={ids[i]!} id={ids[i]!}>
+              {(handle) => (
+                <div className="flex items-stretch gap-2">
+                  <div className="flex w-11 shrink-0 items-center justify-center rounded-xl border border-rule bg-paper">
+                    {handle}
+                  </div>
+                  <div className="min-w-0 flex-1 rounded-xl border border-rule bg-cream p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-[0.78rem] font-semibold text-muted">
+                        {title ? title(row, i) : `${singular(label)} ${i + 1}`}
+                      </span>
+                      <IconButton onClick={() => remove(i)} label={`Remove ${singular(label)}`} danger>
+                        ✕
+                      </IconButton>
+                    </div>
+                    <RepeaterColumnsGrid
+                      row={row}
+                      columns={columns}
+                      onFieldChange={(key, v) => setField(i, key, v)}
+                    />
+                  </div>
+                </div>
+              )}
+            </SortableRow>
+          ))}
+        </div>
+      </SortableList>
+      <div className="mt-3">
+        <AddButton onClick={add} label={`Add ${singular(label)}`} />
+      </div>
+    </div>
+  );
+}
+
+let rowKeySeq = 0;
+function makeRowKey(): string {
+  rowKeySeq += 1;
+  return `row-${rowKeySeq}`;
 }
 
 export interface LinkRow {

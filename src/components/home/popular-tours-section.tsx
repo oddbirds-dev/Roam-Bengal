@@ -17,7 +17,7 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${toursBg})`, opacity: 1 }}
+        style={{ backgroundImage: `url(${homepage.popular_bg_image || toursBg})`, opacity: 1 }}
       />
       <div aria-hidden className="absolute inset-0 bg-black/60" />
 

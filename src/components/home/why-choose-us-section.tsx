@@ -33,7 +33,7 @@ export function WhyChooseUsSection(_props: HomeSectionProps) {
         </div>
 
         <PhotoFrame
-          src=""
+          src={homepage.why_image}
           alt="Traveller hiking a forest trail in Bangladesh"
           gradientCss="linear-gradient(150deg,#22B57A,#F2B705 60%,#C4390E)"
           placeholderLabel="images/why-choose-us.jpg"

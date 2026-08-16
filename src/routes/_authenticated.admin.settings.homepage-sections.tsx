@@ -96,32 +96,36 @@ function HomepageSectionsScreen() {
                 return (
                   <SortableRow key={entry.id} id={entry.id}>
                     {(handle) => (
-                      <div
-                        className={`flex items-center gap-3 rounded-2xl border border-rule bg-paper p-4 transition-opacity ${
-                          entry.visible ? "" : "opacity-50"
-                        }`}
-                      >
-                        {handle}
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint text-[0.78rem] font-bold text-green-dark">
-                          {index + 1}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[0.92rem] font-bold text-ink">{meta.label}</p>
-                          <p className="truncate text-[0.78rem] text-muted">{meta.blurb}</p>
+                      <div className="flex items-stretch gap-3">
+                        <div className="flex w-12 shrink-0 items-center justify-center rounded-2xl border border-rule bg-paper">
+                          {handle}
                         </div>
-                        <SwitchToggle
-                          checked={entry.visible}
-                          onChange={() => toggleVisible(entry.id)}
-                          label={entry.visible ? `Hide ${meta.label}` : `Show ${meta.label}`}
-                        />
-                        <Link
-                          to="/admin/settings"
-                          search={{ key: HOME_SECTION_SETTINGS_KEY[entry.id] }}
-                          className="inline-flex shrink-0 items-center gap-1 rounded-full border-[1.5px] border-rule px-3.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:border-green hover:text-green"
+                        <div
+                          className={`flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-rule bg-paper p-4 transition-opacity ${
+                            entry.visible ? "" : "opacity-50"
+                          }`}
                         >
-                          Edit
-                          <AdminIcon name="chevron" className="h-3.5 w-3.5" />
-                        </Link>
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint text-[0.78rem] font-bold text-green-dark">
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[0.92rem] font-bold text-ink">{meta.label}</p>
+                            <p className="truncate text-[0.78rem] text-muted">{meta.blurb}</p>
+                          </div>
+                          <SwitchToggle
+                            checked={entry.visible}
+                            onChange={() => toggleVisible(entry.id)}
+                            label={entry.visible ? `Hide ${meta.label}` : `Show ${meta.label}`}
+                          />
+                          <Link
+                            to="/admin/settings"
+                            search={{ key: HOME_SECTION_SETTINGS_KEY[entry.id] }}
+                            className="inline-flex shrink-0 items-center gap-1 rounded-full border-[1.5px] border-rule px-3.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:border-green hover:text-green"
+                          >
+                            Edit
+                            <AdminIcon name="chevron" className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
                       </div>
                     )}
                   </SortableRow>

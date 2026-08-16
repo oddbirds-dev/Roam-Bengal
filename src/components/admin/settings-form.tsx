@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { Card } from "@/components/admin/admin-ui";
 import {
   BlockListField,
+  DraggableRepeaterField,
   GroupedListField,
   LinkGroupField,
   LinkListField,
-  RepeaterField,
   SelectField,
   StringListField,
   TextArea,
@@ -373,6 +373,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
         fields: [
           { kind: "text", key: "popular_kicker", label: "Small label above the heading" },
           { kind: "text", key: "popular_heading", label: "Heading" },
+          { kind: "image", key: "popular_bg_image", label: "Background photo" },
         ],
       },
       {
@@ -432,6 +433,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
         fields: [
           { kind: "text", key: "why_heading", label: "Heading" },
           { kind: "textarea", key: "why_intro", label: "Paragraph under the heading", rows: 3 },
+          { kind: "image", key: "why_image", label: "Photo" },
           {
             kind: "rows",
             key: "why_items",
@@ -1154,7 +1156,7 @@ function FieldControl({
 
     case "rows":
       return (
-        <RepeaterField
+        <DraggableRepeaterField
           label={field.label}
           hint={field.hint}
           title={field.title}
