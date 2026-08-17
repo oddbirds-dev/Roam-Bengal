@@ -58,8 +58,8 @@ export const HOME_SECTIONS: Record<HomeSectionId, HomeSectionMeta> = {
     Component: GallerySection,
   },
   faith: {
-    label: "Why travellers keep faith",
-    blurb: "Wildlife photos alongside the trust-building list and callouts.",
+    label: "Why travellers trust us",
+    blurb: "Guide and traveller photos alongside the numbered trust list and callouts.",
     Component: FaithSection,
   },
   journal: {

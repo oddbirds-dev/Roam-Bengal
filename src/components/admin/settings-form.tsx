@@ -800,21 +800,14 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
     { kind: "image", key: "popular_bg_image", label: "Background photo" },
   ],
   faith: [
-    { kind: "text", key: "faith_kicker", label: "Small label above the heading" },
     { kind: "text", key: "faith_heading_1", label: "Heading — first line" },
     { kind: "text", key: "faith_heading_2", label: "Heading — second line" },
-    {
-      kind: "text",
-      key: "faith_pin",
-      label: "Location tag on the photo",
-      placeholder: "📍 Sundarbans",
-    },
-    { kind: "image", key: "faith_image_1", label: "Back photo (larger, green)" },
-    { kind: "image", key: "faith_image_2", label: "Front photo (smaller, orange)" },
+    { kind: "image", key: "faith_image_1", label: "Top-left photo (green accent)" },
+    { kind: "image", key: "faith_image_2", label: "Bottom-right photo (orange accent)" },
     {
       kind: "list",
       key: "faith_list",
-      label: "Tick-list points",
+      label: "Numbered reasons",
       hint: "One reason per line.",
     },
     {
