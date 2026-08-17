@@ -805,10 +805,15 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
     { kind: "image", key: "faith_image_1", label: "Top-left photo (green accent)" },
     { kind: "image", key: "faith_image_2", label: "Bottom-right photo (orange accent)" },
     {
-      kind: "list",
+      kind: "rows",
       key: "faith_list",
-      label: "Numbered reasons",
-      hint: "One reason per line.",
+      label: "Reasons",
+      hint: "One reason per row, with an icon.",
+      columns: [
+        { key: "icon", label: "Icon", type: "select", options: WHY_ICONS, span: 4 },
+        { key: "text", label: "Reason", type: "textarea", span: 8 },
+      ],
+      blank: { icon: "globe", text: "" },
     },
     {
       kind: "rows",

@@ -74,12 +74,12 @@ const WHY_STYLES: Record<string, { bg: string; fg: string; d: string }> = {
   },
 };
 
-export function WhyIcon({ name }: { name: string }) {
+export function WhyIcon({ name, bg, fg }: { name: string; bg?: string; fg?: string }) {
   const style = WHY_STYLES[name] ?? WHY_STYLES.globe!;
   return (
     <span
       className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-      style={{ background: style.bg, color: style.fg }}
+      style={{ background: bg ?? style.bg, color: fg ?? style.fg }}
     >
       <svg
         width="20"

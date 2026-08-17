@@ -1,7 +1,25 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
+import { WhyIcon } from "@/components/art/icons";
 import type { HomeSectionProps } from "./registry";
+
+/** `faith_list` rows used to be plain strings before each reason got an icon; sites with
+ *  settings saved under the old shape need to keep rendering until the admin re-saves. */
+function faithListItem(row: string | { icon: string; text: string }) {
+  return typeof row === "string" ? { icon: "globe", text: row } : row;
+}
+
+/** One bubble colour per reason, cycling through the brand palette so the list reads as
+ *  colourful rather than a monochrome repeat of `WhyIcon`'s default green. */
+const ICON_COLORS = [
+  { bg: "#DCEFE0", fg: "#1E5F3B" }, // green
+  { bg: "#FBE1D2", fg: "#C4390E" }, // rust
+  { bg: "#FBF0C8", fg: "#8C6A3D" }, // gold
+  { bg: "#DCEAE7", fg: "#123D30" }, // teal
+  { bg: "#F0E6D8", fg: "#5A3E1B" }, // brown
+  { bg: "#FCE8D6", fg: "#C4390E" }, // orange
+];
 
 export function FaithSection(_props: HomeSectionProps) {
   const { homepage } = useSiteSettings();
@@ -26,14 +44,14 @@ export function FaithSection(_props: HomeSectionProps) {
             {homepage.faith_heading_2}
           </h2>
 
-          <ol className="flex flex-col gap-3">
-            {homepage.faith_list.map((item, i) => (
-              <li key={item} className="flex gap-2.5 text-[0.95rem] leading-[1.5] text-ink">
-                <span className="shrink-0 font-semibold text-green">{i + 1}.</span>
-                <FormatText>{item}</FormatText>
+          <ul className="flex flex-col gap-3.5">
+            {homepage.faith_list.map(faithListItem).map((item, i) => (
+              <li key={item.text} className="flex items-center gap-3 text-[0.95rem] leading-[1.5] text-ink">
+                <WhyIcon name={item.icon} {...ICON_COLORS[i % ICON_COLORS.length]} />
+                <FormatText>{item.text}</FormatText>
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
 
         <div className="flex flex-col justify-center gap-5 nav:col-start-1 nav:row-start-2">

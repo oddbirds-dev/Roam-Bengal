@@ -135,13 +135,16 @@ export const siteDefaults = {
     faith_image_1: "",
     faith_image_2: "",
     faith_list: [
-      "English-speaking, friendly local guide",
-      "Deep insight into Bangladesh's landmarks and history",
-      "Genuinely engaged, attentive travel companionship",
-      "Every logistical detail handled for a hassle-free trip",
-      "A relaxed pace, shaped around comfortable conversation",
-      "Private tour boat and a stop at the Bagerhat Mosque's terracotta shrines",
-      "A private guide for your Sundarbans mangrove tour",
+      { icon: "compass", text: "English-speaking, friendly local guide" },
+      { icon: "globe", text: "Deep insight into Bangladesh's landmarks and history" },
+      { icon: "chat", text: "Genuinely engaged, attentive travel companionship" },
+      { icon: "shield", text: "Every logistical detail handled for a hassle-free trip" },
+      { icon: "sparkles", text: "A relaxed pace, shaped around comfortable conversation" },
+      {
+        icon: "coin",
+        text: "Private tour boat and a stop at the Bagerhat Mosque's terracotta shrines",
+      },
+      { icon: "lock", text: "A private guide for your Sundarbans mangrove tour" },
     ],
     faith_callouts: [
       {
