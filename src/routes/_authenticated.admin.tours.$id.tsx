@@ -45,8 +45,16 @@ export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
     ]);
     return { tour, activities, destinations, themes, isNew };
   },
-  component: TourEditor,
+  component: TourEditorRoute,
 });
+
+/** Keyed by `$id` so switching tours (via the list, or list → list) remounts the editor
+ *  instead of reusing the instance — otherwise `useAction`'s error/busy state and the
+ *  form's local state would leak from whichever tour was open before. */
+function TourEditorRoute() {
+  const { id } = Route.useParams();
+  return <TourEditor key={id} />;
+}
 
 /** Mirrors the `TourInput` Zod schema in admin-content.functions.ts. */
 function emptyTour() {
