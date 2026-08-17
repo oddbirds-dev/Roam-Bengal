@@ -43,8 +43,6 @@ export const Route = createFileRoute("/tours/")({
 });
 
 const BANNER_BG = "linear-gradient(160deg, #1E5F3B 0%, #123D26 100%)";
-const BANNER_OVERLAY =
-  "linear-gradient(180deg, rgba(8,15,10,0.35) 0%, rgba(8,15,10,0.15) 40%, rgba(8,15,10,0.55) 100%)";
 const DREAM_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
 
 /** `.tour-photo-frame` colours, cycled down the listing in reference order. */
@@ -97,7 +95,7 @@ function ToursIndex() {
           placeholderLabel="images/tours-banner.jpg"
           className="absolute inset-0 z-0 h-full w-full"
         />
-        <div className="absolute inset-0 z-[1]" style={{ background: BANNER_OVERLAY }} />
+        <div className="absolute inset-0 z-[1] bg-black/40" />
 
         <SiteHeader logo="light" />
 
