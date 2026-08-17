@@ -95,7 +95,7 @@ function ToursIndex() {
           placeholderLabel="images/tours-banner.jpg"
           className="absolute inset-0 z-0 h-full w-full"
         />
-        <div className="absolute inset-0 z-[1] bg-black/40" />
+        <div className="absolute inset-0 z-[1] bg-black/60" />  
 
         <SiteHeader logo="light" />
 
