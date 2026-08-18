@@ -26,13 +26,24 @@ function ToursList() {
         title="Tours"
         subtitle={`${tours.length} tour${tours.length === 1 ? "" : "s"}, drafts included`}
         actions={
-          <Link
-            to="/admin/tours/$id"
-            params={{ id: "new" }}
-            className="inline-flex items-center justify-center rounded-[30px] border-[1.5px] border-transparent bg-green-dark px-5 py-2.5 text-[0.84rem] font-semibold text-white hover:bg-green"
-          >
-            + New tour
-          </Link>
+          <>
+            <Link
+              to="/admin/tours/$id"
+              params={{ id: "new" }}
+              search={{ category: "day-tour" }}
+              className="inline-flex items-center justify-center rounded-[30px] border-[1.5px] border-rule bg-paper px-5 py-2.5 text-[0.84rem] font-semibold text-ink transition-colors hover:border-green hover:text-green"
+            >
+              + Single day
+            </Link>
+            <Link
+              to="/admin/tours/$id"
+              params={{ id: "new" }}
+              search={{ category: "multi-day" }}
+              className="inline-flex items-center justify-center rounded-[30px] border-[1.5px] border-transparent bg-green-dark px-5 py-2.5 text-[0.84rem] font-semibold text-white hover:bg-green"
+            >
+              + Multi-day
+            </Link>
+          </>
         }
       />
 

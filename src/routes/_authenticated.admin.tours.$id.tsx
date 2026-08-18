@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 import {
   AdminButton,
   ErrorBanner,
@@ -35,6 +36,9 @@ import { toTourDTO } from "@/lib/tour-dto";
 import { PREVIEW_READY_MESSAGE, sendTourDraft } from "@/lib/tour-preview";
 
 export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
+  // Only consulted for a brand-new tour — picks which category the "+ New tour" link
+  // pre-selects so single-day and multi-day both land on an already-correct form.
+  validateSearch: z.object({ category: z.enum(["day-tour", "multi-day"]).optional() }),
   loader: async ({ params }) => {
     const isNew = params.id === "new";
     const [tour, activities, destinations, themes] = await Promise.all([
@@ -124,6 +128,7 @@ interface EditorState {
 
 function TourEditor() {
   const { tour, activities, destinations, themes, isNew } = Route.useLoaderData();
+  const { category: newCategory } = Route.useSearch();
   const navigate = useNavigate();
   const { run, busy, error, saved } = useAction();
   // Fixed positioning takes this pane out of the shell's padded main column, so the
@@ -133,6 +138,7 @@ function TourEditor() {
 
   const [form, setForm] = useState<TourForm>(() => ({
     ...emptyTour(),
+    ...(newCategory ? { category: newCategory } : {}),
     ...(tour ? hydrate(tour) : {}),
   }));
   const [themeIds, setThemeIds] = useState<string[]>(() => {
