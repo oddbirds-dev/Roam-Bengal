@@ -4,11 +4,11 @@ import { formatPrice } from "@/components/tour-card";
 import type { TourDTO } from "@/lib/content-types";
 
 /**
- * Sidebar upsell: two hand-picked tours styled for a first-time visitor to book quickly.
- * Shared by the blog sidebar and the tour page's own sidebar.
+ * Sidebar upsell: a handful of hand-picked tours styled for a first-time visitor to book
+ * quickly. Shared by the blog sidebar and the tour page's own sidebar.
  */
-export function BestValueTours({ tours }: { tours: TourDTO[] }) {
-  const picks = tours.slice(0, 2);
+export function BestValueTours({ tours, limit = 4 }: { tours: TourDTO[]; limit?: number }) {
+  const picks = tours.slice(0, limit);
   if (!picks.length) return null;
 
   return (
