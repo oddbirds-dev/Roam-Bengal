@@ -35,33 +35,33 @@ const ACCENTS = [
   {
     ring: "border-rule",
     surface: "bg-paper",
-    iconBg: "bg-teal/10",
+    iconBg: "bg-teal/20",
     iconText: "text-teal",
     numberBg: "bg-teal",
     price: "text-teal",
-    noteBg: "bg-teal/10",
+    noteBg: "bg-teal/15",
     noteText: "text-teal-dark",
     ribbon: "bg-teal",
   },
   {
     ring: "border-rule",
     surface: "bg-paper",
-    iconBg: "bg-brown/10",
+    iconBg: "bg-brown/20",
     iconText: "text-brown",
     numberBg: "bg-brown",
     price: "text-brown",
-    noteBg: "bg-brown/10",
+    noteBg: "bg-brown/15",
     noteText: "text-brown-dark",
     ribbon: "bg-brown",
   },
   {
     ring: "border-rule",
     surface: "bg-paper",
-    iconBg: "bg-orange/10",
+    iconBg: "bg-orange/20",
     iconText: "text-orange",
     numberBg: "bg-orange",
     price: "text-orange",
-    noteBg: "bg-orange/10",
+    noteBg: "bg-orange/15",
     noteText: "text-rust",
     ribbon: "bg-orange",
   },
@@ -112,7 +112,7 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
             {copy.promises_heading ? (
               <h3 className="mb-5 flex items-center gap-3 font-display text-[1.05rem] font-bold text-green-dark">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green">
-                  <FeatureIcon name="route" />
+                  <FeatureIcon name="plane" />
                 </span>
                 {copy.promises_heading}
               </h3>
@@ -150,21 +150,40 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
           </div>
         ) : null}
 
-        <div className="mt-8 overflow-hidden rounded-2xl bg-green-dark px-6 py-8 text-center">
-          <h3 className="font-display text-[clamp(1.15rem,2.4vw,1.5rem)] font-bold text-white">
-            {copy.cta_heading}
-          </h3>
-          <ButtonLink
-            to="/contact"
-            variant="ember"
-            search={{ tour: tour.slug }}
-            className="mt-5 w-full sm:w-auto sm:min-w-[320px]"
-          >
-            {copy.cta_label} →
-          </ButtonLink>
-          {copy.cta_footnote ? (
-            <p className="mt-4 text-center text-[0.8rem] text-white/75">{copy.cta_footnote}</p>
-          ) : null}
+        <div className="relative mt-8 overflow-hidden rounded-2xl bg-green-dark px-6 py-8 text-center">
+          <FlightPathDoodle />
+          <div className="relative">
+            <h3 className="font-display text-[clamp(1.15rem,2.4vw,1.5rem)] font-bold text-white">
+              {copy.cta_heading}
+            </h3>
+            <ButtonLink
+              to="/contact"
+              variant="ember"
+              search={{ tour: tour.slug }}
+              className="mt-5 w-full sm:w-auto sm:min-w-[320px]"
+            >
+              {copy.cta_label} →
+            </ButtonLink>
+            {copy.cta_footnote ? (
+              <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[0.8rem] text-white/75">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="shrink-0"
+                >
+                  <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3Z" />
+                </svg>
+                {copy.cta_footnote}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>
@@ -264,6 +283,27 @@ function GroupGlyph({ solo }: { solo: boolean }) {
           <path d="M16.2 5.1a3.2 3.2 0 0 1 0 5.9M17.4 15.2c1.6.6 2.9 1.9 3.6 4.2" />
         </>
       )}
+    </svg>
+  );
+}
+
+/** Dashed flight path + plane, echoing the reference banner's corner doodle. */
+function FlightPathDoodle() {
+  return (
+    <svg
+      className="pointer-events-none absolute -right-2 -bottom-4 h-28 w-40 text-white/15"
+      viewBox="0 0 160 112"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="M4 90C40 80 70 95 100 70S150 20 156 8" strokeDasharray="4 6" strokeLinecap="round" />
+      <path
+        d="M156 8l-13 2 4 5 9-7Zm0 0l-2 13-5-4 7-9Z"
+        fill="currentColor"
+        stroke="none"
+      />
     </svg>
   );
 }
