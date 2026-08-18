@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
 import { TourPricing } from "@/components/tour/tour-pricing";
+import { BestValueTours } from "@/components/tour/best-value-tours";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
@@ -84,6 +85,9 @@ function TourDetail() {
   const tour = draft ?? saved;
 
   const related = resolveRelated(tour, allTours);
+  const bestValuePicks = allTours
+    .filter((t) => t.slug !== tour.slug && !related.some((r) => r.slug === t.slug))
+    .sort((a, b) => (a.priceUsd ?? Infinity) - (b.priceUsd ?? Infinity));
   const facts = TOUR_FACT_KEYS.map((key) => [key, factValue(tour, key)] as const).filter(
     (entry): entry is readonly [TourFactKey, string] => Boolean(entry[1]),
   );
@@ -493,39 +497,9 @@ function TourDetail() {
               </ButtonLink>
             </div>
 
-            {related.length ? (
+            {bestValuePicks.length ? (
               <div className="mt-6">
-                <h4 className="mb-3 font-display text-[1rem] font-bold text-green">
-                  You Might Also Like
-                </h4>
-                <div className="flex flex-col gap-3">
-                  {related.map((r) => (
-                    <Link
-                      key={r.id}
-                      to="/tours/$slug"
-                      params={{ slug: r.slug }}
-                      className="flex gap-3 rounded-xl border border-rule p-2.5 transition-colors hover:border-green"
-                    >
-                      <PhotoFrame
-                        src={r.heroImage ?? r.images[0]}
-                        alt={r.title}
-                        gradient={gradientFor(r.slug)}
-                        className="h-16 w-20 shrink-0 rounded-lg"
-                      />
-                      <div className="min-w-0">
-                        <h5 className="truncate font-display text-[0.88rem] font-bold text-green-dark">
-                          {r.title}
-                        </h5>
-                        <span className="block text-[0.72rem] text-muted">
-                          📍 {r.destinationLabel} · {r.durationDays} Days
-                        </span>
-                        <span className="block text-[0.78rem] font-semibold text-orange">
-                          From {formatPrice(r.priceUsd)}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <BestValueTours tours={bestValuePicks} />
               </div>
             ) : null}
           </aside>
