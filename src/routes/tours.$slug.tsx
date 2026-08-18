@@ -270,10 +270,6 @@ function TourDetail() {
                 </Section>
               ) : null}
 
-              {/* Price tiers, promises and the booking CTA. Renders nothing until a tour
-                  has tiers, so the prose fallback below still covers older tours. */}
-              <TourPricing tour={tour} />
-
               {tour.offers.length || (tour.priceUsd !== null && !tour.priceTiers.length) ? (
                 <Section
                   id={tour.priceTiers.length ? "offers" : "cost"}
@@ -309,6 +305,10 @@ function TourDetail() {
                   ) : null}
                 </Section>
               ) : null}
+
+              {/* Price tiers, promises and the booking CTA. Renders nothing until a tour
+                  has tiers, so the prose fallback above still covers older tours. */}
+              <TourPricing tour={tour} />
 
               {tour.inclusions.length || tour.exclusions.length ? (
                 <Section id="inclusions" title="🛑 What's Included">
