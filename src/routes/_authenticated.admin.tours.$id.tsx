@@ -95,7 +95,7 @@ function emptyTour() {
     group_size_max: null as number | null,
     stops_count: null as number | null,
     facts: {} as Record<string, string>,
-    overview: [] as string[],
+    overview: "",
     overview_tip: "",
     highlights: [] as string[],
     glance: [] as { when: string; detail: string }[],
@@ -535,10 +535,11 @@ function TourEditor() {
               </FormSection>
 
               <FormSection title="Overview & highlights">
-                <StringListField
-                  label="Overview paragraphs"
-                  multiline
-                  values={form.overview}
+                <TextArea
+                  label="Overview"
+                  hint="Leave a blank line between paragraphs."
+                  rows={7}
+                  value={form.overview}
                   onChange={(v) => set("overview", v)}
                 />
                 <TextArea
@@ -797,7 +798,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     group_size_max: numOrNull(row.group_size_max),
     stops_count: numOrNull(row.stops_count),
     facts: (row.facts && typeof row.facts === "object" ? row.facts : {}) as Record<string, string>,
-    overview: list(row.overview) as string[],
+    overview: text(row.overview),
     overview_tip: text(row.overview_tip),
     highlights: list(row.highlights) as string[],
     glance: list(row.glance) as TourForm["glance"],

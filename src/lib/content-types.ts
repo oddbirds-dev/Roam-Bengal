@@ -51,6 +51,15 @@ export const TOUR_FACT_META: Record<TourFactKey, { label: string; icon: string }
 
 export type TourFacts = Partial<Record<TourFactKey, string>>;
 
+/** `overview` stores its paragraphs as one string, separated by a blank line. */
+export function overviewParagraphs(overview: string | null): string[] {
+  if (!overview) return [];
+  return overview
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 export interface ItineraryDay {
   day: number;
   title: string;
@@ -130,7 +139,8 @@ export interface TourDTO {
   groupSizeMax: number | null;
   stopsCount: number | null;
   facts: TourFacts;
-  overview: string[];
+  /** Multiple paragraphs are blank-line separated within the one string; see `FormatDocument`. */
+  overview: string | null;
   overviewTip: string | null;
   highlights: string[];
   glance: GlanceEntry[];

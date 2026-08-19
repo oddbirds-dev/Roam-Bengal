@@ -16,6 +16,7 @@ import { useTourDraft } from "@/lib/tour-preview";
 import {
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
+  overviewParagraphs,
   type TourDTO,
   type TourFactKey,
 } from "@/lib/content-types";
@@ -56,7 +57,7 @@ export const Route = createFileRoute("/tours/$slug")({
     
     return buildSeoMeta(loaderData.seoMeta, {
       title: `${tour.title} — Roam Bengal`,
-      description: tour.overview[0] ?? "",
+      description: overviewParagraphs(tour.overview)[0] ?? "",
       image: tour.heroImage ?? tour.images[0] ?? undefined,
       urlPath: `/tours/${tour.slug}`
     });
@@ -194,10 +195,10 @@ function TourDetail() {
             </div>
 
             <div className="mt-10 flex flex-col gap-12">
-              {tour.overview.length ? (
+              {tour.overview ? (
                 <Section id="overview" title="📜 Trip Overview">
-                  {tour.overview.map((p) => (
-                      <p key={p} className="text-[0.92rem] leading-7 text-ink/85">
+                  {overviewParagraphs(tour.overview).map((p, i) => (
+                      <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
                         <FormatText>{p}</FormatText>
                       </p>
                   ))}
@@ -565,7 +566,7 @@ function Section({
 function hasSection(tour: TourDTO, id: string): boolean {
   switch (id) {
     case "overview":
-      return tour.overview.length > 0;
+      return Boolean(tour.overview);
     case "highlights":
       return tour.highlights.length > 0;
     case "itinerary":

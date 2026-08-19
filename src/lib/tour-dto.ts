@@ -48,7 +48,7 @@ export function toTourDTO(row: TourRowLike): TourDTO {
     groupSizeMax: num(row.group_size_max),
     stopsCount: num(row.stops_count),
     facts: jsonObject(row.facts) as TourFacts,
-    overview: arr<string>(row.overview),
+    overview: text(row.overview),
     overviewTip: text(row.overview_tip),
     highlights: strArr(row.highlights),
     glance: arr(row.glance),
