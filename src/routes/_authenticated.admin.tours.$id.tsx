@@ -592,7 +592,7 @@ function TourEditor() {
                   label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
                   values={form.itinerary}
                   onChange={(v) => set("itinerary", v)}
-                  blank={() => ({ day: form.itinerary.length + 1, title: "", detail: "" })}
+                  blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
                   title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
                   columns={[
                     { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
