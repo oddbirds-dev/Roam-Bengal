@@ -29,6 +29,13 @@ export const TOUR_FACT_KEYS = [
 
 export type TourFactKey = (typeof TOUR_FACT_KEYS)[number];
 
+/** Facts a single-day tour rarely needs — hidden behind a toggle in the admin editor. */
+export const TOUR_FACT_KEYS_EXTRA: readonly TourFactKey[] = [
+  "accommodation",
+  "arrival",
+  "departure",
+];
+
 /** Label + icon per fact key. Shared by the public page and the admin editor so the
  *  two cannot drift. */
 export const TOUR_FACT_META: Record<TourFactKey, { label: string; icon: string }> = {

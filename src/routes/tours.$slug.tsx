@@ -188,7 +188,9 @@ function TourDetail() {
                     href={`#${id}`}
                     className="rounded-full px-4 py-2 text-[0.8rem] font-medium whitespace-nowrap text-muted hover:bg-mint hover:text-green"
                   >
-                    {label}
+                    {id === "itinerary" && tour.category === "day-tour"
+                      ? "Full-Day Itinerary"
+                      : label}
                   </a>
                 ))}
               </div>
@@ -252,7 +254,10 @@ function TourDetail() {
               ) : null}
 
               {tour.itinerary.length ? (
-                <Section id="itinerary" title="🗺️ Day-by-Day Itinerary">
+                <Section
+                  id="itinerary"
+                  title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
+                >
                   <ol className="flex flex-col gap-6">
                     {tour.itinerary.map((day, i) => (
                       <li key={day.day} className="relative flex gap-4">

@@ -31,7 +31,12 @@ import {
   adminUpsertTour,
 } from "@/lib/admin-content.functions";
 import { listTourThemes } from "@/lib/site-content.functions";
-import { TOUR_FACT_KEYS, TOUR_FACT_META, type TourCategory } from "@/lib/content-types";
+import {
+  TOUR_FACT_KEYS,
+  TOUR_FACT_KEYS_EXTRA,
+  TOUR_FACT_META,
+  type TourCategory,
+} from "@/lib/content-types";
 import { toTourDTO } from "@/lib/tour-dto";
 import { PREVIEW_READY_MESSAGE, sendTourDraft } from "@/lib/tour-preview";
 
@@ -148,6 +153,15 @@ function TourEditor() {
 
   const set = <K extends keyof TourForm>(key: K, value: TourForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  const isDayTour = form.category === "day-tour";
+
+  // Accommodation/arrival/departure are rarely needed for a single-day tour, so they
+  // start collapsed — unless the tour already has one set, in which case hiding it would
+  // bury existing content behind an extra click.
+  const [showExtraFacts, setShowExtraFacts] = useState(() =>
+    TOUR_FACT_KEYS_EXTRA.some((key) => Boolean(form.facts[key])),
+  );
 
   // Dirty tracking compares against the last committed state rather than a boolean flag,
   // so undoing an edit by hand correctly reports "Everything is saved" again.
@@ -527,11 +541,26 @@ function TourEditor() {
               >
                 <KeyValueField
                   label="Facts"
-                  keys={TOUR_FACT_KEYS}
+                  keys={TOUR_FACT_KEYS.filter((k) => !TOUR_FACT_KEYS_EXTRA.includes(k))}
                   labels={TOUR_FACT_META}
                   values={form.facts}
                   onChange={(v) => set("facts", v)}
                 />
+                <Toggle
+                  label="Show accommodation, arrival & departure"
+                  hint="Rarely needed for single-day tours."
+                  checked={showExtraFacts}
+                  onChange={setShowExtraFacts}
+                />
+                {showExtraFacts ? (
+                  <KeyValueField
+                    label="More facts"
+                    keys={TOUR_FACT_KEYS_EXTRA}
+                    labels={TOUR_FACT_META}
+                    values={form.facts}
+                    onChange={(v) => set("facts", v)}
+                  />
+                ) : null}
               </FormSection>
 
               <FormSection title="Overview & highlights">
@@ -560,13 +589,13 @@ function TourEditor() {
 
               <FormSection title="Itinerary">
                 <RepeaterField
-                  label="Itinerary days"
+                  label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
                   values={form.itinerary}
                   onChange={(v) => set("itinerary", v)}
                   blank={() => ({ day: form.itinerary.length + 1, title: "", detail: "" })}
-                  title={(row) => `Day ${row.day}`}
+                  title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
                   columns={[
-                    { key: "day", label: "Day", type: "number", span: 2 },
+                    { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
                     { key: "title", label: "Title", span: 10 },
                     { key: "detail", label: "Detail", type: "textarea" },
                   ]}
