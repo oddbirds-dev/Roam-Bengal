@@ -123,7 +123,6 @@ const TourInput = z.object({
   slug,
   title: z.string().min(1).max(240),
   category: z.enum(["day-tour", "multi-day", "holiday"]),
-  summary: optionalText(2000),
   hero_image: optionalText(1000),
   images: textArray(1000),
   duration_label: optionalText(120),

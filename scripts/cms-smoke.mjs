@@ -30,7 +30,7 @@ async function cleanup() {
 // text fields and [] for ~14 array fields.
 const tourForm = {
   slug: `cms-tour-${stamp}`, title: "CMS Tour", category: "multi-day",
-  summary: "", hero_image: "", images: [], duration_label: "", duration_days: 1,
+  hero_image: "", images: [], duration_label: "", duration_days: 1,
   price_usd: null, discount_price_usd: null, price_note: "", rating: null,
   reviews_count: 0, destination_label: "", activity_label: "",
   primary_destination_slug: "", is_featured: false, activities_count: null,

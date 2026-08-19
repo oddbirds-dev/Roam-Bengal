@@ -84,9 +84,9 @@ export function TourCard({
 
         <h4 className="mb-1.5 font-display text-[1.25rem] font-bold text-green">{tour.title}</h4>
 
-        {tour.summary ? (
+        {tour.overview[0] ? (
           <p className="mb-4 line-clamp-2 text-[0.85rem] leading-[1.55] text-muted">
-            {tour.summary}
+            {tour.overview[0]}
           </p>
         ) : null}
 

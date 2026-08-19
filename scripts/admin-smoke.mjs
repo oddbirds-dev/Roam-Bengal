@@ -30,7 +30,6 @@ const tourPayload = {
   slug: SLUG,
   title: "Scratch Tour",
   category: "multi-day",
-  summary: "Created by the admin smoke test.",
   duration_days: 3,
   price_usd: 123,
   destination_label: "Nowhere",

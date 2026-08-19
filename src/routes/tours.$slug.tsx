@@ -56,7 +56,7 @@ export const Route = createFileRoute("/tours/$slug")({
     
     return buildSeoMeta(loaderData.seoMeta, {
       title: `${tour.title} — Roam Bengal`,
-      description: tour.summary ?? "",
+      description: tour.overview[0] ?? "",
       image: tour.heroImage ?? tour.images[0] ?? undefined,
       urlPath: `/tours/${tour.slug}`
     });

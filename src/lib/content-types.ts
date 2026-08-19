@@ -108,7 +108,6 @@ export interface TourDTO {
   slug: string;
   title: string;
   category: TourCategory;
-  summary: string | null;
   heroImage: string | null;
   images: string[];
   durationLabel: string | null;

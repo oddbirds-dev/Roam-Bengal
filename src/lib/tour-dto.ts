@@ -27,7 +27,6 @@ export function toTourDTO(row: TourRowLike): TourDTO {
     category: CATEGORIES.includes(row.category as TourCategory)
       ? (row.category as TourCategory)
       : "multi-day",
-    summary: text(row.summary),
     heroImage: text(row.hero_image),
     images: strArr(row.images),
     durationLabel: text(row.duration_label),

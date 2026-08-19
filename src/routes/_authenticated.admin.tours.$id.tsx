@@ -68,7 +68,6 @@ function emptyTour() {
     // Widened deliberately: `as const` would pin the field to "multi-day" and make the
     // category <select> unassignable.
     category: "multi-day" as TourCategory,
-    summary: "",
     hero_image: "",
     images: [] as string[],
     duration_label: "",
@@ -346,14 +345,6 @@ function TourEditor() {
                     onChange={(v) => set("duration_days", v ?? 1)}
                   />
                 </div>
-
-                <TextArea
-                  label="Summary"
-                  hint="The paragraph on tour cards."
-                  rows={3}
-                  value={form.summary}
-                  onChange={(v) => set("summary", v)}
-                />
 
                 <div className="flex flex-wrap gap-8">
                   <Toggle
@@ -785,7 +776,6 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     slug: text(row.slug),
     title: text(row.title),
     category: (row.category as TourForm["category"]) ?? "multi-day",
-    summary: text(row.summary),
     hero_image: text(row.hero_image),
     images: list(row.images) as string[],
     duration_label: text(row.duration_label),
