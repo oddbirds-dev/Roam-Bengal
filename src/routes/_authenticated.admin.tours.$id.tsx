@@ -625,15 +625,19 @@ function TourEditor() {
 
               <FormSection title="What's included">
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <StringListField
+                  <TextArea
                     label="Inclusions"
-                    values={form.inclusions}
-                    onChange={(v) => set("inclusions", v)}
+                    hint="One per line."
+                    rows={5}
+                    value={form.inclusions.join("\n")}
+                    onChange={(v) => set("inclusions", v.split("\n"))}
                   />
-                  <StringListField
+                  <TextArea
                     label="Exclusions"
-                    values={form.exclusions}
-                    onChange={(v) => set("exclusions", v)}
+                    hint="One per line."
+                    rows={5}
+                    value={form.exclusions.join("\n")}
+                    onChange={(v) => set("exclusions", v.split("\n"))}
                   />
                 </div>
                 <GroupedListField
