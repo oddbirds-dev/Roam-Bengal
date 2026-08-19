@@ -151,11 +151,6 @@ export function GalleryField({
               >
                 ✕
               </button>
-              {i === 0 ? (
-                <span className="absolute bottom-2 left-2 rounded-full bg-ink/70 px-2 py-0.5 text-[0.62rem] font-semibold text-white">
-                  Main
-                </span>
-              ) : null}
             </div>
           ))}
         </div>

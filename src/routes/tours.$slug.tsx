@@ -92,9 +92,13 @@ function TourDetail() {
     (entry): entry is readonly [TourFactKey, string] => Boolean(entry[1]),
   );
 
-  // No gallery yet: show the hero image in the main tile rather than leaving every
-  // tile blank, mirroring how tour cards fall back to heroImage elsewhere.
-  const gallery = tour.images.length ? tour.images : [tour.heroImage, null, null, null];
+  // The hero leads the mosaic and the gallery fills in behind it, matching how cards
+  // resolve their image (`heroImage ?? images[0]`). Letting the gallery win instead would
+  // mean setting a hero had no effect on the page the hero was picked for. A hero that is
+  // also in the gallery must not take two tiles.
+  const gallery = tour.heroImage
+    ? [tour.heroImage, ...tour.images.filter((src) => src !== tour.heroImage)]
+    : tour.images;
 
   return (
     <>

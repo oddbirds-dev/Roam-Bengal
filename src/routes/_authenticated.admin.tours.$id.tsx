@@ -479,7 +479,7 @@ function TourEditor() {
               <FormSection title="Images">
                 <ImageField
                   label="Hero image"
-                  hint="Used on cards. Falls back to the first gallery image."
+                  hint="Leads the tour page gallery and every card. Falls back to the first gallery image."
                   value={form.hero_image}
                   onChange={(v) => set("hero_image", v)}
                 />
