@@ -549,10 +549,12 @@ function TourEditor() {
                   value={form.overview_tip}
                   onChange={(v) => set("overview_tip", v)}
                 />
-                <StringListField
+                <TextArea
                   label="Highlights"
-                  values={form.highlights}
-                  onChange={(v) => set("highlights", v)}
+                  hint="One per line."
+                  rows={5}
+                  value={form.highlights.join("\n")}
+                  onChange={(v) => set("highlights", v.split("\n"))}
                 />
               </FormSection>
 
