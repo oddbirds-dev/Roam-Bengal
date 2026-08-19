@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImageOff } from "lucide-react";
 
 /**
@@ -58,6 +58,9 @@ export function PhotoFrame({
   children,
 }: PhotoFrameProps) {
   const [failed, setFailed] = useState(false);
+  // A previously-broken `src` must not keep failing a later, corrected one — the live
+  // admin preview swaps `src` on this same mounted instance instead of reloading.
+  useEffect(() => setFailed(false), [src]);
   const showImage = Boolean(src) && !failed;
 
   // The frame needs a positioned box for the absolute <img>, but Tailwind emits
