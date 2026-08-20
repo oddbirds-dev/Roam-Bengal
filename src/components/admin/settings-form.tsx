@@ -369,10 +369,31 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
       {
         title: "Reviews block",
         fields: [
+          {
+            kind: "text",
+            key: "reviews_eyebrow",
+            label: "Handwritten line above the heading",
+            placeholder: "Loved by Travellers Worldwide",
+          },
           { kind: "text", key: "reviews_heading_1", label: "Heading — first line" },
           { kind: "text", key: "reviews_heading_2", label: "Heading — second line" },
+          {
+            kind: "textarea",
+            key: "reviews_subtext",
+            label: "Line under the heading",
+            rows: 2,
+          },
           { kind: "text", key: "reviews_cta_label", label: "Button text" },
           { kind: "text", key: "reviews_cta_link", label: "Button goes to" },
+        ],
+      },
+      {
+        title: "Reviews block — side photos",
+        description:
+          "The two tilted prints at the edges of the reviews band. Decorative, and only shown on wide screens — leave them empty to hide them.",
+        fields: [
+          { kind: "image", key: "reviews_photo_left", label: "Left photo" },
+          { kind: "image", key: "reviews_photo_right", label: "Right photo" },
         ],
       },
     ],
