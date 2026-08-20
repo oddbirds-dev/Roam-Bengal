@@ -649,10 +649,12 @@ function TourEditor() {
               </FormSection>
 
               <FormSection title="Advice & responsibilities">
-                <GroupedListField
+                <TextArea
                   label="Advice blocks"
-                  values={form.advice}
-                  onChange={(v) => set("advice", v)}
+                  hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
+                  rows={8}
+                  value={serializeAdvice(form.advice)}
+                  onChange={(v) => set("advice", parseAdvice(v))}
                 />
                 <RepeaterField
                   label="Accessibility notes"
@@ -860,4 +862,22 @@ function slugify(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Advice blocks as one text box: a blank line between blocks, first line of each is the
+ * heading, the rest are items. `serializeAdvice(parseAdvice(x)) === x` for any `x` —
+ * no trimming or dropping empty lines — otherwise the field fights the cursor the moment
+ * a block boundary (a blank line) is only half-typed.
+ */
+function serializeAdvice(advice: { title: string; items: string[] }[]): string {
+  return advice.map((block) => [block.title, ...block.items].join("\n")).join("\n\n");
+}
+
+function parseAdvice(text: string): { title: string; items: string[] }[] {
+  if (!text.trim()) return [];
+  return text.split(/\n\s*\n/).map((block) => {
+    const [title = "", ...items] = block.split("\n");
+    return { title, items };
+  });
 }
