@@ -44,48 +44,50 @@ export const policyDefaults: Record<PolicySlug, PolicyPage> = {
       {
         heading: "🔒 Secure and Transparent Payments",
         paragraphs: [
-          "We keep our payment process straightforward. Every booking confirmation includes a written breakdown of inclusions and costs, so you always know exactly what you're paying for.",
+          "At Roam Bengal, we believe trust begins with clarity. Our payment policy is built to be simple, secure, and completely transparent, so you always know exactly what you're paying for and why.",
+          "From private tours to fully custom itineraries, every payment reflects fair local pricing and zero hidden costs — so you can focus on the trip, not the fine print.",
+          "We keep the payment process straightforward. Every booking confirmation includes a written breakdown of what's included and what it costs, so there's never any guesswork about what you're paying for.",
         ],
       },
       {
         heading: "💰 Deposit and Balance",
         items: [
-          "To confirm your tour, we require a 20% deposit of the total tour cost.",
-          "You pay the remaining 80% balance no later than 7 days before the tour start date.",
-          "For last-minute bookings (less than 7 days before departure), the full amount is payable at the time of confirmation.",
+          "**25% deposit** — confirms your private tour and locks in your dates.",
+          "**75% balance** — due no later than 14 days before your tour start date.",
+          "**Last-minute bookings** — for bookings made less than 14 days before departure, the full amount is due at confirmation.",
         ],
       },
       {
         heading: "💳 Accepted Payment Methods",
         paragraphs: ["We accept the following secure payment methods:"],
         items: [
-          "Mobile financial services — bKash, Nagad, and Rocket",
-          "Debit and credit cards (Visa, Mastercard) via our secure payment gateway",
-          "Local and international bank transfer",
-          "Cash payment at our Dhaka office, for selected group tours",
+          "**International cards** — Visa, Mastercard, and Amex, processed securely via Stripe.",
+          "**Wise and Western Union** — international money transfer for guests who prefer it over a card.",
+          "**International bank transfer** — available on request for select bookings.",
+          "**USD, EUR, or GBP** — every invoice is issued in USD by default; equivalent EUR or GBP pricing is available on request.",
         ],
       },
       {
         heading: "💱 Currency and Conversion",
         items: [
-          "Prices are quoted in Bangladeshi Taka (BDT).",
-          "If you pay in a currency other than BDT, conversion is based on the prevailing bank exchange rate on the day of payment.",
-          "Any transfer fees or bank charges are the traveller's responsibility.",
+          "All prices are quoted in US Dollars (USD).",
+          "If you pay in a different currency, conversion is based on the official exchange rate on the day of payment.",
+          "Any transfer fees or bank charges from your side are the traveller's responsibility.",
         ],
       },
       {
         heading: "📝 Payment Confirmation",
         paragraphs: ["Once we receive your payment, you will receive:"],
         items: [
-          "An official payment receipt by email or SMS.",
-          "A final confirmation with your full booking details.",
-          "We recommend keeping this confirmation as proof of your reservation.",
+          "An official payment receipt sent to your email.",
+          "A final confirmation with your complete booking details.",
+          "A confirmation worth keeping as proof of your reservation.",
         ],
       },
       {
         heading: "🔒 Secure Transactions",
         paragraphs: [
-          "All card and mobile wallet transactions are processed through licensed, encrypted, PCI-DSS compliant payment gateways. Roam Bengal does not store or share your payment details.",
+          "All payments are processed through encrypted, verified platforms to keep your information safe. Roam Bengal does not store or share your payment details.",
         ],
       },
       {

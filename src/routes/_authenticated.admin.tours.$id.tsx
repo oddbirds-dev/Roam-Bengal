@@ -9,11 +9,17 @@ import {
 } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import {
+  AddButton,
   GroupedListField,
+  inputBase,
   KeyValueField,
+  Label,
+  MarkdownTextarea,
   NumberField,
   RelatedContentField,
+  reorder,
   RepeaterField,
+  RowControls,
   SelectField,
   StringListField,
   TextArea,
@@ -27,6 +33,7 @@ import {
   adminGetTour,
   adminListActivities,
   adminListDestinations,
+  adminListFaqs,
   adminSetTourThemes,
   adminUpsertTour,
 } from "@/lib/admin-content.functions";
@@ -46,13 +53,14 @@ export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
   validateSearch: z.object({ category: z.enum(["day-tour", "multi-day"]).optional() }),
   loader: async ({ params }) => {
     const isNew = params.id === "new";
-    const [tour, activities, destinations, themes] = await Promise.all([
+    const [tour, activities, destinations, themes, siteFaqs] = await Promise.all([
       isNew ? Promise.resolve(null) : adminGetTour({ data: { id: params.id } }),
       adminListActivities(),
       adminListDestinations(),
       listTourThemes(),
+      adminListFaqs(),
     ]);
-    return { tour, activities, destinations, themes, isNew };
+    return { tour, activities, destinations, themes, siteFaqs, isNew };
   },
   component: TourEditorRoute,
 });
@@ -131,7 +139,7 @@ interface EditorState {
 }
 
 function TourEditor() {
-  const { tour, activities, destinations, themes, isNew } = Route.useLoaderData();
+  const { tour, activities, destinations, themes, siteFaqs, isNew } = Route.useLoaderData();
   const { category: newCategory } = Route.useSearch();
   const navigate = useNavigate();
   const { run, busy, error, saved } = useAction();
@@ -676,23 +684,20 @@ function TourEditor() {
                   values={form.pledge}
                   onChange={(v) => set("pledge", v)}
                 />
-                <StringListField
+                <TextArea
                   label="Why choose us for this tour"
-                  values={form.why_items}
-                  onChange={(v) => set("why_items", v)}
+                  hint="One per line."
+                  rows={5}
+                  value={form.why_items.join("\n")}
+                  onChange={(v) => set("why_items", v.split("\n"))}
                 />
               </FormSection>
 
               <FormSection title="FAQs, map & video">
-                <RepeaterField
-                  label="Tour FAQs"
+                <TourFaqsField
                   values={form.faqs}
                   onChange={(v) => set("faqs", v)}
-                  blank={() => ({ question: "", answer: "" })}
-                  columns={[
-                    { key: "question", label: "Question" },
-                    { key: "answer", label: "Answer", type: "textarea" },
-                  ]}
+                  faqOptions={siteFaqs}
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <TextField
@@ -766,6 +771,105 @@ function TourEditor() {
             {busy ? "Saving…" : saved && !dirty ? "Saved" : "Save changes"}
           </AdminButton>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Tour FAQs: each row can be filled by picking an existing FAQ from the site-wide
+ * database (copies its question/answer text in as a starting point) or written from
+ * scratch. The picker is a one-shot copy, not a live link — nothing here tracks which
+ * FAQ a row came from, so editing the copied text afterwards is expected.
+ */
+function TourFaqsField({
+  values,
+  onChange,
+  faqOptions,
+}: {
+  values: { question: string; answer: string }[];
+  onChange: (v: { question: string; answer: string }[]) => void;
+  faqOptions: { id: string; question: string; answer: string }[];
+}) {
+  const setField = (i: number, key: "question" | "answer", v: string) =>
+    onChange(values.map((row, idx) => (idx === i ? { ...row, [key]: v } : row)));
+  const remove = (i: number) => onChange(values.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) => onChange(reorder(values, i, dir));
+
+  function pickFromDatabase(i: number, faqId: string) {
+    const picked = faqOptions.find((f) => f.id === faqId);
+    if (!picked) return;
+    onChange(
+      values.map((row, idx) =>
+        idx === i ? { question: picked.question, answer: picked.answer } : row,
+      ),
+    );
+  }
+
+  return (
+    <div>
+      <Label hint="Pick an existing FAQ to copy its text in, or write a custom one below.">
+        Tour FAQs
+      </Label>
+      <div className="flex flex-col gap-3">
+        {values.map((row, i) => (
+          <div key={i} className="rounded-xl border border-rule bg-cream p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[0.78rem] font-semibold text-muted">Tour FAQ {i + 1}</span>
+              <RowControls
+                onUp={i > 0 ? () => move(i, -1) : undefined}
+                onDown={i < values.length - 1 ? () => move(i, 1) : undefined}
+                onRemove={() => remove(i)}
+              />
+            </div>
+
+            {faqOptions.length ? (
+              <div className="mb-3">
+                <span className="mb-1 block text-[0.72rem] font-medium text-muted">
+                  Pick from FAQ database
+                </span>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) pickFromDatabase(i, e.target.value);
+                  }}
+                  className={inputBase}
+                >
+                  <option value="">— Write custom below —</option>
+                  {faqOptions.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.question}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-3">
+              <div>
+                <span className="mb-1 block text-[0.72rem] font-medium text-muted">Question</span>
+                <input
+                  type="text"
+                  value={row.question}
+                  onChange={(e) => setField(i, "question", e.target.value)}
+                  className={inputBase}
+                />
+              </div>
+              <div>
+                <span className="mb-1 block text-[0.72rem] font-medium text-muted">Answer</span>
+                <MarkdownTextarea
+                  rows={3}
+                  value={row.answer}
+                  onChange={(v) => setField(i, "answer", v)}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        <AddButton
+          onClick={() => onChange([...values, { question: "", answer: "" }])}
+          label="Tour FAQ"
+        />
       </div>
     </div>
   );

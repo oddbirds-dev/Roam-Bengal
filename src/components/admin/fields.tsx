@@ -16,7 +16,7 @@ import type { LinkTargetKind } from "@/lib/link-targets";
  * a keyboard or focus bug here fixes it on every screen.
  */
 
-const inputBase =
+export const inputBase =
   "w-full rounded-[10px] border border-rule bg-paper px-3.5 py-2.5 text-[0.88rem] " +
   "outline-none transition-colors focus:border-green focus:ring-2 focus:ring-green/15 " +
   "disabled:bg-cream disabled:text-muted";
@@ -52,7 +52,7 @@ const MIN_FONT_PX = 8;
 const MAX_FONT_PX = 96;
 const SIZE_OPEN_RE = /<span style="font-size: (\d+)px">$/;
 
-function MarkdownTextarea({
+export function MarkdownTextarea({
   id,
   rows = 4,
   value,
@@ -1335,7 +1335,7 @@ export function KeyValueField({
 
 // ---------------------------------------------------------------------------
 
-function RowControls({
+export function RowControls({
   onUp,
   onDown,
   onRemove,
@@ -1392,7 +1392,7 @@ function IconButton({
   );
 }
 
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+export function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       type="button"
@@ -1404,7 +1404,7 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   );
 }
 
-function reorder<T>(list: T[], index: number, dir: -1 | 1): T[] {
+export function reorder<T>(list: T[], index: number, dir: -1 | 1): T[] {
   const next = [...list];
   const target = index + dir;
   if (target < 0 || target >= next.length) return list;
