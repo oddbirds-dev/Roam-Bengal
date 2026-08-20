@@ -37,7 +37,7 @@ function LinksScreen() {
                 <Td className="text-muted">{row.anchor || "—"}</Td>
                 <Td>
                   <code className="rounded bg-rust/10 px-1.5 py-0.5 text-[0.78rem] text-rust">
-                    {row.to}
+                    {row.to || "(no address)"}
                   </code>
                 </Td>
               </tr>

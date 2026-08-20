@@ -163,33 +163,38 @@ export const policyDefaults: Record<PolicySlug, PolicyPage> = {
 
   refund: {
     eyebrow: "Fair & Transparent",
-    title: "Refund Policy",
-    subhead: "When a refund is due, we make sure it's quick, clear, and hassle-free.",
+    title: "Refund & Cancellation Policy",
+    subhead:
+      "We know travel plans change. Our refund policy is built around one goal: being as fair to you as the local bookings we make on your behalf will allow. Below is exactly what to expect if you need to cancel.",
     blocks: [
       {
-        heading: "💵 How Refund Amounts Are Calculated",
+        heading: "📅 Cancellation Tiers",
         paragraphs: [
-          "Refund amounts are based on how far in advance you cancel or reschedule, as outlined in our Cancellation Policy. Any non-refundable components already paid to third parties — such as permits, entry tickets already booked, or non-refundable hotel rates — will be deducted from the refund amount.",
+          "Every quote and confirmation email also states these terms in plain language before you pay a deposit — nothing here should be a surprise.",
+        ],
+        items: [
+          "**30+ days before departure — full refund.** 100% of your payment returned, no questions asked.",
+          "**15–29 days before departure — 75% refund.** A partial cancellation fee applies to cover guide and accommodation holds already made on your behalf.",
+          "**7–14 days before departure — 50% refund.** At this point most local bookings (boats, homestays, permits) can no longer be released.",
+          "**0–6 days before departure — no refund.** We'll still try to help you reschedule where possible, but the tour cost is non-refundable this close to departure.",
         ],
       },
       {
-        heading: "🔄 Refund Method",
-        paragraphs: [
-          "Refunds are always returned to the original payment method used at booking:",
-        ],
+        heading: "🔁 Free Rescheduling",
         items: [
-          "bKash, Nagad, or Rocket — refunded to the same mobile wallet number",
-          "Debit/credit card — refunded to the same card via our payment gateway",
-          "Bank transfer — refunded to the same bank account",
-          "Cash payments — refunded by bank transfer or mobile wallet, as agreed with our team",
+          "Move your dates for free up to 72 hours before departure.",
+          "Rescheduling doesn't restart your cancellation-tier clock — it stays tied to your original departure date.",
+          "One free reschedule per booking; a second change may carry a small admin fee depending on the tour.",
         ],
       },
       {
-        heading: "⏱️ Refund Processing Time",
+        heading: "❓ Frequently Asked Questions",
         items: [
-          "Refund requests are reviewed and approved within 2–3 business days.",
-          "Once approved, funds are returned within 7–10 business days, depending on your bank or mobile wallet provider.",
-          "International card refunds may take slightly longer due to bank processing times, which are outside our control.",
+          "**Can I reschedule instead of cancelling?** Yes — free rescheduling is available up to 72 hours before your departure date, subject to guide and accommodation availability for the new dates.",
+          "**What if Roam Bengal has to cancel the tour?** If we cancel due to safety concerns, severe weather, or an inability to deliver the itinerary as booked, you'll receive a full refund or the option to rebook for a later date, whichever you prefer.",
+          "**Are deposits refundable?** Deposits follow the same tiered schedule above, calculated from the date your booking is confirmed to your original departure date.",
+          "**How long does a refund take to process?** Approved refunds are issued to your original payment method within 7–10 business days.",
+          "**Does this apply to add-ons and custom itineraries?** Yes, the same tiers apply to optional add-ons (like the extras listed on individual tour pages) and fully custom itineraries booked directly with us.",
         ],
       },
       {
@@ -198,7 +203,7 @@ export const policyDefaults: Record<PolicySlug, PolicyPage> = {
         items: [
           "Government permits, park entry fees, and visa-related costs already paid on your behalf",
           "Bookings made under non-refundable promotional rates",
-          "No-show bookings, as outlined in our Cancellation Policy",
+          "No-show bookings — if you do not arrive at the meeting point without prior notice",
         ],
       },
       {
@@ -207,16 +212,10 @@ export const policyDefaults: Record<PolicySlug, PolicyPage> = {
           "If a tour didn't match what was promised — due to an issue on our end, such as a missed itinerary item or a service failure — please contact us within 7 days of your tour. We review each case individually and may offer a partial refund, credit toward a future tour, or another resolution, depending on the circumstances.",
         ],
       },
-      {
-        heading: "📮 How to Request a Refund",
-        paragraphs: [
-          "To request a refund, simply email or WhatsApp our support team with your booking reference and the reason for your request. We'll confirm the eligible amount and expected timeline before processing.",
-        ],
-      },
     ],
-    contact_heading: "❓ Need to Request a Refund?",
+    contact_heading: "❓ Need to Cancel or Change a Booking?",
     contact_body:
-      "Reach out with your booking details, and our team will guide you through the process.",
+      "Message us directly and we'll confirm your refund amount or help you find new dates — usually within a few hours.",
   },
 
   privacy: {

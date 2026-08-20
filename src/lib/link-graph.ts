@@ -163,7 +163,10 @@ function collectNavLinks(value: unknown): { to: string; label: string }[] {
     }
     if (!node || typeof node !== "object") return;
     const record = node as Record<string, unknown>;
-    if (typeof record.to === "string" && record.to) {
+    // A row saved with a blank URL is kept on purpose: it still renders as a link, so the
+    // audit has to see it. `label` is what distinguishes a link row from any other object
+    // that happens to carry a `to` key.
+    if (typeof record.to === "string" && (record.to || typeof record.label === "string")) {
       out.push({ to: record.to, label: typeof record.label === "string" ? record.label : "" });
     }
     Object.values(record).forEach(visit);
@@ -218,6 +221,21 @@ export function buildReport(graph: LinkGraph, bodies: Map<string, string>): Link
   let externalTotal = 0;
 
   for (const edge of edges) {
+    // A nav row with a blank URL renders as `<Link to="">`, which resolves to "/" — it
+    // looks like a working link in the footer but drops the visitor on the homepage.
+    if (!edge.to.trim()) {
+      internalTotal++;
+      broken.push({
+        from: edge.from,
+        fromTitle:
+          edge.from === "site"
+            ? "Header / footer navigation"
+            : (titleByPath.get(edge.from) ?? edge.from),
+        to: edge.to,
+        anchor: edge.anchor,
+      });
+      continue;
+    }
     if (!isInternal(edge.to)) {
       externalTotal++;
       if (edge.from !== "site") bump(outExternal, edge.from);
