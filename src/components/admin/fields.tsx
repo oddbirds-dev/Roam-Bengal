@@ -369,6 +369,10 @@ export function RichTextEditor({
   /** What we last handed to `onChange`. Re-writing `innerHTML` from a value we ourselves
    *  produced would reset the caret to the top of the field on every keystroke. */
   const emitted = useRef<string | null>(null);
+  /** The element that `emitted` describes. Opening the code view unmounts the editable, so
+   *  coming back hands us a brand-new empty div — one the value guard alone would happily
+   *  skip painting, and the next input event would then save as empty. */
+  const painted = useRef<HTMLDivElement | null>(null);
   /** The selection at the moment the link picker opened; focus moves to the dialog. */
   const savedRange = useRef<Range | null>(null);
   const colorInput = useRef<HTMLInputElement>(null);
@@ -380,8 +384,11 @@ export function RichTextEditor({
   useEffect(() => {
     const el = ref.current;
     if (!el || showSource) return;
-    if (value === emitted.current) return;
+    // A fresh element always needs painting; one we have already painted only when the
+    // value changed underneath us.
+    if (el === painted.current && value === emitted.current) return;
     el.innerHTML = sourceToHtml(value);
+    painted.current = el;
     emitted.current = value;
   }, [value, showSource]);
 
@@ -788,11 +795,9 @@ export function RichTextEditor({
           rows={rows}
           value={value}
           placeholder={placeholder}
-          onChange={(e) => {
-            // Straight through: the editable surface re-reads it when the toggle flips back.
-            emitted.current = null;
-            onChange(e.target.value);
-          }}
+          // Straight through. The editable surface repaints from this when the toggle
+          // flips back, because remounting gives it an element `painted` has never seen.
+          onChange={(e) => onChange(e.target.value)}
           className="w-full bg-transparent px-3.5 py-2.5 font-mono text-[0.8rem] outline-none"
         />
       ) : (
