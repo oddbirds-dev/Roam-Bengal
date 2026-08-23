@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, MapPin, Quote, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote, Send } from "lucide-react";
 import { FaStar } from "react-icons/fa";
 import { SiFacebook, SiGoogle, SiTripadvisor, SiTrustpilot } from "react-icons/si";
 import type { IconType } from "react-icons/lib";
@@ -7,8 +7,18 @@ import { Link } from "@tanstack/react-router";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { buttonClass } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import birdsImg from "@/assets/bird.webp";
+import routeImg from "@/assets/map.webp";
+import pinTrailImg from "@/assets/loc.png";
 import type { TestimonialDTO } from "@/lib/content-types";
-import { PLATFORM_BRANDS, REVIEWS_BG, REVIEWS_TOPO_LINE, REVIEW_CARD_TINTS } from "./palette";
+import {
+  PLATFORM_BRANDS,
+  REVIEWS_BG,
+  REVIEWS_SHORE_BACK,
+  REVIEWS_SHORE_FRONT,
+  REVIEWS_TOPO_LINE,
+  REVIEW_CARD_TINTS,
+} from "./palette";
 import type { HomeSectionProps } from "./registry";
 
 /** Three cards per slide, three slides at most — past that the dots stop reading as a
@@ -44,6 +54,7 @@ export function ReviewsSection({ testimonials }: HomeSectionProps) {
       style={{ background: REVIEWS_BG }}
     >
       <TopoField />
+      <MapDoodles />
       <EdgePhoto
         side="left"
         src={homepage.reviews_photo_left}
@@ -336,7 +347,31 @@ function EdgePhoto({
   );
 }
 
-/** Faint contour lines and a dotted route, as on a walking map. */
+/**
+ * The drawn marginalia of the band: a dotted route looping behind the heading and a
+ * few gulls higher up. Both sit above the contour field but below the content, and
+ * both are placed to clear the `EdgePhoto` prints that appear at `xl`.
+ */
+function MapDoodles() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1]">
+      <img
+        src={routeImg}
+        alt=""
+        loading="lazy"
+        className="absolute -top-4 right-[2%] w-[230px] opacity-30 nav:w-[320px]"
+      />
+      <img
+        src={birdsImg}
+        alt=""
+        loading="lazy"
+        className="absolute top-[4%] left-[22%] w-[92px] opacity-50 nav:w-[124px]"
+      />
+    </div>
+  );
+}
+
+/** Faint contour lines, as on a walking map. */
 function TopoField() {
   return (
     <svg
@@ -360,24 +395,26 @@ function TopoField() {
           )),
         )}
       </g>
-      <path
-        d="M1160 120 C1235 78 1318 118 1330 176 C1341 231 1272 254 1236 226"
-        stroke={REVIEWS_TOPO_LINE}
-        strokeWidth="2"
-        strokeDasharray="7 9"
-        strokeLinecap="round"
-        opacity="0.26"
-      />
     </svg>
   );
 }
 
-/** The green shore the band closes on, with map pins dotted along it. */
+/** How far up from the section boundary the shore dissolves into the page. */
+const SHORE_FADE = "linear-gradient(to bottom, #000 0, #000 calc(100% - 58px), transparent 100%)";
+
+/** The shore the band closes on, with the pin-and-trail marker on it. */
 function Shoreline() {
   return (
     <div
       className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[190px]"
       aria-hidden="true"
+      // Without this the band is guillotined by the section boundary into a hard
+      // horizontal line. Dissolving the last stretch lets it settle into the page
+      // background instead, and takes the trail's tail down with it.
+      style={{
+        maskImage: SHORE_FADE,
+        WebkitMaskImage: SHORE_FADE,
+      }}
     >
       <svg
         className="absolute inset-0 h-full w-full"
@@ -387,31 +424,21 @@ function Shoreline() {
       >
         <path
           d="M0,72 C210,8 400,116 700,84 C980,54 1180,124 1440,58 L1440,190 L0,190 Z"
-          fill="#1E5F3B"
+          fill={REVIEWS_SHORE_BACK}
           opacity="0.35"
         />
         <path
           d="M0,104 C230,44 420,146 700,112 C990,78 1190,150 1440,92 L1440,190 L0,190 Z"
-          fill="#123D26"
+          fill={REVIEWS_SHORE_FRONT}
         />
       </svg>
-      <MapPin className="absolute bottom-[52px] left-[7%] h-7 w-7 text-white/30" strokeWidth={1.6} />
-      <svg
-        className="absolute bottom-[34px] left-[11%] h-10 w-[220px] text-white/25"
-        viewBox="0 0 220 40"
-        fill="none"
-      >
-        <path
-          d="M4 30 C60 4 130 46 214 12"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeDasharray="6 8"
-          strokeLinecap="round"
-        />
-      </svg>
-      <MapPin
-        className="absolute right-[12%] bottom-[74px] h-6 w-6 text-white/25"
-        strokeWidth={1.6}
+      {/* Pin-and-trail sits low enough that the pin lands on the green; the trail runs
+          off the foot of the section, which the section's own `overflow-hidden` crops. */}
+      <img
+        src={pinTrailImg}
+        alt=""
+        loading="lazy"
+        className="absolute top-[64px] left-[5%] w-[300px] opacity-70 nav:w-[400px]"
       />
     </div>
   );

@@ -43,3 +43,10 @@ export const DREAM_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
 export const REVIEWS_BG = "linear-gradient(180deg,#FBF7EF,#F7F2E6 55%,#F5F0E4)";
 /** Colour of the contour lines drifting behind the reviews heading. */
 export const REVIEWS_TOPO_LINE = "#1E5F3B";
+/**
+ * The two waves of the shoreline the reviews band closes on — the paler one sits behind at
+ * low opacity, the solid one in front. Same `orange → rust` pairing as `TOUR_FRAMES`, so
+ * the closing band belongs to the palette the tour cards above it already use.
+ */
+export const REVIEWS_SHORE_BACK = "#F0791E";
+export const REVIEWS_SHORE_FRONT = "#C4390E";
