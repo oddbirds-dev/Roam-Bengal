@@ -11,6 +11,8 @@ export type TourCategory = "day-tour" | "multi-day" | "holiday";
 /** Ordered fact keys for the tour page's icon grid. */
 export const TOUR_FACT_KEYS = [
   "tour_type",
+  "tour_duration",
+  "tour_location",
   "best_season",
   "group_size",
   "accommodation",
@@ -19,12 +21,12 @@ export const TOUR_FACT_KEYS = [
   "guiding_method",
   "language",
   "min_age",
-  "max_age",
   "fitness_level",
-  "max_altitude",
   "pickup_drop",
   "arrival",
   "departure",
+  "max_age",
+  "max_altitude",
 ] as const;
 
 export type TourFactKey = (typeof TOUR_FACT_KEYS)[number];
@@ -40,8 +42,10 @@ export const TOUR_FACT_KEYS_EXTRA: readonly TourFactKey[] = [
  *  two cannot drift. */
 export const TOUR_FACT_META: Record<TourFactKey, { label: string; icon: string }> = {
   tour_type: { label: "Tour Type", icon: "🚶" },
+  tour_duration: { label: "Tour Duration", icon: "🕒" },
+  tour_location: { label: "Tour Location", icon: "📍" },
   best_season: { label: "Best Season", icon: "🌤️" },
-  group_size: { label: "Group Size", icon: "👥" },
+  group_size: { label: "Group Type", icon: "👥" },
   accommodation: { label: "Accommodation", icon: "🏨" },
   transportation: { label: "Transport", icon: "🚐" },
   meals: { label: "Tour Meals", icon: "🍽️" },
@@ -57,6 +61,32 @@ export const TOUR_FACT_META: Record<TourFactKey, { label: string; icon: string }
 };
 
 export type TourFacts = Partial<Record<TourFactKey, string>>;
+
+/**
+ * House defaults for the fact grid, taken from the Dhaka day tour the reference design
+ * was drawn from. A new tour starts with these in the admin editor, and a tour saved
+ * before a key existed still renders one on the public page — whatever the tour itself
+ * stores, or can derive from its own columns, wins over the value here.
+ *
+ * `max_age` and `max_altitude` are deliberately absent: there is no sensible house value.
+ */
+export const TOUR_FACT_DEFAULTS: TourFacts = {
+  tour_type: "Cultural",
+  tour_duration: "8 +/- Hours",
+  tour_location: "Dhaka",
+  best_season: "Year Round",
+  group_size: "Private",
+  accommodation: "Excluded",
+  transportation: "Private",
+  meals: "Included",
+  guiding_method: "Full Time",
+  language: "English",
+  min_age: "12+ Years",
+  fitness_level: "Moderate",
+  pickup_drop: "Included",
+  arrival: "Dhaka",
+  departure: "Dhaka",
+};
 
 /** `overview` stores its paragraphs as one string, separated by a blank line. */
 export function overviewParagraphs(overview: string | null): string[] {

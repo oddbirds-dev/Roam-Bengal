@@ -69,11 +69,37 @@ const MAX_FONT_PX = 96;
 /** `[anchor text](/some/path "optional title")` */
 const MD_LINK = /\[([^\]\n]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
 
-/** Class groups the toolbar owns. Applying one strips the others in the same group, so
- *  picking a second font replaces the first instead of nesting inside it. */
-const CLASS_GROUPS = ["font-", "text-"] as const;
+/**
+ * The three things the toolbar can put on a span. Applying one clears the same group off
+ * everything it wraps, so picking a second font replaces the first instead of nesting
+ * inside it.
+ *
+ * "color" deliberately spans two mechanisms: the `text-*` brand classes and a custom
+ * `color:` style. They are alternatives for the same decision, so choosing either has to
+ * clear the other — otherwise a preset picked after a custom colour looks like it did
+ * nothing, because the inline style still wins.
+ */
+type FormatGroup = "font" | "color" | "size";
 
-type FormatGroup = (typeof CLASS_GROUPS)[number] | "size";
+/** The class prefix a group owns, if it owns one. */
+const GROUP_CLASS_PREFIX: Record<FormatGroup, string | null> = {
+  font: "font-",
+  color: "text-",
+  size: null,
+};
+
+/** The inline style property a group owns, if it owns one. */
+const GROUP_STYLE_PROP: Record<FormatGroup, string | null> = {
+  font: null,
+  color: "color",
+  size: "font-size",
+};
+
+/** Seeds the custom-colour picker when the selection has no colour of its own. */
+const DEFAULT_CUSTOM_COLOR = "#1E5F3B";
+
+/** Sentinel option value — not a class, so it can never collide with a real one. */
+const CUSTOM_COLOR = "__custom__";
 
 const FONT_OPTIONS = [
   { value: "font-display", label: "Display (Playfair)" },
@@ -94,6 +120,19 @@ const COLOR_OPTIONS = [
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+/** `el.style.color` reads back as `rgb(30, 95, 59)` whatever was assigned, so a value that
+ *  round-trips through the editor would otherwise change shape on every save. Store the
+ *  hex the author actually picked. */
+function toHexColor(value: string): string {
+  const raw = value.trim();
+  const rgb = raw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (!rgb) return raw;
+  return `#${rgb
+    .slice(1, 4)
+    .map((n) => Number(n).toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 /** Stored source → HTML for the editable surface. Raw HTML in the source passes straight
@@ -153,13 +192,20 @@ function serializeNode(node: Node): string {
       return href ? `[${inner}](${href})` : inner;
     }
     case "SPAN": {
+      // Class and style are not alternatives — a span can carry a brand font class and a
+      // custom colour at once, so both attributes have to survive the trip.
       const cls = el.getAttribute("class")?.trim();
-      if (cls) return `<span class="${escapeAttr(cls)}">${inner}</span>`;
+      const styles: string[] = [];
       const size = Number.parseInt(el.style.fontSize, 10);
-      if (Number.isFinite(size) && size !== BASE_FONT_PX) {
-        return `<span style="font-size: ${size}px">${inner}</span>`;
-      }
-      return inner;
+      if (Number.isFinite(size) && size !== BASE_FONT_PX) styles.push(`font-size: ${size}px`);
+      const color = toHexColor(el.style.color);
+      if (color) styles.push(`color: ${color}`);
+
+      if (!cls && styles.length === 0) return inner;
+      const attrs =
+        (cls ? ` class="${escapeAttr(cls)}"` : "") +
+        (styles.length ? ` style="${styles.join("; ")}"` : "");
+      return `<span${attrs}>${inner}</span>`;
     }
     case "DIV":
     case "P":
@@ -178,21 +224,31 @@ export function htmlToSource(html: string): string {
     .replace(/\n+$/, "");
 }
 
+/** A span carrying nothing the toolbar put there is just noise in the markup. */
+function isBareSpan(span: HTMLElement): boolean {
+  return !span.className.trim() && !span.getAttribute("style");
+}
+
+/** Takes `group` off one span — both the class it owns and the style it owns. */
+function clearGroup(span: HTMLElement, group: FormatGroup) {
+  const prop = GROUP_STYLE_PROP[group];
+  if (prop) span.style.removeProperty(prop);
+
+  const prefix = GROUP_CLASS_PREFIX[group];
+  if (prefix) {
+    span.className = span.className
+      .split(/\s+/)
+      .filter((c) => c && !c.startsWith(prefix))
+      .join(" ");
+  }
+}
+
 /** Drops toolbar-owned classes/styles from everything inside `frag`, so the wrapper about
  *  to go around it is the only one that decides. */
 function stripFormatting(frag: DocumentFragment | HTMLElement, group: FormatGroup) {
   frag.querySelectorAll("span").forEach((span) => {
-    if (group === "size") {
-      span.style.removeProperty("font-size");
-    } else {
-      span.className = span.className
-        .split(/\s+/)
-        .filter((c) => c && !c.startsWith(group))
-        .join(" ");
-    }
-    if (!span.className.trim() && !span.getAttribute("style")) {
-      span.replaceWith(...Array.from(span.childNodes));
-    }
+    clearGroup(span, group);
+    if (isBareSpan(span)) span.replaceWith(...Array.from(span.childNodes));
   });
 }
 
@@ -204,14 +260,8 @@ function unwrapRedundantAncestor(el: HTMLElement, root: HTMLElement, group: Form
   if (!parent || parent === root || parent.tagName !== "SPAN") return;
   if (parent.textContent !== el.textContent) return;
 
-  if (group === "size") parent.style.removeProperty("font-size");
-  else {
-    parent.className = parent.className
-      .split(/\s+/)
-      .filter((c) => c && !c.startsWith(group))
-      .join(" ");
-  }
-  if (!parent.className.trim() && !parent.getAttribute("style")) {
+  clearGroup(parent, group);
+  if (isBareSpan(parent)) {
     parent.replaceWith(...Array.from(parent.childNodes));
   }
 }
@@ -289,6 +339,11 @@ export function RichTextEditor({
   const emitted = useRef<string | null>(null);
   /** The selection at the moment the link picker opened; focus moves to the dialog. */
   const savedRange = useRef<Range | null>(null);
+  const colorInput = useRef<HTMLInputElement>(null);
+  /** The span a custom colour is being tried on. The OS colour dialog takes focus and
+   *  fires as the author drags, so the selection is gone by the second event — holding the
+   *  element instead of the range is what makes the live preview possible. */
+  const colorTarget = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -333,19 +388,74 @@ export function RichTextEditor({
     emit();
   };
 
-  const applyClass = (cls: string) => {
-    const group = CLASS_GROUPS.find((g) => cls.startsWith(g)) ?? "font-";
+  /** Wraps the selection in a fresh span, having first cleared `group` off everything
+   *  inside it and off a redundant ancestor. Every style the toolbar applies is this. */
+  const wrapSelection = (
+    group: FormatGroup,
+    decorate: (span: HTMLElement) => void,
+    emptyMessage: string,
+  ) => {
+    let wrapper: HTMLElement | null = null;
     withSelection((range) => {
       const el = ref.current!;
       const contents = range.extractContents();
       stripFormatting(contents, group);
       const span = document.createElement("span");
-      span.className = cls;
+      decorate(span);
       span.appendChild(contents);
       range.insertNode(span);
       unwrapRedundantAncestor(span, el, group);
       selectNode(span);
-    }, "Select some text first, then choose a style.");
+      wrapper = span;
+    }, emptyMessage);
+    return wrapper;
+  };
+
+  const applyClass = (cls: string) => {
+    const group: FormatGroup = cls.startsWith("text-") ? "color" : "font";
+    wrapSelection(
+      group,
+      (span) => {
+        span.className = cls;
+      },
+      "Select some text first, then choose a style.",
+    );
+  };
+
+  /** Opens the OS colour dialog on a span wrapped around the selection up front, so every
+   *  event the dialog fires while the author drags lands on the same element. */
+  const startCustomColor = () => {
+    const el = ref.current;
+    const input = colorInput.current;
+    if (!el || !input) return;
+
+    // Seed the swatch from the colour already on the selection, when there is one.
+    const selection = window.getSelection();
+    const from =
+      selection && selection.rangeCount > 0
+        ? closestWithin(
+            selection.getRangeAt(0).commonAncestorContainer,
+            el,
+            (node) => node.tagName === "SPAN" && !!node.style.color,
+          )
+        : null;
+    input.value = from ? toHexColor(from.style.color) : DEFAULT_CUSTOM_COLOR;
+
+    colorTarget.current = wrapSelection(
+      "color",
+      (span) => {
+        span.style.color = input.value;
+      },
+      "Select some text first, then pick a colour.",
+    );
+    if (colorTarget.current) input.click();
+  };
+
+  const applyCustomColor = (hex: string) => {
+    const target = colorTarget.current;
+    if (!target) return;
+    target.style.color = hex;
+    emit();
   };
 
   const applySize = (rawNext: number) => {
@@ -585,7 +695,8 @@ export function RichTextEditor({
           disabled={showSource}
           value=""
           onChange={(e) => {
-            if (e.target.value) applyClass(e.target.value);
+            if (e.target.value === CUSTOM_COLOR) startCustomColor();
+            else if (e.target.value) applyClass(e.target.value);
             e.target.value = "";
           }}
           className={dropdown}
@@ -596,7 +707,21 @@ export function RichTextEditor({
               {o.label}
             </option>
           ))}
+          <option value={CUSTOM_COLOR}>Custom…</option>
         </select>
+        {/* Hidden: the dropdown owns the interaction, this is only the OS colour dialog.
+            React fires `onChange` on the native `input` event, so the text recolours live
+            as the author moves around the wheel rather than only on OK. */}
+        <input
+          ref={colorInput}
+          type="color"
+          tabIndex={-1}
+          aria-hidden="true"
+          // Zero-sized rather than `display: none`, which stops `.click()` opening the
+          // dialog. Left in flow so the dialog anchors next to the dropdown that opened it.
+          className="pointer-events-none h-0 w-0 border-0 p-0 opacity-0"
+          onChange={(e) => applyCustomColor(e.currentTarget.value)}
+        />
         <div className="h-4 w-px bg-rule" />
         <button
           type="button"

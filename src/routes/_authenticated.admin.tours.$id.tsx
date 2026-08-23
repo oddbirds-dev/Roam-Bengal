@@ -39,6 +39,7 @@ import {
 } from "@/lib/admin-content.functions";
 import { listTourThemes } from "@/lib/site-content.functions";
 import {
+  TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
   TOUR_FACT_KEYS_EXTRA,
   TOUR_FACT_META,
@@ -107,7 +108,9 @@ function emptyTour() {
     activities_count: null as number | null,
     group_size_max: null as number | null,
     stops_count: null as number | null,
-    facts: {} as Record<string, string>,
+    // A new tour starts on the house defaults so the fact grid is filled in from the
+    // first save; every field stays editable, and clearing one leaves it out of the grid.
+    facts: { ...TOUR_FACT_DEFAULTS } as Record<string, string>,
     overview: "",
     overview_tip: "",
     highlights: [] as string[],

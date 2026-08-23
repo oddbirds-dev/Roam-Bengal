@@ -14,6 +14,7 @@ import { buildSeoMeta } from "@/lib/seo-head";
 import { toTourDTO } from "@/lib/tour-dto";
 import { useTourDraft } from "@/lib/tour-preview";
 import {
+  TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
   overviewParagraphs,
@@ -598,20 +599,27 @@ function hasSection(tour: TourDTO, id: string): boolean {
 }
 
 /**
- * Facts fall back to values derived from other columns, so a tour with an empty `facts`
- * object still renders a useful grid rather than nothing.
+ * Facts fall back to values derived from other columns and then to the house defaults, so
+ * a tour with an empty `facts` object still renders a full grid rather than nothing. The
+ * derived value sits in the middle because it is about this tour, while the default is
+ * only about the typical tour.
  */
 function factValue(tour: TourDTO, key: TourFactKey): string | undefined {
   const stored = tour.facts[key];
   if (stored) return stored;
+  return derivedFact(tour, key) ?? TOUR_FACT_DEFAULTS[key];
+}
+
+function derivedFact(tour: TourDTO, key: TourFactKey): string | undefined {
   switch (key) {
     case "tour_type":
       return tour.activityLabel ?? undefined;
+    case "tour_duration":
+      return tour.durationLabel ?? undefined;
+    case "tour_location":
     case "departure":
     case "arrival":
       return tour.destinationLabel ?? undefined;
-    case "group_size":
-      return tour.groupSizeMax ? `Up to ${tour.groupSizeMax}` : undefined;
     case "accommodation":
       return tour.category === "day-tour" ? "Not required" : undefined;
     default:
