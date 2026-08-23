@@ -399,22 +399,12 @@ function TopoField() {
   );
 }
 
-/** How far up from the section boundary the shore dissolves into the page. */
-const SHORE_FADE = "linear-gradient(to bottom, #000 0, #000 calc(100% - 58px), transparent 100%)";
-
 /** The shore the band closes on, with the pin-and-trail marker on it. */
 function Shoreline() {
   return (
     <div
       className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[190px]"
       aria-hidden="true"
-      // Without this the band is guillotined by the section boundary into a hard
-      // horizontal line. Dissolving the last stretch lets it settle into the page
-      // background instead, and takes the trail's tail down with it.
-      style={{
-        maskImage: SHORE_FADE,
-        WebkitMaskImage: SHORE_FADE,
-      }}
     >
       <svg
         className="absolute inset-0 h-full w-full"
@@ -432,8 +422,7 @@ function Shoreline() {
           fill={REVIEWS_SHORE_FRONT}
         />
       </svg>
-      {/* Sits low enough that the pin lands on the solid part of the shore; the trail
-          runs down into the fade above and dissolves with it. */}
+      {/* Sits low enough that the pin lands on the solid part of the shore. */}
       <img
         src={pinTrailImg}
         alt=""
