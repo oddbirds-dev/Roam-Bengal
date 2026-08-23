@@ -432,8 +432,8 @@ function Shoreline() {
           fill={REVIEWS_SHORE_FRONT}
         />
       </svg>
-      {/* Pin-and-trail sits low enough that the pin lands on the green; the trail runs
-          off the foot of the section, which the section's own `overflow-hidden` crops. */}
+      {/* Sits low enough that the pin lands on the solid part of the shore; the trail
+          runs down into the fade above and dissolves with it. */}
       <img
         src={pinTrailImg}
         alt=""
