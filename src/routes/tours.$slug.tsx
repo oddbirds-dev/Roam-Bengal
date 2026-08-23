@@ -13,6 +13,7 @@ import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
 import { toTourDTO } from "@/lib/tour-dto";
 import { useTourDraft } from "@/lib/tour-preview";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
   TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
@@ -81,6 +82,7 @@ const TABS = [
 function TourDetail() {
   const { tour: saved, allTours } = Route.useLoaderData();
   const { preview } = Route.useSearch();
+  const { tour_pricing } = useSiteSettings();
 
   // In preview mode the editor's unsaved form wins over whatever is in the database.
   const draft = useTourDraft(preview === true);
@@ -93,6 +95,10 @@ function TourDetail() {
   const facts = TOUR_FACT_KEYS.map((key) => [key, factValue(tour, key)] as const).filter(
     (entry): entry is readonly [TourFactKey, string] => Boolean(entry[1]),
   );
+
+  // Sidebar reassurances are policy copy, identical on every tour, so they live in the
+  // `tour_pricing` site setting next to the wording of the price block below them.
+  const sidebarPromises = tour_pricing.sidebar_promises.filter(Boolean);
 
   // The hero leads the mosaic and the gallery fills in behind it, matching how cards
   // resolve their image (`heroImage ?? images[0]`). Letting the gallery win instead would
@@ -489,14 +495,16 @@ function TourDetail() {
                 </div>
               ) : null}
 
-              <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
-                {PROMISES.map((p) => (
-                  <li key={p} className="flex gap-2">
-                    <span className="text-green-bright">✓</span>
-                    <strong className="font-semibold text-ink">{p}</strong>
-                  </li>
-                ))}
-              </ul>
+              {sidebarPromises.length ? (
+                <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
+                  {sidebarPromises.map((p) => (
+                    <li key={p} className="flex gap-2">
+                      <span className="text-green-bright">✓</span>
+                      <strong className="font-semibold text-ink">{p}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
 
               <ButtonLink
                 to="/contact"
@@ -537,15 +545,6 @@ function TourDetail() {
     </>
   );
 }
-
-const PROMISES = [
-  "100% Exclusive Private Tours",
-  "Fully Flexible & Customisable",
-  "Transparent Pricing Promise",
-  "Expert, Knowledgeable Guides",
-  "No Shopping Detours, Ever",
-  "Direct Booking Savings",
-];
 
 /** Empty shell for preview mode, replaced the moment the editor's draft arrives. */
 function blankTour(slug: string): TourDTO {

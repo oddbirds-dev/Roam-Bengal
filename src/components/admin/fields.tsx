@@ -81,13 +81,6 @@ const MD_LINK = /\[([^\]\n]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
  */
 type FormatGroup = "font" | "color" | "size";
 
-/** The class prefix a group owns, if it owns one. */
-const GROUP_CLASS_PREFIX: Record<FormatGroup, string | null> = {
-  font: "font-",
-  color: "text-",
-  size: null,
-};
-
 /** The inline style property a group owns, if it owns one. */
 const GROUP_STYLE_PROP: Record<FormatGroup, string | null> = {
   font: null,
@@ -101,13 +94,13 @@ const DEFAULT_CUSTOM_COLOR = "#1E5F3B";
 /** Sentinel option value — not a class, so it can never collide with a real one. */
 const CUSTOM_COLOR = "__custom__";
 
-const FONT_OPTIONS = [
+/** The site's own families. Custom ones are appended at render time from settings. */
+const BUILT_IN_FONTS = [
   { value: "font-display", label: "Display (Playfair)" },
   { value: "font-body", label: "Body (Poppins)" },
   { value: "font-script", label: "Script (Caveat)" },
   { value: "font-marker", label: "Marker" },
   { value: "font-kalam", label: "Kalam" },
-  { value: "font-custom", label: "Custom" },
 ];
 
 const COLOR_OPTIONS = [
@@ -117,6 +110,19 @@ const COLOR_OPTIONS = [
   { value: "text-rust", label: "Rust" },
   { value: "text-orange", label: "Orange" },
 ];
+
+/**
+ * Which classes each group owns — matched whole, never by prefix.
+ *
+ * `font-` and `text-` are the two busiest prefixes in Tailwind: `font-semibold` and
+ * `text-center` share them with the families and colours here, and a prefix test would
+ * strip those too the moment someone changed a font.
+ */
+const GROUP_CLASS_RE: Record<FormatGroup, RegExp | null> = {
+  font: new RegExp(`^(${BUILT_IN_FONTS.map((o) => o.value).join("|")}|font-custom(-[a-z0-9-]+)?)$`),
+  color: new RegExp(`^(${COLOR_OPTIONS.map((o) => o.value).join("|")})$`),
+  size: null,
+};
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -234,11 +240,11 @@ function clearGroup(span: HTMLElement, group: FormatGroup) {
   const prop = GROUP_STYLE_PROP[group];
   if (prop) span.style.removeProperty(prop);
 
-  const prefix = GROUP_CLASS_PREFIX[group];
-  if (prefix) {
+  const owned = GROUP_CLASS_RE[group];
+  if (owned) {
     span.className = span.className
       .split(/\s+/)
-      .filter((c) => c && !c.startsWith(prefix))
+      .filter((c) => c && !owned.test(c))
       .join(" ");
   }
 }
@@ -329,6 +335,17 @@ export function RichTextEditor({
   ariaLabel?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Fonts the admin added under Site content → Custom Fonts, offered alongside the site's
+  // own five. Only saved fonts appear: the class has to exist in the page before the
+  // editor can show text in it.
+  const { custom_fonts } = useSiteSettings();
+  const fontOptions = [
+    ...BUILT_IN_FONTS,
+    ...resolveCustomFonts(custom_fonts).map((font) => ({
+      value: font.className,
+      label: font.label,
+    })),
+  ];
   const [hint, setHint] = useState<string | null>(null);
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [sizeValue, setSizeValue] = useState(BASE_FONT_PX);
@@ -412,7 +429,7 @@ export function RichTextEditor({
   };
 
   const applyClass = (cls: string) => {
-    const group: FormatGroup = cls.startsWith("text-") ? "color" : "font";
+    const group: FormatGroup = GROUP_CLASS_RE.color.test(cls) ? "color" : "font";
     wrapSelection(
       group,
       (span) => {
@@ -617,7 +634,7 @@ export function RichTextEditor({
           className={dropdown}
         >
           <option value="">Font</option>
-          {FONT_OPTIONS.map((o) => (
+          {fontOptions.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>

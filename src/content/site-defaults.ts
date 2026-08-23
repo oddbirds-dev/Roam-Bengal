@@ -10,6 +10,8 @@
  * Source: reference design/*.html.
  */
 
+import type { CustomFontEntry } from "@/lib/custom-fonts";
+
 export interface NavLink {
   label: string;
   to: string;
@@ -17,8 +19,11 @@ export interface NavLink {
 
 export const siteDefaults = {
   custom_fonts: {
+    // The original single font, kept because content already refers to it as `font-custom`.
+    // `fonts` is the list everything new goes in — see lib/custom-fonts.ts.
     font_url: "",
     font_family: "",
+    fonts: [] as CustomFontEntry[],
   },
 
   integrations: {
@@ -287,6 +292,15 @@ export const siteDefaults = {
     cta_heading: "Ready To Start Your Adventure?",
     cta_label: "Book This Tour Now",
     cta_footnote: "Free cancellation · No payment required today",
+    /** The ticked reassurances in the sticky "Tour Cost" box in the tour page sidebar. */
+    sidebar_promises: [
+      "100% Exclusive Private Tours",
+      "Fully Flexible & Customisable",
+      "Transparent Pricing Promise",
+      "Expert, Knowledgeable Guides",
+      "No Shopping Detours, Ever",
+      "Direct Booking Savings",
+    ],
   },
 
   blog_page: {

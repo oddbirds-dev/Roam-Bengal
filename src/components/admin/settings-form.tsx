@@ -152,12 +152,48 @@ const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode =>
 
 export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
   custom_fonts: {
-    title: "Custom Font",
-    description: "Load an external font, e.g., from Google Fonts.",
-    where: "Available in text formatting options",
+    title: "Custom Fonts",
+    description:
+      "Load external fonts, e.g. from Google Fonts. Each one you add here appears by name in the Font menu when you format text.",
+    where: "The Font menu in every text editor",
     sections: [
       {
-        title: "Font Settings",
+        title: "Your fonts",
+        description:
+          "Adding a font does not change anything on its own — select some text in any editor and pick the font by name from the Font menu.",
+        fields: [
+          {
+            kind: "rows",
+            key: "fonts",
+            label: "Fonts",
+            hint: "In Google Fonts: pick the weights you want, then copy the <link> href into Stylesheet URL and the font-family line into Font family name.",
+            title: (row, i) => String(row.label ?? "").trim() || `Font ${i + 1}`,
+            columns: [
+              {
+                key: "label",
+                label: "Name in the Font menu",
+                placeholder: "Open Sans",
+              },
+              {
+                key: "font_url",
+                label: "Stylesheet URL",
+                placeholder:
+                  "https://fonts.googleapis.com/css2?family=Open+Sans&display=swap",
+              },
+              {
+                key: "font_family",
+                label: "Font family name",
+                placeholder: "'Open Sans', sans-serif",
+              },
+            ],
+            blank: { label: "", font_url: "", font_family: "" },
+          },
+        ],
+      },
+      {
+        title: "The original font",
+        description:
+          "This page used to hold a single font, and it still works — it is the one called “Custom” in the Font menu. Any text already using it keeps working; add new fonts to the list above.",
         fields: [
           {
             kind: "text",
@@ -563,6 +599,19 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
           { kind: "text", key: "cta_heading", label: "Heading" },
           { kind: "text", key: "cta_label", label: "Button text" },
           { kind: "text", key: "cta_footnote", label: "Reassurance under the button" },
+        ],
+      },
+      {
+        title: "Tour Cost box",
+        description: "The sticky price box in the sidebar of every tour page.",
+        fields: [
+          {
+            kind: "list",
+            key: "sidebar_promises",
+            label: "Ticked reassurances",
+            hint: "One per line, each shown with a green tick above the Book Now button. Leave empty to hide the list.",
+            placeholder: "100% Exclusive Private Tours",
+          },
         ],
       },
     ],

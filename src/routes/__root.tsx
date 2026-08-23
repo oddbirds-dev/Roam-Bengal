@@ -12,6 +12,7 @@ import { ErrorPage } from "@/components/error-page";
 import { getAllSettings } from "@/lib/site-content.functions";
 import { mergeSettings, useSiteSettings } from "@/hooks/use-site-settings";
 import { siteDefaults } from "@/content/site-defaults";
+import { customFontCss, customFontUrls, resolveCustomFonts } from "@/lib/custom-fonts";
 
 export const Route = createRootRoute({
   // Header and footer copy lives in `site_settings`, so every page needs it. Loading it
@@ -59,6 +60,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   const { custom_fonts, integrations } = useSiteSettings();
+  const fonts = resolveCustomFonts(custom_fonts);
   const gtmId = integrations.gtm_container_id;
   const adsenseClientId = integrations.adsense_client_id;
 
@@ -66,10 +68,12 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
-        {custom_fonts?.font_url ? <link rel="stylesheet" href={custom_fonts.font_url} /> : null}
-        {custom_fonts?.font_family ? (
-          <style dangerouslySetInnerHTML={{ __html: `.font-custom { font-family: ${custom_fonts.font_family}; }` }} />
-        ) : null}
+        {/* Admin → Site content → Custom Fonts. One `<style>` for the whole list: it is
+            unlayered, so it beats Tailwind's layered utilities whatever order they load in. */}
+        {customFontUrls(fonts).map((href) => (
+          <link key={href} rel="stylesheet" href={href} />
+        ))}
+        {fonts.length ? <style dangerouslySetInnerHTML={{ __html: customFontCss(fonts) }} /> : null}
         {gtmId ? (
           // GA4 and Google Ads are configured as tags inside the GTM container itself —
           // no separate gtag.js snippets needed once this container is live.
