@@ -21,7 +21,12 @@ export function SiteFooter() {
             alt={header.logo_alt}
             className="h-14 w-auto"
           />
-          <p className="mt-3.5 max-w-[260px] text-[0.85rem] opacity-70">{footer.intro}</p>
+          {/* Left-aligned against the base `p { text-align: justify }`: this column is only
+              260px wide, and justifying prose that narrow stretches single spaces into
+              rivers of whitespace across every line. */}
+          <p className="mt-3.5 max-w-[260px] text-left text-[0.85rem] opacity-70">
+            {footer.intro}
+          </p>
         </div>
 
         {footer.columns.map((col) => (
