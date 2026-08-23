@@ -504,6 +504,7 @@ export type Database = {
           glance: Json;
           group_size_max: number | null;
           hero_image: string | null;
+          hidden_sections: string[];
           highlights: string[];
           id: string;
           images: string[];
@@ -553,6 +554,7 @@ export type Database = {
           glance?: Json;
           group_size_max?: number | null;
           hero_image?: string | null;
+          hidden_sections?: string[];
           highlights?: string[];
           id?: string;
           images?: string[];
@@ -602,6 +604,7 @@ export type Database = {
           glance?: Json;
           group_size_max?: number | null;
           hero_image?: string | null;
+          hidden_sections?: string[];
           highlights?: string[];
           id?: string;
           images?: string[];

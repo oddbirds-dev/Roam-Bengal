@@ -14,7 +14,7 @@ export function DreamCtaSection(_props: HomeSectionProps) {
           <h2 className="mb-[22px] font-kalam text-[clamp(1.9rem,3.4vw,2.5rem)] leading-[1.3] font-bold">
             <span className="text-green">{homepage.cta_heading_1}</span>
             <br />
-            About <span className="text-gold">{homepage.cta_heading_2}</span>
+            About <span className="text-accent">{homepage.cta_heading_2}</span>
           </h2>
           {homepage.cta_paragraphs.map((p) => (
             <p key={p} className="mb-[18px] max-w-[480px] text-[0.95rem] leading-[1.6] text-ink">

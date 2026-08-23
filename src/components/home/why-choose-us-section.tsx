@@ -14,7 +14,7 @@ export function WhyChooseUsSection(_props: HomeSectionProps) {
           <h2 className="mb-[18px] font-kalam text-[clamp(2rem,3.6vw,2.7rem)] leading-[1.15] font-bold text-green">
             {homepage.why_heading_1}
             <br />
-            <span className="text-gold">{homepage.why_heading_2}</span>
+            <span className="text-accent">{homepage.why_heading_2}</span>
           </h2>
           <p className="mb-[30px] max-w-[480px] text-[0.95rem] text-muted">
             <FormatText>{homepage.why_intro}</FormatText>

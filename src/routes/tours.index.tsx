@@ -113,7 +113,7 @@ function ToursIndex() {
             <h2 className="mb-6 font-kalam text-[clamp(1.7rem,3vw,2.3rem)] leading-[1.3] font-bold uppercase">
               <span className="text-green">{tours_page.intro_heading_1}</span>
               <br />
-              <span className="text-orange">{tours_page.intro_heading_2}</span>
+              <span className="text-accent">{tours_page.intro_heading_2}</span>
             </h2>
               {tours_page.intro_paragraphs.map((p) => (
                 <p key={p} className="mb-4 max-w-[900px] text-[0.98rem] leading-[1.7] text-ink">
@@ -193,7 +193,7 @@ function ToursIndex() {
               <h2 className="mb-[22px] font-kalam text-[clamp(1.9rem,3.4vw,2.5rem)] leading-[1.3] font-bold">
                 <span className="text-green">{homepage.cta_heading_1}</span>
                 <br />
-                About <span className="text-gold">{homepage.cta_heading_2}</span>
+                About <span className="text-accent">{homepage.cta_heading_2}</span>
               </h2>
                 {homepage.cta_paragraphs.map((p) => (
                   <p

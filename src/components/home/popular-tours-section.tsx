@@ -22,7 +22,9 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
       <div aria-hidden className="absolute inset-0 bg-black/60" />
 
       <div className="relative z-10">
-        <SectionHead kicker={homepage.popular_kicker}>{homepage.popular_heading}</SectionHead>
+        <SectionHead kicker={homepage.popular_kicker} className="[&>h2]:text-white">
+          {homepage.popular_heading}
+        </SectionHead>
 
         <div className="wide grid gap-[26px] text-left nav:grid-cols-3">
           {featuredTours.map((tour, i) => (

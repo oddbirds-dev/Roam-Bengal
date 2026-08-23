@@ -14,7 +14,7 @@ export function GallerySection(_props: HomeSectionProps) {
           <h2 className="mb-3.5 font-kalam text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.3] font-bold">
             <span className="text-green">{gallery.heading_1}</span>
             <br />
-            <span className="text-gold">{gallery.heading_2}</span>
+            <span className="text-accent">{gallery.heading_2}</span>
           </h2>
           <p className="max-w-[520px] text-[0.92rem] text-muted">
             <FormatText>{gallery.blurb}</FormatText>

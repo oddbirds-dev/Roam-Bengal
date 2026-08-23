@@ -111,6 +111,7 @@ const COLOR_OPTIONS = [
   { value: "text-gold", label: "Gold" },
   { value: "text-rust", label: "Rust" },
   { value: "text-orange", label: "Orange" },
+  { value: "text-accent", label: "Accent" },
 ];
 
 /**

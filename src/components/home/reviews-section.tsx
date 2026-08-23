@@ -66,7 +66,7 @@ export function ReviewsSection({ testimonials }: HomeSectionProps) {
           <h2 className="mt-1 font-display text-[clamp(1.9rem,4.2vw,3rem)] leading-[1.16] font-bold text-green-dark">
             {homepage.reviews_heading_1}
             <br />
-            <span className="text-gold">{homepage.reviews_heading_2}</span>
+            <span className="text-accent">{homepage.reviews_heading_2}</span>
           </h2>
           <p className="mx-auto mt-4 max-w-[560px] text-center text-[0.95rem] text-muted">
             {homepage.reviews_subtext}

@@ -38,6 +38,12 @@ import {
   adminUpsertTour,
 } from "@/lib/admin-content.functions";
 import { listTourThemes } from "@/lib/site-content.functions";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import {
+  setSectionHidden,
+  TOUR_SECTIONS,
+  type TourSectionId,
+} from "@/lib/tour-sections";
 import {
   TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
@@ -130,6 +136,8 @@ function emptyTour() {
     related_slugs: [] as string[],
     is_published: false,
     sort_order: 0,
+    // Which sections of this form the tour hides. Editor-only — see lib/tour-sections.ts.
+    hidden_sections: [] as string[],
   };
 }
 
@@ -151,10 +159,15 @@ function TourEditor() {
   // to keep the left offset from leaving a gap (or clipping) against the actual rail width.
   const sidebarCollapsed = useSidebarCollapsed();
 
+  // A brand-new tour starts from the template set in Site content → Tour editor template.
+  // An existing tour uses whatever it was saved with, so changing the template later never
+  // reshapes tours that are already written.
+  const { tour_editor } = useSiteSettings();
+
   const [form, setForm] = useState<TourForm>(() => ({
     ...emptyTour(),
     ...(newCategory ? { category: newCategory } : {}),
-    ...(tour ? hydrate(tour) : {}),
+    ...(tour ? hydrate(tour) : { hidden_sections: [...tour_editor.hidden_sections] }),
   }));
   const [themeIds, setThemeIds] = useState<string[]>(() => {
     if (!tour) return [];
@@ -166,6 +179,11 @@ function TourEditor() {
     setForm((f) => ({ ...f, [key]: value }));
 
   const isDayTour = form.category === "day-tour";
+
+  /** Editor-only visibility. The public page renders from content, so a hidden section
+   *  that still holds something keeps showing on the site — which is what the warning
+   *  beside its toggle says. */
+  const shows = (id: TourSectionId) => !form.hidden_sections.includes(id);
 
   // Accommodation/arrival/departure are rarely needed for a single-day tour, so they
   // start collapsed — unless the tour already has one set, in which case hiding it would
@@ -387,343 +405,369 @@ function TourEditor() {
                 </div>
               </FormSection>
 
-              <FormSection title="Pricing">
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <NumberField
-                    label="Price USD"
-                    min={0}
-                    value={form.price_usd}
-                    onChange={(v) => set("price_usd", v)}
-                  />
-                  <NumberField
-                    label="Price BDT"
-                    hint="Shown as the local rate. Blank hides it."
-                    min={0}
-                    value={form.price_bdt}
-                    onChange={(v) => set("price_bdt", v)}
-                  />
-                  <NumberField
-                    label="Discount USD"
-                    hint="Shown instead of the price when set."
-                    min={0}
-                    value={form.discount_price_usd}
-                    onChange={(v) => set("discount_price_usd", v)}
-                  />
-                  <NumberField
-                    label="Child price USD (blank hides the child row)"
-                    min={0}
-                    value={form.child_price_usd}
-                    onChange={(v) => set("child_price_usd", v)}
-                  />
-                  <NumberField
-                    label="Child discount USD"
-                    min={0}
-                    value={form.discount_child_price_usd}
-                    onChange={(v) => set("discount_child_price_usd", v)}
-                  />
-                  <TextField
-                    label="Price note"
-                    value={form.price_note}
-                    onChange={(v) => set("price_note", v)}
-                    placeholder="per person for a group of 2"
-                  />
-                </div>
-                <RepeaterField
-                  label="Group price tiers"
-                  hint="The cards under “Choose Your Perfect Experience”. Order them as you want them read — cheapest first works best. Leave empty to hide the block."
-                  values={form.price_tiers}
-                  onChange={(v) => set("price_tiers", v)}
-                  blank={() => ({ label: "", persons: null, price: null, note: "", badge: "" })}
-                  title={(row) => (row.label as string) || "New tier"}
-                  columns={[
-                    { key: "label", label: "Title", placeholder: "Four Pax Group", span: 5 },
-                    { key: "persons", label: "People", type: "number", span: 2 },
-                    { key: "price", label: "USD each", type: "number", span: 2 },
-                    {
-                      key: "badge",
-                      label: "Corner ribbon",
-                      placeholder: "Best value",
-                      span: 3,
-                    },
-                    {
-                      key: "note",
-                      label: "Small print under the price",
-                      placeholder: "Per person — best value",
-                    },
-                  ]}
-                />
-              </FormSection>
+              <SectionPicker
+                form={form}
+                themeCount={themeIds.length}
+                onChange={(v) => set("hidden_sections", v)}
+              />
 
-              <FormSection
-                title="Rating & ordering"
-                description="Social proof and the four figures on a tour card."
-              >
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <NumberField
-                    label="Rating"
-                    hint="0–5. Blank hides the stars."
-                    min={0}
-                    max={5}
-                    step={0.1}
-                    value={form.rating}
-                    onChange={(v) => set("rating", v)}
+              {shows("pricing") ? (
+                <FormSection title="Pricing">
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <NumberField
+                      label="Price USD"
+                      min={0}
+                      value={form.price_usd}
+                      onChange={(v) => set("price_usd", v)}
+                    />
+                    <NumberField
+                      label="Price BDT"
+                      hint="Shown as the local rate. Blank hides it."
+                      min={0}
+                      value={form.price_bdt}
+                      onChange={(v) => set("price_bdt", v)}
+                    />
+                    <NumberField
+                      label="Discount USD"
+                      hint="Shown instead of the price when set."
+                      min={0}
+                      value={form.discount_price_usd}
+                      onChange={(v) => set("discount_price_usd", v)}
+                    />
+                    <NumberField
+                      label="Child price USD (blank hides the child row)"
+                      min={0}
+                      value={form.child_price_usd}
+                      onChange={(v) => set("child_price_usd", v)}
+                    />
+                    <NumberField
+                      label="Child discount USD"
+                      min={0}
+                      value={form.discount_child_price_usd}
+                      onChange={(v) => set("discount_child_price_usd", v)}
+                    />
+                    <TextField
+                      label="Price note"
+                      value={form.price_note}
+                      onChange={(v) => set("price_note", v)}
+                      placeholder="per person for a group of 2"
+                    />
+                  </div>
+                  <RepeaterField
+                    label="Group price tiers"
+                    hint="The cards under “Choose Your Perfect Experience”. Order them as you want them read — cheapest first works best. Leave empty to hide the block."
+                    values={form.price_tiers}
+                    onChange={(v) => set("price_tiers", v)}
+                    blank={() => ({ label: "", persons: null, price: null, note: "", badge: "" })}
+                    title={(row) => (row.label as string) || "New tier"}
+                    columns={[
+                      { key: "label", label: "Title", placeholder: "Four Pax Group", span: 5 },
+                      { key: "persons", label: "People", type: "number", span: 2 },
+                      { key: "price", label: "USD each", type: "number", span: 2 },
+                      {
+                        key: "badge",
+                        label: "Corner ribbon",
+                        placeholder: "Best value",
+                        span: 3,
+                      },
+                      {
+                        key: "note",
+                        label: "Small print under the price",
+                        placeholder: "Per person — best value",
+                      },
+                    ]}
                   />
-                  <NumberField
-                    label="Reviews count"
-                    min={0}
-                    value={form.reviews_count}
-                    onChange={(v) => set("reviews_count", v ?? 0)}
-                  />
-                  <NumberField
-                    label="Activities"
-                    min={0}
-                    value={form.activities_count}
-                    onChange={(v) => set("activities_count", v)}
-                  />
-                  <NumberField
-                    label="Max group size"
-                    min={1}
-                    value={form.group_size_max}
-                    onChange={(v) => set("group_size_max", v)}
-                  />
-                  <NumberField
-                    label="Stops"
-                    min={0}
-                    value={form.stops_count}
-                    onChange={(v) => set("stops_count", v)}
-                  />
-                  <NumberField
-                    label="Sort order"
-                    min={0}
-                    value={form.sort_order}
-                    onChange={(v) => set("sort_order", v ?? 0)}
-                  />
-                </div>
-              </FormSection>
+                </FormSection>
+              ) : null}
 
-              <FormSection title="Images">
-                <ImageField
-                  label="Hero image"
-                  hint="Leads the tour page gallery and every card. Falls back to the first gallery image."
-                  value={form.hero_image}
-                  onChange={(v) => set("hero_image", v)}
-                />
-                <GalleryField
-                  label="Gallery"
-                  hint="The tour page shows the first four as a mosaic."
-                  values={form.images}
-                  onChange={(v) => set("images", v)}
-                />
-              </FormSection>
+              {shows("rating") ? (
+                <FormSection
+                  title="Rating & ordering"
+                  description="Social proof and the four figures on a tour card."
+                >
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <NumberField
+                      label="Rating"
+                      hint="0–5. Blank hides the stars."
+                      min={0}
+                      max={5}
+                      step={0.1}
+                      value={form.rating}
+                      onChange={(v) => set("rating", v)}
+                    />
+                    <NumberField
+                      label="Reviews count"
+                      min={0}
+                      value={form.reviews_count}
+                      onChange={(v) => set("reviews_count", v ?? 0)}
+                    />
+                    <NumberField
+                      label="Activities"
+                      min={0}
+                      value={form.activities_count}
+                      onChange={(v) => set("activities_count", v)}
+                    />
+                    <NumberField
+                      label="Max group size"
+                      min={1}
+                      value={form.group_size_max}
+                      onChange={(v) => set("group_size_max", v)}
+                    />
+                    <NumberField
+                      label="Stops"
+                      min={0}
+                      value={form.stops_count}
+                      onChange={(v) => set("stops_count", v)}
+                    />
+                    <NumberField
+                      label="Sort order"
+                      min={0}
+                      value={form.sort_order}
+                      onChange={(v) => set("sort_order", v ?? 0)}
+                    />
+                  </div>
+                </FormSection>
+              ) : null}
 
-              <FormSection
-                title="Themes"
-                description="Drives the filter pills on the public /tours page."
-              >
-                <div className="flex flex-wrap gap-2">
-                  {activities.map((activity) => {
-                    const on = themeIds.includes(activity.id);
-                    return (
-                      <button
-                        key={activity.id}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() =>
-                          setThemeIds((ids) =>
-                            on ? ids.filter((i) => i !== activity.id) : [...ids, activity.id],
-                          )
-                        }
-                        className={`rounded-[30px] border px-4 py-2 text-[0.82rem] font-semibold transition-colors ${
-                          on
-                            ? "border-green-dark bg-green-dark text-white"
-                            : "border-rule bg-paper text-ink hover:border-green"
-                        }`}
-                      >
-                        {activity.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </FormSection>
+              {shows("images") ? (
+                <FormSection title="Images">
+                  <ImageField
+                    label="Hero image"
+                    hint="Leads the tour page gallery and every card. Falls back to the first gallery image."
+                    value={form.hero_image}
+                    onChange={(v) => set("hero_image", v)}
+                  />
+                  <GalleryField
+                    label="Gallery"
+                    hint="The tour page shows the first four as a mosaic."
+                    values={form.images}
+                    onChange={(v) => set("images", v)}
+                  />
+                </FormSection>
+              ) : null}
 
-              <FormSection
-                title="Trip facts"
-                description="Any field left blank falls back to a derived default."
-              >
-                <KeyValueField
-                  label="Facts"
-                  keys={TOUR_FACT_KEYS.filter((k) => !TOUR_FACT_KEYS_EXTRA.includes(k))}
-                  labels={TOUR_FACT_META}
-                  values={form.facts}
-                  onChange={(v) => set("facts", v)}
-                />
-                <Toggle
-                  label="Show accommodation, arrival & departure"
-                  hint="Rarely needed for single-day tours."
-                  checked={showExtraFacts}
-                  onChange={setShowExtraFacts}
-                />
-                {showExtraFacts ? (
+              {shows("themes") ? (
+                <FormSection
+                  title="Themes"
+                  description="Drives the filter pills on the public /tours page."
+                >
+                  <div className="flex flex-wrap gap-2">
+                    {activities.map((activity) => {
+                      const on = themeIds.includes(activity.id);
+                      return (
+                        <button
+                          key={activity.id}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() =>
+                            setThemeIds((ids) =>
+                              on ? ids.filter((i) => i !== activity.id) : [...ids, activity.id],
+                            )
+                          }
+                          className={`rounded-[30px] border px-4 py-2 text-[0.82rem] font-semibold transition-colors ${
+                            on
+                              ? "border-green-dark bg-green-dark text-white"
+                              : "border-rule bg-paper text-ink hover:border-green"
+                          }`}
+                        >
+                          {activity.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </FormSection>
+              ) : null}
+
+              {shows("facts") ? (
+                <FormSection
+                  title="Trip facts"
+                  description="Any field left blank falls back to a derived default."
+                >
                   <KeyValueField
-                    label="More facts"
-                    keys={TOUR_FACT_KEYS_EXTRA}
+                    label="Facts"
+                    keys={TOUR_FACT_KEYS.filter((k) => !TOUR_FACT_KEYS_EXTRA.includes(k))}
                     labels={TOUR_FACT_META}
                     values={form.facts}
                     onChange={(v) => set("facts", v)}
                   />
-                ) : null}
-              </FormSection>
+                  <Toggle
+                    label="Show accommodation, arrival & departure"
+                    hint="Rarely needed for single-day tours."
+                    checked={showExtraFacts}
+                    onChange={setShowExtraFacts}
+                  />
+                  {showExtraFacts ? (
+                    <KeyValueField
+                      label="More facts"
+                      keys={TOUR_FACT_KEYS_EXTRA}
+                      labels={TOUR_FACT_META}
+                      values={form.facts}
+                      onChange={(v) => set("facts", v)}
+                    />
+                  ) : null}
+                </FormSection>
+              ) : null}
 
-              <FormSection title="Overview & highlights">
-                <TextArea
-                  label="Overview"
-                  hint="Leave a blank line between paragraphs."
-                  rows={7}
-                  value={form.overview}
-                  onChange={(v) => set("overview", v)}
-                />
-                <TextArea
-                  label="Good-to-know tip"
-                  hint="Rendered as the 💡 callout."
-                  rows={2}
-                  value={form.overview_tip}
-                  onChange={(v) => set("overview_tip", v)}
-                />
-                <TextArea
-                  label="Highlights"
-                  hint="One per line."
-                  rows={5}
-                  value={form.highlights.join("\n")}
-                  onChange={(v) => set("highlights", v.split("\n"))}
-                />
-              </FormSection>
-
-              <FormSection title="Itinerary">
-                <RepeaterField
-                  label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
-                  values={form.itinerary}
-                  onChange={(v) => set("itinerary", v)}
-                  blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
-                  title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
-                  columns={[
-                    { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
-                    { key: "title", label: "Title", span: 10 },
-                    { key: "detail", label: "Detail", type: "textarea" },
-                  ]}
-                />
-                <RepeaterField
-                  label="Journey at a glance"
-                  values={form.glance}
-                  onChange={(v) => set("glance", v)}
-                  blank={() => ({ when: "", detail: "" })}
-                  columns={[
-                    { key: "when", label: "When", placeholder: "Day 1, Morning", span: 4 },
-                    { key: "detail", label: "What happens", span: 8 },
-                  ]}
-                />
-                <RepeaterField
-                  label="Optional add-ons"
-                  values={form.addons}
-                  onChange={(v) => set("addons", v)}
-                  blank={() => ({ icon: "", title: "", detail: "" })}
-                  columns={[
-                    { key: "icon", label: "Icon", placeholder: "🎣", span: 2 },
-                    { key: "title", label: "Title", span: 10 },
-                    { key: "detail", label: "Detail", type: "textarea" },
-                  ]}
-                />
-              </FormSection>
-
-              <FormSection title="What's included">
-                <div className="grid gap-6 sm:grid-cols-2">
+              {shows("overview") ? (
+                <FormSection title="Overview & highlights">
                   <TextArea
-                    label="Inclusions"
-                    hint="One per line."
-                    rows={5}
-                    value={form.inclusions.join("\n")}
-                    onChange={(v) => set("inclusions", v.split("\n"))}
+                    label="Overview"
+                    hint="Leave a blank line between paragraphs."
+                    rows={7}
+                    value={form.overview}
+                    onChange={(v) => set("overview", v)}
                   />
                   <TextArea
-                    label="Exclusions"
+                    label="Good-to-know tip"
+                    hint="Rendered as the 💡 callout."
+                    rows={2}
+                    value={form.overview_tip}
+                    onChange={(v) => set("overview_tip", v)}
+                  />
+                  <TextArea
+                    label="Highlights"
                     hint="One per line."
                     rows={5}
-                    value={form.exclusions.join("\n")}
-                    onChange={(v) => set("exclusions", v.split("\n"))}
+                    value={form.highlights.join("\n")}
+                    onChange={(v) => set("highlights", v.split("\n"))}
                   />
-                </div>
-                <GroupedListField
-                  label="Offer cards"
-                  hint="The three cards under Tour Price & Offers."
-                  values={form.offers}
-                  onChange={(v) => set("offers", v)}
-                />
-              </FormSection>
+                </FormSection>
+              ) : null}
 
-              <FormSection title="Advice & responsibilities">
-                <TextArea
-                  label="Advice blocks"
-                  hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
-                  rows={8}
-                  value={serializeAdvice(form.advice)}
-                  onChange={(v) => set("advice", parseAdvice(v))}
-                />
-                <RepeaterField
-                  label="Accessibility notes"
-                  values={form.accessibility}
-                  onChange={(v) => set("accessibility", v)}
-                  blank={() => ({ label: "", detail: "" })}
-                  columns={[
-                    {
-                      key: "label",
-                      label: "Label",
-                      placeholder: "Step minimisation",
-                      span: 4,
-                    },
-                    { key: "detail", label: "Detail", span: 8 },
-                  ]}
-                />
-                <StringListField
-                  label="Responsible travel pledge"
-                  values={form.pledge}
-                  onChange={(v) => set("pledge", v)}
-                />
-                <TextArea
-                  label="Why choose us for this tour"
-                  hint="One per line."
-                  rows={5}
-                  value={form.why_items.join("\n")}
-                  onChange={(v) => set("why_items", v.split("\n"))}
-                />
-              </FormSection>
+              {shows("itinerary") ? (
+                <FormSection title="Itinerary">
+                  <RepeaterField
+                    label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
+                    values={form.itinerary}
+                    onChange={(v) => set("itinerary", v)}
+                    blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
+                    title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
+                    columns={[
+                      { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
+                      { key: "title", label: "Title", span: 10 },
+                      { key: "detail", label: "Detail", type: "textarea" },
+                    ]}
+                  />
+                  <RepeaterField
+                    label="Journey at a glance"
+                    values={form.glance}
+                    onChange={(v) => set("glance", v)}
+                    blank={() => ({ when: "", detail: "" })}
+                    columns={[
+                      { key: "when", label: "When", placeholder: "Day 1, Morning", span: 4 },
+                      { key: "detail", label: "What happens", span: 8 },
+                    ]}
+                  />
+                  <RepeaterField
+                    label="Optional add-ons"
+                    values={form.addons}
+                    onChange={(v) => set("addons", v)}
+                    blank={() => ({ icon: "", title: "", detail: "" })}
+                    columns={[
+                      { key: "icon", label: "Icon", placeholder: "🎣", span: 2 },
+                      { key: "title", label: "Title", span: 10 },
+                      { key: "detail", label: "Detail", type: "textarea" },
+                    ]}
+                  />
+                </FormSection>
+              ) : null}
 
-              <FormSection title="FAQs, map & video">
-                <TourFaqsField
-                  values={form.faqs}
-                  onChange={(v) => set("faqs", v)}
-                  faqOptions={siteFaqs}
-                />
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <TextField
-                    label="Map embed URL"
-                    hint="An embeddable map URL, not a share link."
-                    value={form.map_embed}
-                    onChange={(v) => set("map_embed", v)}
+              {shows("included") ? (
+                <FormSection title="What's included">
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <TextArea
+                      label="Inclusions"
+                      hint="One per line."
+                      rows={5}
+                      value={form.inclusions.join("\n")}
+                      onChange={(v) => set("inclusions", v.split("\n"))}
+                    />
+                    <TextArea
+                      label="Exclusions"
+                      hint="One per line."
+                      rows={5}
+                      value={form.exclusions.join("\n")}
+                      onChange={(v) => set("exclusions", v.split("\n"))}
+                    />
+                  </div>
+                  <GroupedListField
+                    label="Offer cards"
+                    hint="The three cards under Tour Price & Offers."
+                    values={form.offers}
+                    onChange={(v) => set("offers", v)}
                   />
-                  <TextField
-                    label="Video embed URL"
-                    hint="YouTube/Vimeo embed URL."
-                    value={form.video_url}
-                    onChange={(v) => set("video_url", v)}
+                </FormSection>
+              ) : null}
+
+              {shows("advice") ? (
+                <FormSection title="Advice & responsibilities">
+                  <TextArea
+                    label="Advice blocks"
+                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
+                    rows={8}
+                    value={serializeAdvice(form.advice)}
+                    onChange={(v) => set("advice", parseAdvice(v))}
                   />
-                </div>
-                <RelatedContentField
-                  label="Related tours"
-                  hint="Shown as “You Might Also Like”. Leave empty to pick automatically."
-                  kind="tour"
-                  values={form.related_slugs}
-                  onChange={(v) => set("related_slugs", v)}
-                />
-              </FormSection>
+                  <RepeaterField
+                    label="Accessibility notes"
+                    values={form.accessibility}
+                    onChange={(v) => set("accessibility", v)}
+                    blank={() => ({ label: "", detail: "" })}
+                    columns={[
+                      {
+                        key: "label",
+                        label: "Label",
+                        placeholder: "Step minimisation",
+                        span: 4,
+                      },
+                      { key: "detail", label: "Detail", span: 8 },
+                    ]}
+                  />
+                  <StringListField
+                    label="Responsible travel pledge"
+                    values={form.pledge}
+                    onChange={(v) => set("pledge", v)}
+                  />
+                  <TextArea
+                    label="Why choose us for this tour"
+                    hint="One per line."
+                    rows={5}
+                    value={form.why_items.join("\n")}
+                    onChange={(v) => set("why_items", v.split("\n"))}
+                  />
+                </FormSection>
+              ) : null}
+
+              {shows("extras") ? (
+                <FormSection title="FAQs, map & video">
+                  <TourFaqsField
+                    values={form.faqs}
+                    onChange={(v) => set("faqs", v)}
+                    faqOptions={siteFaqs}
+                  />
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <TextField
+                      label="Map embed URL"
+                      hint="An embeddable map URL, not a share link."
+                      value={form.map_embed}
+                      onChange={(v) => set("map_embed", v)}
+                    />
+                    <TextField
+                      label="Video embed URL"
+                      hint="YouTube/Vimeo embed URL."
+                      value={form.video_url}
+                      onChange={(v) => set("video_url", v)}
+                    />
+                  </div>
+                  <RelatedContentField
+                    label="Related tours"
+                    hint="Shown as “You Might Also Like”. Leave empty to pick automatically."
+                    kind="tour"
+                    values={form.related_slugs}
+                    onChange={(v) => set("related_slugs", v)}
+                  />
+                </FormSection>
+              ) : null}
             </div>
           </div>
         </div>
@@ -879,6 +923,80 @@ function TourFaqsField({
 }
 
 /** A titled block of fields. Flat by design — cards buried the form in chrome. */
+/**
+ * Which parts of this form the tour shows.
+ *
+ * Collapsed by default: it is a setup decision, not something you revisit while writing.
+ * Switching a section off is safe — the public tour page renders from content, so nothing
+ * disappears from the site — but a section that still holds something says so rather than
+ * letting an author think they removed it.
+ */
+function SectionPicker({
+  form,
+  themeCount,
+  onChange,
+}: {
+  form: TourForm;
+  themeCount: number;
+  onChange: (hidden: string[]) => void;
+}) {
+  const hidden = form.hidden_sections;
+  const [open, setOpen] = useState(false);
+  const offCount = TOUR_SECTIONS.filter((s) => hidden.includes(s.id)).length;
+
+  return (
+    <section className="border-t border-rule pt-7">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 text-left"
+      >
+        <span>
+          <span className="block font-display text-[1.05rem] font-bold text-green-dark">
+            Sections
+          </span>
+          <span className="mt-1 block text-[0.8rem] text-muted">
+            {offCount === 0
+              ? "Every section is shown. Turn off the ones this tour does not need."
+              : `${offCount} section${offCount === 1 ? "" : "s"} hidden on this tour.`}
+          </span>
+        </span>
+        <AdminIcon
+          name="chevron"
+          className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? "rotate-90" : ""}`}
+        />
+      </button>
+
+      {open ? (
+        <div className="mt-5 flex flex-col gap-3 rounded-[10px] border border-rule bg-paper px-4 py-3.5">
+          <p className="text-[0.78rem] text-muted">
+            This only tidies the form you are looking at. The tour page on the website shows
+            a section whenever it has content, whatever you set here.
+          </p>
+          {TOUR_SECTIONS.map((section) => {
+            const isHidden = hidden.includes(section.id);
+            const filled = section.hasContent(form, themeCount);
+            return (
+              <Toggle
+                key={section.id}
+                label={section.label}
+                checked={!isHidden}
+                hint={
+                  isHidden && filled
+                    ? "Hidden here, but it still has content — that content keeps showing on the website."
+                    : section.hint
+                }
+                onChange={(on) => onChange(setSectionHidden(hidden, section.id, !on))}
+              />
+            );
+          })}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function FormSection({
   title,
   description,
@@ -961,6 +1079,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     related_slugs: list(row.related_slugs) as string[],
     is_published: Boolean(row.is_published),
     sort_order: Number(row.sort_order ?? 0),
+    hidden_sections: list(row.hidden_sections) as string[],
   };
 }
 

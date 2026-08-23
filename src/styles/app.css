@@ -28,6 +28,10 @@
   /* Booking CTA — a deeper, redder orange than `orange`. */
   --color-ember: #ec7730;
   --color-gold: #f2b705;
+  /* Second-line heading accent — the phrase set apart in every "Heading one / Heading
+     two" pair. Its own token because the role used to be split between `gold` and
+     `orange`, so the same heading read differently from one section to the next. */
+  --color-accent: #ee6029;
   --color-rust: #c4390e;
   --color-rust-dark: #7a2408;
   --color-ink: #20291f;

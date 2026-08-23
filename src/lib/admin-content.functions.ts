@@ -165,6 +165,8 @@ const TourInput = z.object({
   related_slugs: z.array(slug).max(12).default([]),
   is_published: z.boolean().default(true),
   sort_order: z.coerce.number().int().min(0).max(9999).default(0),
+  // Editor-only: which sections of the form this tour hides. See lib/tour-sections.ts.
+  hidden_sections: z.array(z.string().max(40)).max(40).default([]),
 });
 
 export const adminListTours = createServerFn({ method: "GET" })

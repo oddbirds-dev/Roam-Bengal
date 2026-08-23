@@ -39,7 +39,7 @@ function About() {
           <div>
             <Eyebrow>{about.eyebrow}</Eyebrow>
             <h1 className="font-display text-[clamp(2rem,4.6vw,3rem)] leading-tight text-green">
-              {about.heading_1} <span className="text-orange">{about.heading_2}</span>
+              {about.heading_1} <span className="text-accent">{about.heading_2}</span>
             </h1>
             {about.intro_paragraphs.map((p) => (
               <p key={p} className="mt-4 text-[0.94rem] leading-7 text-muted">
@@ -168,7 +168,7 @@ function About() {
             <h2 className="font-display text-[clamp(1.6rem,3.2vw,2.2rem)] leading-tight text-green">
               {homepage.cta_heading_1}
               <br />
-              About <span className="text-orange">{homepage.cta_heading_2}</span>
+              About <span className="text-accent">{homepage.cta_heading_2}</span>
             </h2>
             <div className="mt-7">
               <ButtonLink to="/contact" variant="green-dark">

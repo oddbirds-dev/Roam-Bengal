@@ -26,6 +26,12 @@ export const siteDefaults = {
     fonts: [] as CustomFontEntry[],
   },
 
+  tour_editor: {
+    // Sections switched off by default in the tour editor for newly created tours.
+    // Existing tours keep whatever they were last saved with. See lib/tour-sections.ts.
+    hidden_sections: [] as string[],
+  },
+
   integrations: {
     gtm_container_id: "",
     adsense_client_id: "",

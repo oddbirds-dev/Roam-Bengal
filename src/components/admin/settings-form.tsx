@@ -6,16 +6,19 @@ import {
   GroupedListField,
   LinkGroupField,
   LinkListField,
+  Label,
   SelectField,
   StringListField,
   TextArea,
   TextField,
+  Toggle,
   type ContentBlock,
   type GroupRow,
   type LinkRow,
   type RepeaterColumn,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import { TOUR_SECTION_OPTIONS } from "@/lib/tour-sections";
 import type { HomeSectionId } from "@/components/home/registry";
 import {
   INFO_SLUGS,
@@ -61,6 +64,18 @@ export type SettingsField =
       hint?: string;
       multiline?: boolean;
       placeholder?: string;
+    }
+  | {
+      /**
+       * A grid of on/off switches. The stored value is the list of options that are
+       * **off**, so an option added to the code later is on everywhere by default rather
+       * than silently missing from every record saved before it existed.
+       */
+      kind: "toggles";
+      key: string;
+      label: string;
+      hint?: string;
+      options: readonly { value: string; label: string; hint?: string }[];
     }
   | { kind: "links"; key: string; label: string; hint?: string; addLabel?: string }
   | { kind: "linkGroups"; key: string; label: string; hint?: string }
@@ -151,6 +166,29 @@ const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode =>
 // ---------------------------------------------------------------------------
 
 export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
+  tour_editor: {
+    title: "Tour editor template",
+    description:
+      "Which sections a brand-new tour starts with. Every tour can then switch its own sections on or off while you edit it.",
+    where: "The tour editor form",
+    sections: [
+      {
+        title: "Sections for new tours",
+        description:
+          "This only sets the starting point for tours created from now on — tours you have already saved keep their own settings. Switching a section off never removes anything from the live website; it only tidies the editing form.",
+        fields: [
+          {
+            kind: "toggles",
+            key: "hidden_sections",
+            label: "Sections",
+            hint: "Turn off what a typical new tour does not need — a day tour rarely has a day-by-day itinerary, for instance.",
+            options: TOUR_SECTION_OPTIONS,
+          },
+        ],
+      },
+    ],
+  },
+
   custom_fonts: {
     title: "Custom Fonts",
     description:
@@ -1007,6 +1045,7 @@ for (const slug of INFO_SLUGS) {
 
 /** Display order on the settings index — grouped by where it appears, not alphabetically. */
 export const SETTINGS_ORDER = [
+  "tour_editor",
   "custom_fonts",
   "integrations",
   "header",
@@ -1194,6 +1233,32 @@ export function FieldControl({
           onChange={onChange}
         />
       );
+
+    case "toggles": {
+      const off = asTextList(value);
+      return (
+        <div>
+          <Label hint={field.hint}>{field.label}</Label>
+          <div className="flex flex-col gap-3 rounded-[10px] border border-rule bg-paper px-4 py-3.5">
+            {field.options.map((option) => (
+              <Toggle
+                key={option.value}
+                label={option.label}
+                hint={option.hint}
+                checked={!off.includes(option.value)}
+                onChange={(on) =>
+                  onChange(
+                    on
+                      ? off.filter((v) => v !== option.value)
+                      : [...off.filter((v) => v !== option.value), option.value],
+                  )
+                }
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
 
     case "links":
       return (
