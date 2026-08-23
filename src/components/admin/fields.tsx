@@ -18,6 +18,18 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
  * a keyboard or focus bug here fixes it on every screen.
  */
 
+/**
+ * The switch drawn beside `Toggle`'s hidden checkbox: this span is the track, its `::after`
+ * is the thumb. The thumb has to be a pseudo-element rather than a child span, because
+ * `peer-checked:` compiles to a *sibling* selector — a real child would not be a sibling of
+ * the input and would never move.
+ */
+const SWITCH = `relative mt-px h-[22px] w-[38px] shrink-0 rounded-full bg-muted/30 transition-colors
+  peer-checked:bg-green peer-focus-visible:ring-2 peer-focus-visible:ring-green/40
+  after:absolute after:top-[3px] after:left-[3px] after:h-4 after:w-4 after:rounded-full
+  after:bg-paper after:shadow-sm after:transition-transform after:content-[""]
+  peer-checked:after:translate-x-4`;
+
 export const inputBase =
   "w-full rounded-[10px] border border-rule bg-paper px-3.5 py-2.5 text-[0.88rem] " +
   "outline-none transition-colors focus:border-green focus:ring-2 focus:ring-green/15 " +
@@ -1102,13 +1114,18 @@ export function Toggle({
   const id = useFieldId(label);
   return (
     <label htmlFor={id} className="flex cursor-pointer items-start gap-3">
+      {/* A real checkbox, visually hidden but still focusable and still the thing the
+          label points at — so keyboard, screen readers, and click-the-label all keep
+          working for free. The span next to it is the switch, driven entirely by
+          `peer-checked`. */}
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-5 w-5 shrink-0 accent-[#1E5F3B]"
+        className="peer sr-only"
       />
+      <span aria-hidden="true" className={SWITCH} />
       <span>
         <span className="block text-[0.86rem] font-semibold text-ink">{label}</span>
         {hint ? <span className="block text-[0.74rem] text-muted">{hint}</span> : null}

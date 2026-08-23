@@ -8,7 +8,7 @@ import type { HomeSectionProps } from "./registry";
 export function GallerySection(_props: HomeSectionProps) {
   const { gallery } = useSiteSettings();
   return (
-    <section className="pt-5 pb-[90px]">
+    <section className="pt-[90px] pb-[90px]">
       <div className="wrap mb-9 flex flex-wrap items-end justify-between gap-[30px]">
         <div>
           <h2 className="mb-3.5 font-kalam text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.3] font-bold">
