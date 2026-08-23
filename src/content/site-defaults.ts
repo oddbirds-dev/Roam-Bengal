@@ -57,6 +57,10 @@ export const siteDefaults = {
   },
 
   footer: {
+    // The footer sits on a dark green gradient, so the shipped default is the light
+    // wordmark rather than `header.logo_url`'s dark one. Upload a replacement in
+    // Admin → Footer → Logo.
+    logo_url: "",
     intro:
       "Small-group tours across Bangladesh, planned by the boatmen, tea-garden guides, and hill-trekkers who call these routes home since 2014.",
     columns: [

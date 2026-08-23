@@ -353,6 +353,17 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     where: "Bottom of every page",
     sections: [
       {
+        title: "Logo",
+        fields: [
+          {
+            kind: "image",
+            key: "logo_url",
+            label: "Footer logo",
+            hint: "Shown above the intro paragraph. The footer band is dark green, so use a light logo. Leave empty for the default light logo.",
+          },
+        ],
+      },
+      {
         title: "Intro",
         fields: [
           {

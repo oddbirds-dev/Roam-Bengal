@@ -17,9 +17,9 @@ export function SiteFooter() {
       >
         <div className="col-span-2 nav:col-span-1">
           <img
-            src={header.logo_url || "/logo.png"}
-            alt="Roam Bengal"
-            className="h-11 w-auto rounded bg-white/95 px-2 py-1.5"
+            src={footer.logo_url || "/logo-white.png"}
+            alt={header.logo_alt}
+            className="h-14 w-auto"
           />
           <p className="mt-3.5 max-w-[260px] text-[0.85rem] opacity-70">{footer.intro}</p>
         </div>
