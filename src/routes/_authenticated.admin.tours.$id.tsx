@@ -14,7 +14,7 @@ import {
   inputBase,
   KeyValueField,
   Label,
-  MarkdownTextarea,
+  RichTextEditor,
   NumberField,
   RelatedContentField,
   reorder,
@@ -857,7 +857,7 @@ function TourFaqsField({
               </div>
               <div>
                 <span className="mb-1 block text-[0.72rem] font-medium text-muted">Answer</span>
-                <MarkdownTextarea
+                <RichTextEditor
                   rows={3}
                   value={row.answer}
                   onChange={(v) => setField(i, "answer", v)}

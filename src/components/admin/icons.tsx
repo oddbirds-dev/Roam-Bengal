@@ -31,6 +31,7 @@ const PATHS: Record<string, string> = {
   minus: "M5 12h14",
   italic: "M19 4h-9 M14 20H5 M15 4L9 20",
   underline: "M6 3v7a6 6 0 0 0 12 0V3 M4 21h16",
+  code: "M9 17l-5-5 5-5 M15 7l5 5-5 5",
 };
 
 export function AdminIcon({

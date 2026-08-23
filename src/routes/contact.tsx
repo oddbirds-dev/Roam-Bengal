@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ContactScene } from "@/components/art/dhaka-scene";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTours } from "@/lib/site-content.functions";
 import { submitInquiry } from "@/lib/capture.functions";
@@ -76,7 +77,7 @@ function Contact() {
           <h1 className="mb-4 font-display text-[clamp(2rem,4.2vw,2.8rem)] leading-[1.2] font-bold">
             {contact.banner_title}
           </h1>
-          <p className="text-center text-[1rem] leading-[1.7] text-muted">{contact.hero_intro}</p>
+          <p className="text-center text-[1rem] leading-[1.7] text-muted"><FormatText>{contact.hero_intro}</FormatText></p>
         </div>
 
         {/* Info cards */}
@@ -93,7 +94,7 @@ function Contact() {
             <h2 className="mb-2.5 font-display text-[1.7rem] font-bold">
               {contact.form_heading}
             </h2>
-            <p className="mb-7 text-[0.92rem] text-muted">{contact.form_intro}</p>
+            <p className="mb-7 text-[0.92rem] text-muted"><FormatText>{contact.form_intro}</FormatText></p>
 
             {state === "done" ? (
               <div className="rounded-2xl border border-green-bright/40 bg-mint p-7 text-center">
@@ -209,7 +210,7 @@ function Contact() {
               <h3 className="mb-1.5 font-display text-[1.2rem] font-bold">
                 {whatsapp.strip_heading}
               </h3>
-              <p className="text-[0.86rem] text-muted">{whatsapp.strip_body}</p>
+              <p className="text-[0.86rem] text-muted"><FormatText>{whatsapp.strip_body}</FormatText></p>
             </div>
             <ButtonLink to={whatsapp.link} variant="whatsapp">
               {whatsapp.strip_cta}

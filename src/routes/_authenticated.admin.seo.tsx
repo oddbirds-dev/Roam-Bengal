@@ -257,6 +257,7 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
         <TextArea
           label="Meta description"
           rows={3}
+          plain
           value={form.meta_description}
           onChange={(v) => set("meta_description", v)}
         />
@@ -273,6 +274,7 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
         <TextArea
           label="OG description"
           rows={2}
+          plain
           value={form.og_description}
           onChange={(v) => set("og_description", v)}
         />
@@ -459,7 +461,7 @@ function RobotsTab({ initialContent }: { initialContent: string }) {
 
   return (
     <Card title="robots.txt" description="Leave empty to serve the built-in default.">
-      <TextArea label="Content" rows={10} value={content} onChange={setContent} />
+      <TextArea label="Content" rows={10} plain value={content} onChange={setContent} />
       <div className="flex items-center gap-3">
         <AdminButton
           disabled={busy}

@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AdminIcon } from "@/components/admin/icons";
 import {
   LinkPicker,
@@ -44,31 +44,259 @@ export function Label({
   );
 }
 
+/* ------------------------------------------------------------------------ *
+ * Rich text
+ *
+ * The stored format is unchanged — inline Markdown (`**bold**`, `[text](/href)`)
+ * mixed with the raw `<span class>` / `<span style>` / `<u>` the toolbar emits, which is
+ * exactly what `FormatText` renders on the site. What changed is that admins no longer
+ * *see* that format: the editing surface is a `contentEditable` showing the styled result,
+ * and the source is derived from the DOM on every keystroke.
+ *
+ * `sourceToHtml` runs once when a value arrives from outside; `htmlToSource` runs on every
+ * edit. They are deliberately a small, lossy-in-one-direction pair: anything the toolbar
+ * cannot produce is dropped on the way back, which is what keeps pasted Word markup from
+ * ending up in the database.
+ * ------------------------------------------------------------------------ */
+
 /** Font size of a selection is stored as an inline `font-size: Npx` style rather than a
  *  fixed class, so the toolbar can offer a continuous +/- stepper and a typed value like a
  *  word processor, instead of a handful of preset sizes. */
 const BASE_FONT_PX = 16;
 const MIN_FONT_PX = 8;
 const MAX_FONT_PX = 96;
-const SIZE_OPEN_RE = /<span style="font-size: (\d+)px">$/;
 
-export function MarkdownTextarea({
+/** `[anchor text](/some/path "optional title")` */
+const MD_LINK = /\[([^\]\n]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
+
+/** Class groups the toolbar owns. Applying one strips the others in the same group, so
+ *  picking a second font replaces the first instead of nesting inside it. */
+const CLASS_GROUPS = ["font-", "text-"] as const;
+
+type FormatGroup = (typeof CLASS_GROUPS)[number] | "size";
+
+const FONT_OPTIONS = [
+  { value: "font-display", label: "Display (Playfair)" },
+  { value: "font-body", label: "Body (Poppins)" },
+  { value: "font-script", label: "Script (Caveat)" },
+  { value: "font-marker", label: "Marker" },
+  { value: "font-kalam", label: "Kalam" },
+  { value: "font-custom", label: "Custom" },
+];
+
+const COLOR_OPTIONS = [
+  { value: "text-green", label: "Green" },
+  { value: "text-green-dark", label: "Dark Green" },
+  { value: "text-gold", label: "Gold" },
+  { value: "text-rust", label: "Rust" },
+  { value: "text-orange", label: "Orange" },
+];
+
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+/** Stored source → HTML for the editable surface. Raw HTML in the source passes straight
+ *  through; only the Markdown constructs need expanding. */
+export function sourceToHtml(source: string): string {
+  if (!source) return "";
+  MD_LINK.lastIndex = 0;
+  return source
+    .replace(MD_LINK, (_m, text: string, href: string) => `<a href="${escapeAttr(href)}">${text || href}</a>`)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+    .replace(/\n/g, "<br>");
+}
+
+/** Moves whitespace outside a wrapper, because `** bold **` is not bold in Markdown. */
+function wrapTight(inner: string, open: string, close: string): string {
+  const match = inner.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  if (!match || !match[2]) return inner;
+  return `${match[1]}${open}${match[2]}${close}${match[3]}`;
+}
+
+function serializeChildren(node: Node): string {
+  let out = "";
+  node.childNodes.forEach((child) => {
+    out += serializeNode(child);
+  });
+  return out;
+}
+
+/** DOM → stored source. The `default` case unwraps rather than drops, so an unexpected
+ *  element (a pasted `<font>`, a browser-inserted wrapper) loses its markup but never its
+ *  words. */
+function serializeNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.nodeValue ?? "";
+  if (node.nodeType !== Node.ELEMENT_NODE) return "";
+
+  const el = node as HTMLElement;
+  if (el.tagName === "BR") return "\n";
+  // Nothing in the toolbar produces these; a paste might. Drop them whole rather than
+  // letting their bodies survive as text.
+  if (el.tagName === "SCRIPT" || el.tagName === "STYLE") return "";
+
+  const inner = serializeChildren(el);
+  if (!inner) return "";
+
+  switch (el.tagName) {
+    case "B":
+    case "STRONG":
+      return wrapTight(inner, "**", "**");
+    case "I":
+    case "EM":
+      return wrapTight(inner, "*", "*");
+    case "U":
+      return wrapTight(inner, "<u>", "</u>");
+    case "A": {
+      const href = el.getAttribute("href") ?? "";
+      return href ? `[${inner}](${href})` : inner;
+    }
+    case "SPAN": {
+      const cls = el.getAttribute("class")?.trim();
+      if (cls) return `<span class="${escapeAttr(cls)}">${inner}</span>`;
+      const size = Number.parseInt(el.style.fontSize, 10);
+      if (Number.isFinite(size) && size !== BASE_FONT_PX) {
+        return `<span style="font-size: ${size}px">${inner}</span>`;
+      }
+      return inner;
+    }
+    case "DIV":
+    case "P":
+      return `${inner}\n`;
+    default:
+      return inner;
+  }
+}
+
+export function htmlToSource(html: string): string {
+  const root = document.createElement("div");
+  root.innerHTML = html;
+  return serializeChildren(root)
+    .replace(/ /g, " ")
+    // A contentEditable ends every block with a filler line break the author never typed.
+    .replace(/\n+$/, "");
+}
+
+/** Drops toolbar-owned classes/styles from everything inside `frag`, so the wrapper about
+ *  to go around it is the only one that decides. */
+function stripFormatting(frag: DocumentFragment | HTMLElement, group: FormatGroup) {
+  frag.querySelectorAll("span").forEach((span) => {
+    if (group === "size") {
+      span.style.removeProperty("font-size");
+    } else {
+      span.className = span.className
+        .split(/\s+/)
+        .filter((c) => c && !c.startsWith(group))
+        .join(" ");
+    }
+    if (!span.className.trim() && !span.getAttribute("style")) {
+      span.replaceWith(...Array.from(span.childNodes));
+    }
+  });
+}
+
+/** After wrapping, an ancestor carrying the same kind of formatting over exactly the same
+ *  text is now dead weight — and worse, it is what makes a second font pick look like it
+ *  did nothing. Peel it off. */
+function unwrapRedundantAncestor(el: HTMLElement, root: HTMLElement, group: FormatGroup) {
+  const parent = el.parentElement;
+  if (!parent || parent === root || parent.tagName !== "SPAN") return;
+  if (parent.textContent !== el.textContent) return;
+
+  if (group === "size") parent.style.removeProperty("font-size");
+  else {
+    parent.className = parent.className
+      .split(/\s+/)
+      .filter((c) => c && !c.startsWith(group))
+      .join(" ");
+  }
+  if (!parent.className.trim() && !parent.getAttribute("style")) {
+    parent.replaceWith(...Array.from(parent.childNodes));
+  }
+}
+
+function selectNode(node: Node) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  range.selectNodeContents(node);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+/** Re-selects a run of siblings — what's left after a wrapper is peeled off. */
+function selectNodes(nodes: ChildNode[]) {
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  const selection = window.getSelection();
+  if (!first || !last || !selection) return;
+  const range = document.createRange();
+  range.setStartBefore(first);
+  range.setEndAfter(last);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+/** Peels a wrapper off, leaving its children in place and selected. */
+function unwrap(el: HTMLElement) {
+  const kids = Array.from(el.childNodes);
+  el.replaceWith(...kids);
+  selectNodes(kids);
+}
+
+/** The nearest ancestor matching `test`, stopping at the editor root. */
+function closestWithin(
+  node: Node | null,
+  root: HTMLElement,
+  test: (el: HTMLElement) => boolean,
+): HTMLElement | null {
+  let current: Node | null = node;
+  while (current && current !== root) {
+    if (current.nodeType === Node.ELEMENT_NODE && test(current as HTMLElement)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+  return null;
+}
+
+export function RichTextEditor({
   id,
   rows = 4,
   value,
   placeholder,
   onChange,
+  ariaLabel,
 }: {
   id?: string;
   rows?: number;
   value: string;
   placeholder?: string;
   onChange: (v: string) => void;
+  /** `label for=` cannot name a div, so the field label is repeated here for screen
+   *  readers. */
+  ariaLabel?: string;
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [hint, setHint] = useState<string | null>(null);
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [sizeValue, setSizeValue] = useState(BASE_FONT_PX);
+  const [showSource, setShowSource] = useState(false);
+
+  /** What we last handed to `onChange`. Re-writing `innerHTML` from a value we ourselves
+   *  produced would reset the caret to the top of the field on every keystroke. */
+  const emitted = useRef<string | null>(null);
+  /** The selection at the moment the link picker opened; focus moves to the dialog. */
+  const savedRange = useRef<Range | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || showSource) return;
+    if (value === emitted.current) return;
+    el.innerHTML = sourceToHtml(value);
+    emitted.current = value;
+  }, [value, showSource]);
 
   /** Inline, non-blocking replacement for `alert()`, which stole the very selection the
    *  editor was about to format. */
@@ -77,236 +305,213 @@ export function MarkdownTextarea({
     setTimeout(() => setHint(null), 2600);
   };
 
-  /** Re-selects a range after a value change; React has to re-render first. */
-  const reselect = (start: number, end: number) => {
-    setTimeout(() => {
-      if (!ref.current) return;
-      ref.current.setSelectionRange(start, end);
-      ref.current.focus();
-    }, 0);
+  const emit = () => {
+    const el = ref.current;
+    if (!el) return;
+    const next = htmlToSource(el.innerHTML);
+    emitted.current = next;
+    onChange(next);
+  };
+
+  /** Runs `fn` against the live selection, after checking it is a real range inside this
+   *  editor. Everything the toolbar does needs those same three guards. */
+  const withSelection = (fn: (range: Range) => void, emptyMessage: string) => {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    const selection = window.getSelection();
+    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    if (!range || !el.contains(range.commonAncestorContainer)) {
+      flash(emptyMessage);
+      return;
+    }
+    if (range.collapsed) {
+      flash(emptyMessage);
+      return;
+    }
+    fn(range);
+    emit();
   };
 
   const applyClass = (cls: string) => {
-    if (!ref.current) return;
-    const textarea = ref.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    if (!selected) {
-      flash("Select some text first, then choose a style.");
-      return;
-    }
-
-    const wrap = `<span class="${cls}">${selected}</span>`;
-    onChange(before + wrap + after);
-    const newStart = start + wrap.indexOf(selected);
-    reselect(newStart, newStart + selected.length);
+    const group = CLASS_GROUPS.find((g) => cls.startsWith(g)) ?? "font-";
+    withSelection((range) => {
+      const el = ref.current!;
+      const contents = range.extractContents();
+      stripFormatting(contents, group);
+      const span = document.createElement("span");
+      span.className = cls;
+      span.appendChild(contents);
+      range.insertNode(span);
+      unwrapRedundantAncestor(span, el, group);
+      selectNode(span);
+    }, "Select some text first, then choose a style.");
   };
 
-  const openLinkPicker = () => {
-    const textarea = ref.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const existing = findLinkAt(textarea.value, start, end);
+  const applySize = (rawNext: number) => {
+    if (!Number.isFinite(rawNext)) return;
+    const next = Math.min(MAX_FONT_PX, Math.max(MIN_FONT_PX, Math.round(rawNext)));
+    withSelection((range) => {
+      const el = ref.current!;
+      // The stepper is meant to be pressed repeatedly. When the selection is already
+      // exactly one sized span, retune that span rather than nesting a second one inside
+      // it — and keep the same DOM node, so the caret survives the round trip.
+      const sized = closestWithin(
+        range.commonAncestorContainer,
+        el,
+        (node) => node.tagName === "SPAN" && !!node.style.fontSize,
+      );
+      if (sized && sized.textContent === range.toString()) {
+        if (next === BASE_FONT_PX) {
+          sized.style.removeProperty("font-size");
+          if (!sized.className.trim() && !sized.getAttribute("style")) unwrap(sized);
+          else selectNode(sized);
+        } else {
+          sized.style.fontSize = `${next}px`;
+          selectNode(sized);
+        }
+        setSizeValue(next);
+        return;
+      }
 
-    if (existing) {
-      setPicker({
-        range: [existing.start, existing.end],
-        initial: { href: existing.href, text: existing.text },
-        editing: true,
-      });
-      return;
-    }
-
-    setPicker({
-      range: [start, end],
-      initial: { href: "", text: textarea.value.substring(start, end) },
-      editing: false,
-    });
-  };
-
-  const applyLink = ({ value: href, label }: LinkPickResult) => {
-    if (!picker) return;
-    const [start, end] = picker.range;
-    const current = ref.current?.value ?? value;
-    const anchor = label.trim() || current.substring(start, end) || href;
-    const markdown = `[${anchor}](${href})`;
-    onChange(current.substring(0, start) + markdown + current.substring(end));
-    // Land the caret on the anchor text, not the URL — the next edit is usually the words.
-    reselect(start + 1, start + 1 + anchor.length);
-  };
-
-  const removeLink = () => {
-    if (!picker) return;
-    const [start, end] = picker.range;
-    const current = ref.current?.value ?? value;
-    const text = picker.initial.text;
-    onChange(current.substring(0, start) + text + current.substring(end));
-    reselect(start, start + text.length);
-  };
-
-  const handleBold = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!ref.current) return;
-    const textarea = ref.current;
-    // Get current selection bounds right now from the DOM
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    let newValue: string;
-    let newStart = start;
-    let newEnd = end;
-
-    if (before.endsWith("**") && after.startsWith("**")) {
-      newValue = before.substring(0, before.length - 2) + selected + after.substring(2);
-      newStart = start - 2;
-      newEnd = end - 2;
-    } else if (selected.startsWith("**") && selected.endsWith("**") && selected.length >= 4) {
-      newValue = before + selected.substring(2, selected.length - 2) + after;
-      newStart = start;
-      newEnd = end - 4;
-    } else {
-      newValue = before + "**" + selected + "**" + after;
-      newStart = start + 2;
-      newEnd = end + 2;
-    }
-    
-    onChange(newValue);
-    reselect(newStart, newEnd);
-  };
-
-  const handleItalic = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!ref.current) return;
-    const textarea = ref.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    let newValue: string;
-    let newStart = start;
-    let newEnd = end;
-
-    if (before.endsWith("*") && !before.endsWith("**") && after.startsWith("*") && !after.startsWith("**")) {
-      newValue = before.slice(0, -1) + selected + after.slice(1);
-      newStart = start - 1;
-      newEnd = end - 1;
-    } else if (
-      selected.startsWith("*") && !selected.startsWith("**") &&
-      selected.endsWith("*") && !selected.endsWith("**") &&
-      selected.length >= 2
-    ) {
-      newValue = before + selected.slice(1, -1) + after;
-      newEnd = end - 2;
-    } else {
-      newValue = before + "*" + selected + "*" + after;
-      newStart = start + 1;
-      newEnd = end + 1;
-    }
-
-    onChange(newValue);
-    reselect(newStart, newEnd);
-  };
-
-  const handleUnderline = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!ref.current) return;
-    const textarea = ref.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    let newValue: string;
-    let newStart = start;
-    let newEnd = end;
-
-    if (before.endsWith("<u>") && after.startsWith("</u>")) {
-      newValue = before.slice(0, -3) + selected + after.slice(4);
-      newStart = start - 3;
-      newEnd = end - 3;
-    } else if (selected.startsWith("<u>") && selected.endsWith("</u>") && selected.length >= 7) {
-      newValue = before + selected.slice(3, -4) + after;
-      newEnd = end - 7;
-    } else {
-      newValue = before + "<u>" + selected + "</u>" + after;
-      newStart = start + 3;
-      newEnd = end + 3;
-    }
-
-    onChange(newValue);
-    reselect(newStart, newEnd);
+      const contents = range.extractContents();
+      stripFormatting(contents, "size");
+      if (next === BASE_FONT_PX) {
+        // Back to the inherited size: strip, don't wrap in a no-op span.
+        const kids = Array.from(contents.childNodes);
+        range.insertNode(contents);
+        selectNodes(kids);
+      } else {
+        const span = document.createElement("span");
+        span.style.fontSize = `${next}px`;
+        span.appendChild(contents);
+        range.insertNode(span);
+        unwrapRedundantAncestor(span, el, "size");
+        selectNode(span);
+      }
+      setSizeValue(next);
+    }, "Select some text first, then adjust its size.");
   };
 
   /** Reflects the size of whatever's currently selected in the "px" field, so the toolbar
    *  shows the selection's real size rather than staying pinned at the default. */
   const syncSizeFromSelection = () => {
-    if (!ref.current) return;
-    const textarea = ref.current;
-    const before = textarea.value.substring(0, textarea.selectionStart);
-    const after = textarea.value.substring(textarea.selectionEnd);
-    const match = before.match(SIZE_OPEN_RE);
-    setSizeValue(match && after.startsWith("</span>") ? Number(match[1]) : BASE_FONT_PX);
+    const el = ref.current;
+    if (!el) return;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const sized = closestWithin(
+      selection.getRangeAt(0).commonAncestorContainer,
+      el,
+      (node) => node.tagName === "SPAN" && !!node.style.fontSize,
+    );
+    setSizeValue(sized ? Number.parseInt(sized.style.fontSize, 10) : BASE_FONT_PX);
   };
 
-  const applySize = (rawNext: number) => {
-    if (!ref.current || !Number.isFinite(rawNext)) return;
-    const textarea = ref.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
+  /** Bold/italic/underline go through `execCommand`. It is deprecated but universally
+   *  implemented, and it is the only thing that gets toggling a partial selection across
+   *  element boundaries right without a full editor library. `styleWithCSS` off keeps it
+   *  emitting `<b>`/`<i>`/`<u>` — tags the serializer understands — rather than styles. */
+  const command = (name: "bold" | "italic" | "underline") => {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    document.execCommand("styleWithCSS", false, "false");
+    document.execCommand(name);
+    emit();
+  };
 
-    if (!selected) {
-      flash("Select some text first, then adjust its size.");
+  const openLinkPicker = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    const selection = window.getSelection();
+    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    if (!range || !el.contains(range.commonAncestorContainer)) {
+      flash("Put the cursor in the text first.");
       return;
     }
 
-    const next = Math.min(MAX_FONT_PX, Math.max(MIN_FONT_PX, Math.round(rawNext)));
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
+    const anchor = closestWithin(range.commonAncestorContainer, el, (n) => n.tagName === "A");
+    if (anchor) {
+      savedRange.current = null;
+      setPicker({
+        anchor,
+        initial: { href: anchor.getAttribute("href") ?? "", text: anchor.textContent ?? "" },
+        editing: true,
+      });
+      return;
+    }
 
-    const openMatch = before.match(SIZE_OPEN_RE);
-    const wrapped = openMatch && after.startsWith("</span>");
-    const strippedBefore = wrapped ? before.slice(0, before.length - openMatch![0].length) : before;
-    const strippedAfter = wrapped ? after.slice("</span>".length) : after;
-
-    const openTag = next === BASE_FONT_PX ? "" : `<span style="font-size: ${next}px">`;
-    const closeTag = next === BASE_FONT_PX ? "" : "</span>";
-
-    onChange(strippedBefore + openTag + selected + closeTag + strippedAfter);
-    const newStart = strippedBefore.length + openTag.length;
-    reselect(newStart, newStart + selected.length);
-    setSizeValue(next);
+    if (range.collapsed) {
+      flash("Select the words the link should cover.");
+      return;
+    }
+    savedRange.current = range.cloneRange();
+    setPicker({ anchor: null, initial: { href: "", text: range.toString() }, editing: false });
   };
+
+  const applyLink = ({ value: href, label }: LinkPickResult) => {
+    if (!picker) return;
+    if (picker.anchor) {
+      picker.anchor.setAttribute("href", href);
+      if (label.trim()) picker.anchor.textContent = label.trim();
+      emit();
+      return;
+    }
+    const range = savedRange.current;
+    if (!range) return;
+    const anchor = document.createElement("a");
+    anchor.setAttribute("href", href);
+    const contents = range.extractContents();
+    anchor.appendChild(contents);
+    if (label.trim() && label.trim() !== anchor.textContent) anchor.textContent = label.trim();
+    if (!anchor.textContent) anchor.textContent = href;
+    range.insertNode(anchor);
+    selectNode(anchor);
+    emit();
+  };
+
+  const removeLink = () => {
+    const anchor = picker?.anchor;
+    if (!anchor) return;
+    anchor.replaceWith(...Array.from(anchor.childNodes));
+    emit();
+  };
+
+  /** Paste as plain text. Word and Google Docs carry a payload of inline styles that the
+   *  serializer would silently discard anyway — better to never let it in. */
+  const onPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    emit();
+  };
+
+  const toolbarButton =
+    "flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule";
+  const dropdown =
+    "text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green";
 
   return (
     <div className="flex flex-col rounded-[10px] border border-rule bg-paper overflow-hidden transition-colors focus-within:border-green focus-within:ring-2 focus-within:ring-green/15">
       <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
         <select
           title="Text Font"
+          disabled={showSource}
+          value=""
           onChange={(e) => {
             if (e.target.value) applyClass(e.target.value);
             e.target.value = "";
           }}
-          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+          className={dropdown}
         >
           <option value="">Font</option>
-          <option value="font-display">Display (Playfair)</option>
-          <option value="font-body">Body (Poppins)</option>
-          <option value="font-script">Script (Caveat)</option>
-          <option value="font-marker">Marker</option>
-          <option value="font-kalam">Kalam</option>
-          <option value="font-custom">Custom</option>
+          {FONT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
         <div className="h-4 w-px bg-rule" />
         <div className="flex items-center gap-1">
@@ -314,8 +519,9 @@ export function MarkdownTextarea({
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => applySize(sizeValue - 1)}
+            disabled={showSource}
             title="Decrease text size"
-            className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+            className={toolbarButton}
           >
             <AdminIcon name="minus" className="h-[14px] w-[14px]" />
           </button>
@@ -324,6 +530,7 @@ export function MarkdownTextarea({
             value={sizeValue}
             min={MIN_FONT_PX}
             max={MAX_FONT_PX}
+            disabled={showSource}
             title="Text size (px)"
             onChange={(e) => applySize(e.target.valueAsNumber)}
             className="w-11 rounded border border-rule bg-paper px-1 py-0.5 text-center text-[0.72rem] font-medium text-ink outline-none focus:border-green"
@@ -332,8 +539,9 @@ export function MarkdownTextarea({
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => applySize(sizeValue + 1)}
+            disabled={showSource}
             title="Increase text size"
-            className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+            className={toolbarButton}
           >
             <AdminIcon name="plus" className="h-[14px] w-[14px]" />
           </button>
@@ -341,58 +549,74 @@ export function MarkdownTextarea({
         <div className="h-4 w-px bg-rule" />
         <button
           type="button"
-          // Mousedown, not click: the browser clears the textarea's selection when focus
-          // moves, and click fires too late to save it.
+          // Mousedown, not click: the browser clears the selection when focus moves, and
+          // click fires too late to save it.
           onMouseDown={(e) => e.preventDefault()}
-          onClick={handleBold}
+          onClick={() => command("bold")}
+          disabled={showSource}
           title="Bold text"
-          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          className={toolbarButton}
         >
           <AdminIcon name="bold" className="h-[14px] w-[14px]" />
         </button>
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={handleItalic}
+          onClick={() => command("italic")}
+          disabled={showSource}
           title="Italic text"
-          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          className={toolbarButton}
         >
           <AdminIcon name="italic" className="h-[14px] w-[14px]" />
         </button>
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={handleUnderline}
+          onClick={() => command("underline")}
+          disabled={showSource}
           title="Underline text"
-          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          className={toolbarButton}
         >
           <AdminIcon name="underline" className="h-[14px] w-[14px]" />
         </button>
         <div className="h-4 w-px bg-rule" />
         <select
           title="Text Color"
+          disabled={showSource}
+          value=""
           onChange={(e) => {
             if (e.target.value) applyClass(e.target.value);
             e.target.value = "";
           }}
-          className="text-[0.72rem] outline-none bg-transparent font-medium cursor-pointer text-ink hover:text-green"
+          className={dropdown}
         >
           <option value="">Color</option>
-          <option value="text-green">Green</option>
-          <option value="text-green-dark">Dark Green</option>
-          <option value="text-gold">Gold</option>
-          <option value="text-rust">Rust</option>
-          <option value="text-orange">Orange</option>
+          {COLOR_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
         <div className="h-4 w-px bg-rule" />
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={openLinkPicker}
+          disabled={showSource}
           title="Insert or edit a link"
-          className="flex h-[24px] w-[24px] items-center justify-center rounded bg-transparent text-ink hover:bg-rule"
+          className={toolbarButton}
         >
           <AdminIcon name="link" className="h-[14px] w-[14px]" />
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setShowSource((s) => !s)}
+          title={showSource ? "Back to formatted view" : "Edit the underlying code"}
+          aria-pressed={showSource}
+          className={`${toolbarButton} ${showSource ? "bg-rule text-green" : ""}`}
+        >
+          <AdminIcon name="code" className="h-[14px] w-[14px]" />
         </button>
         {hint ? (
           <span role="status" className="ml-auto truncate text-[0.72rem] font-medium text-rust">
@@ -400,19 +624,49 @@ export function MarkdownTextarea({
           </span>
         ) : null}
       </div>
-      <textarea
-        ref={ref}
-        id={id}
-        rows={rows}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        onSelect={syncSizeFromSelection}
-        onClick={syncSizeFromSelection}
-        onKeyUp={syncSizeFromSelection}
-        className="w-full bg-transparent px-3.5 py-2.5 text-[0.88rem] outline-none disabled:bg-cream disabled:text-muted"
-      />
-      {/* Mounted only while open. The tour editor renders ~20 of these textareas, and an
+
+      {showSource ? (
+        <textarea
+          id={id}
+          rows={rows}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => {
+            // Straight through: the editable surface re-reads it when the toggle flips back.
+            emitted.current = null;
+            onChange(e.target.value);
+          }}
+          className="w-full bg-transparent px-3.5 py-2.5 font-mono text-[0.8rem] outline-none"
+        />
+      ) : (
+        <div className="relative">
+          {!value && placeholder ? (
+            <span className="pointer-events-none absolute top-2.5 left-3.5 text-[0.88rem] text-muted">
+              {placeholder}
+            </span>
+          ) : null}
+          <div
+            ref={ref}
+            id={id}
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-multiline="true"
+            aria-label={ariaLabel}
+            spellCheck
+            style={{ minHeight: `calc(${rows} * 1.5em + 1.25rem)` }}
+            onInput={emit}
+            onBlur={emit}
+            onPaste={onPaste}
+            onSelect={syncSizeFromSelection}
+            onKeyUp={syncSizeFromSelection}
+            onMouseUp={syncSizeFromSelection}
+            className="w-full whitespace-pre-wrap px-3.5 py-2.5 text-[0.88rem] leading-[1.5] outline-none [&_a]:text-orange [&_a]:underline"
+          />
+        </div>
+      )}
+
+      {/* Mounted only while open. The tour editor renders ~20 of these, and an
           always-mounted picker would have every one of them subscribe to the target list
           on page load. */}
       {picker ? (
@@ -430,36 +684,11 @@ export function MarkdownTextarea({
 }
 
 interface PickerState {
-  /** Slice of the textarea value the picker will replace. */
-  range: [number, number];
+  /** The `<a>` being edited, or null when the picker will create one. */
+  anchor: HTMLElement | null;
   initial: { href: string; text: string };
   /** True when the caret was inside an existing link, enabling "Remove link". */
   editing: boolean;
-}
-
-/** `[anchor text](/some/path "optional title")` */
-const MD_LINK = /\[([^\]\n]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
-
-/**
- * The markdown link whose source range contains the caret, if any. Lets the toolbar button
- * mean "edit this link" when the editor clicks into one, rather than nesting a new link
- * inside it.
- */
-function findLinkAt(
-  value: string,
-  start: number,
-  end: number,
-): { start: number; end: number; href: string; text: string } | null {
-  MD_LINK.lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = MD_LINK.exec(value)) !== null) {
-    const from = match.index;
-    const to = from + match[0].length;
-    if (start >= from && end <= to) {
-      return { start: from, end: to, text: match[1] ?? "", href: match[2] ?? "" };
-    }
-  }
-  return null;
 }
 
 export function TextField({
@@ -506,6 +735,7 @@ export function TextArea({
   hint,
   rows = 4,
   placeholder,
+  plain,
 }: {
   label: string;
   value: string;
@@ -513,6 +743,10 @@ export function TextArea({
   hint?: string;
   rows?: number;
   placeholder?: string;
+  /** Content that is markup or plain prose in its own right — an embed snippet, a
+   *  robots.txt, a meta description. Formatting it would corrupt it, so these get a plain
+   *  textarea with no toolbar. */
+  plain?: boolean;
 }) {
   const id = useFieldId(label);
   return (
@@ -520,13 +754,25 @@ export function TextArea({
       <Label htmlFor={id} hint={hint}>
         {label}
       </Label>
-      <MarkdownTextarea
-        id={id}
-        rows={rows}
-        value={value}
-        placeholder={placeholder}
-        onChange={onChange}
-      />
+      {plain ? (
+        <textarea
+          id={id}
+          rows={rows}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${inputBase} resize-y font-mono text-[0.8rem]`}
+        />
+      ) : (
+        <RichTextEditor
+          id={id}
+          rows={rows}
+          value={value}
+          placeholder={placeholder}
+          onChange={onChange}
+          ariaLabel={label}
+        />
+      )}
     </div>
   );
 }
@@ -754,7 +1000,7 @@ export function StringListField({
             <div key={i} className="flex items-start gap-2">
               {multiline ? (
                 <div className="grow">
-                  <MarkdownTextarea
+                  <RichTextEditor
                     rows={3}
                     value={value}
                     placeholder={placeholder}
@@ -870,7 +1116,7 @@ function RepeaterColumnsGrid<T extends Record<string, unknown>>({
           {col.render ? (
             col.render(row[col.key], (v) => onFieldChange(col.key, v))
           ) : col.type === "textarea" ? (
-            <MarkdownTextarea
+            <RichTextEditor
               rows={3}
               value={String(row[col.key] ?? "")}
               placeholder={col.placeholder}

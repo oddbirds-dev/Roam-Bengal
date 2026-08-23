@@ -45,7 +45,7 @@ import {
 
 export type SettingsField =
   | { kind: "text"; key: string; label: string; hint?: string; placeholder?: string }
-  | { kind: "textarea"; key: string; label: string; hint?: string; rows?: number }
+  | { kind: "textarea"; key: string; label: string; hint?: string; rows?: number; plain?: boolean }
   | { kind: "image"; key: string; label: string; hint?: string }
   | {
       kind: "select";
@@ -662,6 +662,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             key: "map_embed",
             label: "Google Maps embed code",
             rows: 4,
+            plain: true,
             hint: "In Google Maps: Share → Embed a map → Copy HTML, then paste it here. Leave empty to hide the map.",
           },
         ],
@@ -1104,6 +1105,7 @@ export function FieldControl({
           label={field.label}
           hint={field.hint}
           rows={field.rows}
+          plain={field.plain}
           value={asText(value)}
           onChange={onChange}
         />
