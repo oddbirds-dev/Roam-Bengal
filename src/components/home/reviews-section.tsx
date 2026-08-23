@@ -317,8 +317,8 @@ function EdgePhoto({
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute top-[14%] z-[1] hidden w-[210px] xl:block ${
-        side === "left" ? "-left-16 -rotate-[9deg]" : "-right-16 rotate-[7deg]"
+      className={`pointer-events-none absolute top-[12%] z-[1] hidden w-[300px] xl:block ${
+        side === "left" ? "-left-20 -rotate-[9deg]" : "-right-20 rotate-[7deg]"
       }`}
     >
       <PhotoFrame
@@ -330,7 +330,7 @@ function EdgePhoto({
             : "linear-gradient(160deg,#F0791E,#C4390E)"
         }
         placeholderLabel={placeholderLabel}
-        className="aspect-[3/4] w-full rounded-[6px] border-[10px] border-paper shadow-[0_18px_40px_rgba(32,41,31,0.18)]"
+        className="aspect-[3/4] w-full rounded-[6px] border-[14px] border-paper shadow-[0_22px_50px_rgba(32,41,31,0.2)]"
       />
     </div>
   );
