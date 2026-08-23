@@ -979,6 +979,18 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
     },
     { kind: "text", key: "cta_label", label: "Button text" },
     { kind: "text", key: "cta_link", label: "Button goes to" },
+    {
+      kind: "image",
+      key: "cta_image",
+      label: "Photo beside the text",
+      hint: "Leave empty to keep the drawn Dhaka skyline.",
+    },
+    {
+      kind: "text",
+      key: "cta_image_alt",
+      label: "Photo description",
+      hint: "Describe the photo for screen readers and search engines. Ignored while the drawing is showing.",
+    },
   ],
 };
 

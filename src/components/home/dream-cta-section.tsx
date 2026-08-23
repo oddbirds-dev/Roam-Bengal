@@ -2,6 +2,7 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
 import { ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
+import { PhotoFrame } from "@/components/ui/photo-frame";
 import { DREAM_BG } from "./palette";
 import type { HomeSectionProps } from "./registry";
 
@@ -25,7 +26,19 @@ export function DreamCtaSection(_props: HomeSectionProps) {
             {homepage.cta_label}
           </ButtonLink>
         </div>
-        <DhakaScene className="h-auto w-full" />
+        {/* The drawing is the designed default, not a placeholder, so it stays until a
+            photo is actually uploaded. The frame matches the drawing's 460×380 viewBox so
+            swapping between them does not shift the rest of the section. */}
+        {homepage.cta_image ? (
+          <PhotoFrame
+            src={homepage.cta_image}
+            alt={homepage.cta_image_alt}
+            gradient="orange"
+            className="aspect-[46/38] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)]"
+          />
+        ) : (
+          <DhakaScene className="h-auto w-full" />
+        )}
       </div>
     </section>
   );

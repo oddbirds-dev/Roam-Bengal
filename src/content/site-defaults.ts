@@ -211,6 +211,9 @@ export const siteDefaults = {
     ],
     cta_label: "Plan Your Vacation",
     cta_link: "/contact",
+    // Empty means the section keeps its drawn Dhaka skyline. Upload a photo to replace it.
+    cta_image: "",
+    cta_image_alt: "A Roam Bengal trip in Bangladesh",
   },
 
   gallery: {
