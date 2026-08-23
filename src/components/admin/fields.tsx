@@ -7,6 +7,8 @@ import {
 } from "@/components/admin/link-picker";
 import { SortableList, SortableRow } from "@/components/admin/sortable-list";
 import type { LinkTargetKind } from "@/lib/link-targets";
+import { resolveCustomFonts } from "@/lib/custom-fonts";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 /**
  * Form primitives for the admin editors.
@@ -118,11 +120,11 @@ const COLOR_OPTIONS = [
  * `text-center` share them with the families and colours here, and a prefix test would
  * strip those too the moment someone changed a font.
  */
-const GROUP_CLASS_RE: Record<FormatGroup, RegExp | null> = {
+const GROUP_CLASS_RE = {
   font: new RegExp(`^(${BUILT_IN_FONTS.map((o) => o.value).join("|")}|font-custom(-[a-z0-9-]+)?)$`),
   color: new RegExp(`^(${COLOR_OPTIONS.map((o) => o.value).join("|")})$`),
   size: null,
-};
+} satisfies Record<FormatGroup, RegExp | null>;
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
