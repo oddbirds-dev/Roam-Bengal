@@ -51,7 +51,9 @@ function Home() {
 
         <SiteHeader />
 
-        <main id="main" className="wrap relative z-[4] pt-[60px]">
+        {/* `pb` runs the hero photo on past the buttons, which is what sets where the
+            feature strip below starts. */}
+        <main id="main" className="wrap relative z-[4] pt-[60px] pb-[290px]">
           <span className="block font-script text-[clamp(1.8rem,3.4vw,2.6rem)] leading-tight font-bold -mb-1.5 text-gold">
             {hero.script}
           </span>

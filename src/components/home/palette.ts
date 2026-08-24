@@ -34,6 +34,12 @@ export const REVIEW_CARD_TINTS = [
   { bg: "#EEF1F8", avatar: "#4A7EBB" },
 ];
 
+/** Hairline seam closing the tours band top and bottom, in place of the torn paper edge
+ *  that used to sit there. Runs the `orange → gold → rust` of `TOUR_FRAMES` and fades to
+ *  transparent at both ends so it reads as a seam rather than a hard border. */
+export const SECTION_SEAM =
+  "linear-gradient(90deg,transparent,#F0791E 18%,#E0A612 50%,#C4390E 82%,transparent)";
+
 export const FEATURE_BG = "linear-gradient(120deg,#FCEFD9,#F7E2C0)";
 export const TOURS_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
 export const STORY_BG = "linear-gradient(120deg,#FDF0E4,#EAF4EC)";
