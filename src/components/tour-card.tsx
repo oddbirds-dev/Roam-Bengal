@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import { FaStar, FaHeart } from "react-icons/fa";
 import { PhotoFrame, FRAME_GRADIENTS, gradientFor } from "@/components/ui/photo-frame";
-import { overviewParagraphs, type TourDTO } from "@/lib/content-types";
+import { overviewParagraphs, plainText, type TourDTO } from "@/lib/content-types";
 
 /** Shared by the homepage, /tours, and the tour page's related rail. */
 export function TourCard({
@@ -29,7 +29,8 @@ export function TourCard({
   const discountPrice = tour.discountPriceUsd;
   const hasDiscount = price !== null && discountPrice !== null && discountPrice < price;
   const discountPct = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : null;
-  const teaser = overviewParagraphs(tour.overview)[0];
+  // The overview is authored with markup, so the card strips it rather than printing tags.
+  const teaser = overviewParagraphs(tour.overview).map(plainText).find(Boolean);
 
   return (
     <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_10px_28px_rgba(0,0,0,0.08)] transition-transform duration-250 hover:-translate-y-1.5">

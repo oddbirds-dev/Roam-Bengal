@@ -19,6 +19,7 @@ import {
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
   overviewParagraphs,
+  plainText,
   type TourDTO,
   type TourFactKey,
 } from "@/lib/content-types";
@@ -59,7 +60,7 @@ export const Route = createFileRoute("/tours/$slug")({
     
     return buildSeoMeta(loaderData.seoMeta, {
       title: `${tour.title} — Roam Bengal`,
-      description: overviewParagraphs(tour.overview)[0] ?? "",
+      description: overviewParagraphs(tour.overview).map(plainText).find(Boolean) ?? "",
       image: tour.heroImage ?? tour.images[0] ?? undefined,
       urlPath: `/tours/${tour.slug}`
     });

@@ -97,6 +97,29 @@ export function overviewParagraphs(overview: string | null): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Strips the markup `overview` copy carries — the admin toolbar's raw `<span>`/`<b>` tags
+ * plus markdown emphasis — for the places that print it as plain text instead of running
+ * it through `FormatText`: card teasers and SEO meta descriptions.
+ */
+export function plainText(markup: string): string {
+  return markup
+    .replace(/<[^>]*>/g, "")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/(\*\*\*|\*\*|\*|___|__|_|~~|`)/g, "")
+    .replace(/^\s*#{1,6}\s*/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export interface ItineraryDay {
   day: number;
   title: string;
