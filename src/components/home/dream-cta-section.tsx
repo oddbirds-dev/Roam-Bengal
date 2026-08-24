@@ -2,7 +2,6 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
 import { ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
-import { PhotoFrame } from "@/components/ui/photo-frame";
 import { DREAM_BG } from "./palette";
 import type { HomeSectionProps } from "./registry";
 
@@ -27,14 +26,16 @@ export function DreamCtaSection(_props: HomeSectionProps) {
           </ButtonLink>
         </div>
         {/* The drawing is the designed default, not a placeholder, so it stays until a
-            photo is actually uploaded. The frame matches the drawing's 460×380 viewBox so
-            swapping between them does not shift the rest of the section. */}
+            photo is actually uploaded. The upload sits directly on the section — no frame,
+            fill, or shadow — so a transparent PNG reads the same way the drawing does, and
+            the drawing's 460×380 ratio is kept so swapping does not shift the section. */}
         {homepage.cta_image ? (
-          <PhotoFrame
+          <img
             src={homepage.cta_image}
             alt={homepage.cta_image_alt}
-            gradient="orange"
-            className="aspect-[46/38] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)]"
+            loading="lazy"
+            decoding="async"
+            className="aspect-[46/38] w-full object-contain"
           />
         ) : (
           <DhakaScene className="h-auto w-full" />
