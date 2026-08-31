@@ -1,156 +1,70 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  AdminButton,
-  Card,
-  DeleteButton,
-  ErrorBanner,
-  PageHeader,
-  SavedNote,
-  Table,
-  Td,
-  useAction,
-} from "@/components/admin/admin-ui";
+import { useMemo, useState } from "react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { AdminButton, AdminPage, ConfirmButton, EmptyState, ErrorBanner, ListTable, Td, ViewPublicLink, toast, useAction } from "@/components/admin/admin-ui";
+import { EditorShell } from "@/components/admin/editor-shell";
 import { NumberField, TextArea, TextField } from "@/components/admin/fields";
-import {
-  adminDeleteActivity,
-  adminListActivities,
-  adminUpsertActivity,
-} from "@/lib/admin-content.functions";
+import { AdminIcon } from "@/components/admin/icons";
+import { adminDeleteActivity, adminListActivities, adminUpsertActivity } from "@/lib/admin-content.functions";
+import { activityPreviewChannel } from "@/lib/activity-preview";
+import type { ActivityDTO } from "@/lib/content-types";
+import { getErrorMessage } from "@/lib/utils";
+import { slugify } from "@/lib/slugify";
 
-/**
- * Activities double as the theme filter pills on /tours. Not to be confused with a
- * tour's own `activity_label` / `activities_count` fields, which are display-only.
- */
-export const Route = createFileRoute("/_authenticated/admin/activities")({
-  loader: () => adminListActivities(),
-  component: ActivitiesScreen,
-});
-
-function blank() {
-  return { slug: "", name: "", description: "", sort_order: 0 };
-}
-
-type Form = ReturnType<typeof blank>;
+export const Route = createFileRoute("/_authenticated/admin/activities")({ loader: () => adminListActivities(), component: ActivitiesScreen });
+type Row = Awaited<ReturnType<typeof adminListActivities>>[number];
 
 function ActivitiesScreen() {
   const rows = Route.useLoaderData();
-  const { run, busy, error, saved } = useAction();
-  const [editing, setEditing] = useState<{ id?: string; form: Form } | null>(null);
-
-  async function save() {
-    if (!editing) return;
-    const form = { ...editing.form, slug: editing.form.slug.trim() || slugify(editing.form.name) };
-    const ok = await run(() =>
-      adminUpsertActivity({
-        data: { ...(editing.id ? { id: editing.id } : {}), activity: form as never },
-      }),
-    );
-    if (ok) setEditing(null);
+  const router = useRouter();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  async function remove(row: Row) {
+    try { await adminDeleteActivity({ data: { id: row.id } }); await router.invalidate(); toast.success(`${row.name} deleted`); }
+    catch (e) { toast.error(getErrorMessage(e, "Could not delete. Please try again.")); }
   }
-
+  if (editingId !== null) return <RowForm row={rows.find((r) => r.id === editingId)} onBack={() => setEditingId(null)} />;
   return (
-    <>
-      <PageHeader
-        title="Activities"
-        subtitle="These double as the filter pills on /tours. Assign them to a tour from the tour editor."
-        actions={<AdminButton onClick={() => setEditing({ form: blank() })}>+ New activity</AdminButton>}
-      />
-
-      <ErrorBanner error={error} />
-
-      {editing ? (
-        <div className="mb-6">
-          <Card title={editing.id ? "Edit activity" : "New activity"}>
-            <div className="grid gap-5 sm:grid-cols-3">
-              <TextField
-                label="Name"
-                required
-                hint="Emoji is part of the label, e.g. 🐅 Wildlife"
-                value={editing.form.name}
-                onChange={(v) => setEditing({ ...editing, form: { ...editing.form, name: v } })}
-              />
-              <TextField
-                label="Slug"
-                mono
-                hint="Used in the URL as ?theme=…"
-                placeholder={slugify(editing.form.name)}
-                value={editing.form.slug}
-                onChange={(v) => setEditing({ ...editing, form: { ...editing.form, slug: v } })}
-              />
-              <NumberField
-                label="Sort order"
-                min={0}
-                value={editing.form.sort_order}
-                onChange={(v) =>
-                  setEditing({ ...editing, form: { ...editing.form, sort_order: v ?? 0 } })
-                }
-              />
-            </div>
-            <TextArea
-              label="Description"
-              rows={2}
-              value={editing.form.description}
-              onChange={(v) => setEditing({ ...editing, form: { ...editing.form, description: v } })}
-            />
-            <div className="flex items-center gap-3">
-              <AdminButton onClick={save} disabled={busy}>
-                {busy ? "Saving…" : "Save activity"}
-              </AdminButton>
-              <AdminButton variant="secondary" onClick={() => setEditing(null)}>
-                Cancel
-              </AdminButton>
-              <SavedNote show={saved && !error} />
-            </div>
-          </Card>
-        </div>
-      ) : null}
-
-      <Table head={["Name", "Slug", "Description", ""]} empty={rows.length === 0}>
-        {rows.map((row) => (
-          <tr key={row.id}>
-            <Td>
-              <button
-                type="button"
-                onClick={() => setEditing({ id: row.id, form: hydrate(row) })}
-                className="text-left font-semibold text-green-dark hover:text-green hover:underline"
-              >
-                {row.name}
-              </button>
-            </Td>
-            <Td className="font-mono text-[0.78rem] text-muted">{row.slug}</Td>
-            <Td className="text-muted">{row.description ?? "—"}</Td>
-            <Td className="text-right">
-              <DeleteButton
-                disabled={busy}
-                label="Delete"
-                onConfirm={() => run(() => adminDeleteActivity({ data: { id: row.id } }))}
-              />
-            </Td>
-          </tr>
-        ))}
-      </Table>
-
-      <p className="mt-4 text-[0.78rem] text-muted">
-        Deleting an activity also removes it from every tour that used it.
-      </p>
-    </>
+    <AdminPage title="Activities" subtitle="These double as the filter pills on the tours page. Assign them to a tour from the tour editor." action={<AdminButton onClick={() => setEditingId("new")}><AdminIcon name="plus" className="mr-1.5 h-[15px] w-[15px]" />New activity</AdminButton>}>
+      {rows.length === 0 ? <EmptyState>No activities yet. Press &ldquo;New activity&rdquo; to add your first one.</EmptyState> : (
+        <ListTable head={["Name", "Description", "Order"]} footNote="Deleting an activity also removes it from every tour that used it.">
+          {rows.map((row) => <tr key={row.id} className="hover:bg-cream/50">
+            <Td><button type="button" onClick={() => setEditingId(row.id)} className="text-left font-semibold text-green-dark hover:text-green hover:underline">{row.name}</button><div className="mt-0.5 font-mono text-[0.72rem] text-muted">/{row.slug}</div></Td>
+            <Td className="max-w-sm truncate text-muted">{row.description ?? "—"}</Td><Td className="text-muted">{row.sort_order}</Td>
+            <Td className="text-right"><div className="flex items-center justify-end gap-2"><button type="button" onClick={() => setEditingId(row.id)} className="inline-flex items-center gap-1.5 rounded-[30px] border-[1.5px] border-rule px-4 py-1.5 text-[0.78rem] font-semibold transition-colors hover:border-green hover:text-green"><AdminIcon name="pencil" className="h-[13px] w-[13px]" />Edit</button><ConfirmButton title={`Delete ${row.name}?`} description="Tours tagged with this activity will lose the tag. This cannot be undone." onConfirm={() => remove(row)} /></div></Td>
+          </tr>)}
+        </ListTable>
+      )}
+      <div className="mt-6"><ViewPublicLink href="/tours">View activities on the tours page</ViewPublicLink></div>
+    </AdminPage>
   );
 }
 
-function hydrate(row: Record<string, unknown>): Form {
-  const text = (v: unknown) => (typeof v === "string" ? v : "");
-  return {
-    slug: text(row.slug),
-    name: text(row.name),
-    description: text(row.description),
-    sort_order: Number(row.sort_order ?? 0),
-  };
-}
+function blank(row?: Row) { return { slug: row?.slug ?? "", name: row?.name ?? "", description: row?.description ?? "", sort_order: row?.sort_order ?? 0 }; }
+type Form = ReturnType<typeof blank>;
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
+  const router = useRouter();
+  const { run, busy, error } = useAction();
+  const [v, setV] = useState<Form>(() => blank(row));
+  const [slugTouched, setSlugTouched] = useState(Boolean(row?.slug));
+  const saved = useMemo(() => blank(row), [row]);
+  const dirty = useMemo(() => !row || (Object.keys(saved) as (keyof Form)[]).some((k) => v[k] !== saved[k]), [v, saved, row]);
+  const draft: ActivityDTO = { id: row?.id ?? "preview-activity", slug: v.slug, name: v.name, description: v.description || null };
+  async function save() {
+    const ok = await run(() => adminUpsertActivity({ data: { ...(row ? { id: row.id } : {}), activity: { ...v, slug: v.slug.trim() || slugify(v.name), description: v.description || null } as never } }));
+    if (!ok) return; toast.success(row ? "Activity saved" : "Activity added"); onBack();
+  }
+  async function remove() {
+    if (!row) return;
+    try { await adminDeleteActivity({ data: { id: row.id } }); await router.invalidate(); toast.success("Activity deleted"); onBack(); }
+    catch (e) { toast.error(getErrorMessage(e, "Could not delete. Please try again.")); }
+  }
+  return <EditorShell title={row ? "Edit activity" : "New activity"} blurb={v.name || "Fill out the details below."} previewPath="/tours" previewChannel={activityPreviewChannel} previewDraft={draft} dirty={dirty} saving={busy} onSave={save} onDiscard={() => { setV(blank(row)); setSlugTouched(Boolean(row?.slug)); }} onBack={onBack} backLabel="Activities" footer={row ? <ConfirmButton title={`Delete ${row.name}?`} description="Tours tagged with this activity will lose the tag. This cannot be undone." onConfirm={remove}>Delete activity</ConfirmButton> : null}>
+    <ErrorBanner error={error} />
+    <div className="mt-4 grid gap-5 sm:grid-cols-2">
+      <TextField label="Name" required value={v.name} onChange={(name) => setV((p) => ({ ...p, name, slug: slugTouched ? p.slug : slugify(name) }))} />
+      <TextField label="Web address" mono hint="Used by the tours filter." value={v.slug} onChange={(slug) => { setSlugTouched(true); setV((p) => ({ ...p, slug: slugify(slug) })); }} />
+      <NumberField label="Order" hint="Lower numbers appear first." min={0} value={v.sort_order} onChange={(sort_order) => setV((p) => ({ ...p, sort_order: sort_order ?? 0 }))} />
+      <div className="sm:col-span-2"><TextArea label="Description" rows={3} value={v.description} onChange={(description) => setV((p) => ({ ...p, description }))} /></div>
+    </div>
+  </EditorShell>;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { AdminIcon } from "@/components/admin/icons";
+import { getErrorMessage } from "@/lib/utils";
 
 /** Shared chrome and interaction helpers for the admin screens. */
 
@@ -227,7 +228,7 @@ export function useAction() {
       setSaved(true);
       return result;
     } catch (e) {
-      setError(readableError(e));
+      setError(getErrorMessage(e));
       return null;
     } finally {
       setBusy(false);
@@ -235,25 +236,6 @@ export function useAction() {
   }
 
   return { run, busy, error, saved, clearError: () => setError(null) };
-}
-
-/** Zod errors arrive as a JSON array of issues; show the messages, not the raw blob. */
-function readableError(e: unknown): string {
-  const message = e instanceof Error ? e.message : String(e);
-  try {
-    const issues = JSON.parse(message);
-    if (Array.isArray(issues)) {
-      return issues
-        .map((i) => {
-          const path = Array.isArray(i.path) ? i.path.join(" → ") : "";
-          return path ? `${path}: ${i.message}` : i.message;
-        })
-        .join("\n");
-    }
-  } catch {
-    /* not JSON — fall through */
-  }
-  return message;
 }
 
 export function ErrorBanner({ error }: { error: string | null }) {
@@ -333,6 +315,7 @@ export function AdminModal({
   children,
   footer,
   initialFocusRef,
+  panelClassName = "max-w-[560px]",
 }: {
   open: boolean;
   onClose: () => void;
@@ -341,6 +324,7 @@ export function AdminModal({
   children: ReactNode;
   footer?: ReactNode;
   initialFocusRef?: RefObject<HTMLElement | null>;
+  panelClassName?: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useFieldSafeId(title);
@@ -408,7 +392,7 @@ export function AdminModal({
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={trapTab}
-        className="relative flex max-h-full w-full max-w-[560px] flex-col overflow-hidden rounded-2xl border border-rule bg-paper shadow-xl outline-none"
+        className={`relative flex max-h-full w-full flex-col overflow-hidden rounded-2xl border border-rule bg-paper shadow-xl outline-none ${panelClassName}`}
       >
         <header className="flex items-start justify-between gap-4 border-b border-rule px-5 py-4">
           <div>
@@ -445,4 +429,320 @@ export function AdminModal({
  *  reads better in the DOM inspector and there is only ever one dialog open. */
 function useFieldSafeId(label: string): string {
   return `dialog-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+// ---------------------------------------------------------------------------
+// Toasts
+// ---------------------------------------------------------------------------
+
+/**
+ * Transient confirmation for an action that already happened.
+ *
+ * Hand-rolled rather than pulled from a library for the same reason `AdminModal` is: the panel
+ * has exactly one overlay idiom and one token set, and a dependency would arrive with neither.
+ *
+ * This replaces `SavedNote` on the screens that navigate away after saving — a "✓ Saved." pinned
+ * beside a button the editor is no longer looking at is a confirmation nobody reads. `ErrorBanner`
+ * stays for validation errors, which belong next to the field that caused them.
+ */
+
+export type ToastTone = "success" | "error";
+export type ToastItem = { id: number; tone: ToastTone; message: string };
+
+const TOAST_MS = 4000;
+
+let nextToastId = 1;
+let toasts: ToastItem[] = [];
+const toastListeners = new Set<(items: ToastItem[]) => void>();
+
+function emitToasts() {
+  for (const listener of toastListeners) listener(toasts);
+}
+
+function pushToast(tone: ToastTone, message: string) {
+  const id = nextToastId++;
+  toasts = [...toasts, { id, tone, message }];
+  emitToasts();
+  window.setTimeout(() => dismissToast(id), TOAST_MS);
+}
+
+function dismissToast(id: number) {
+  const next = toasts.filter((t) => t.id !== id);
+  if (next.length === toasts.length) return;
+  toasts = next;
+  emitToasts();
+}
+
+export const toast = {
+  success: (message: string) => pushToast("success", message),
+  error: (message: string) => pushToast("error", message),
+};
+
+/** Mounted once, in the admin shell. */
+export function Toaster() {
+  const [items, setItems] = useState<ToastItem[]>([]);
+
+  useEffect(() => {
+    toastListeners.add(setItems);
+    // Catch anything queued between module load and this mount.
+    setItems(toasts);
+    return () => {
+      toastListeners.delete(setItems);
+    };
+  }, []);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      // `aria-live` rather than `role="alert"`: a save confirmation should be announced without
+      // interrupting whatever the screen reader is already saying.
+      aria-live="polite"
+      className="pointer-events-none fixed right-4 bottom-4 z-[70] flex w-[min(22rem,calc(100vw-2rem))] flex-col gap-2"
+    >
+      {items.map((item) => (
+        <div
+          key={item.id}
+          className={`pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 text-[0.84rem] shadow-lg ${
+            item.tone === "success"
+              ? "border-green-bright/40 bg-mint text-green-dark"
+              : "border-rust/40 bg-paper text-rust"
+          }`}
+        >
+          <AdminIcon
+            name={item.tone === "success" ? "check" : "close"}
+            className="mt-[2px] h-[15px] w-[15px] shrink-0"
+          />
+          <span className="min-w-0 flex-1 whitespace-pre-line">{item.message}</span>
+          <button
+            type="button"
+            onClick={() => dismissToast(item.id)}
+            aria-label="Dismiss"
+            className="shrink-0 rounded p-0.5 opacity-60 transition-opacity hover:opacity-100"
+          >
+            <AdminIcon name="close" className="h-[13px] w-[13px]" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// List screens
+// ---------------------------------------------------------------------------
+
+/**
+ * The frame every list screen shares: heading, one line of context, and an optional primary
+ * action pinned to the right.
+ *
+ * `PageHeader` above does the header alone and is still what the screens with their own bespoke
+ * layout (SEO, Links) use; `AdminPage` adds the width cap and the body slot, so that a list screen
+ * is one component rather than a header plus a hand-repeated wrapper div.
+ */
+export function AdminPage({
+  title,
+  subtitle,
+  action,
+  children,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="mx-auto max-w-6xl">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-[1.7rem] text-green">{title}</h1>
+          {subtitle ? <p className="mt-1.5 text-[0.86rem] text-muted">{subtitle}</p> : null}
+        </div>
+        {action}
+      </div>
+      <div className="mt-6">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * A bordered table that scrolls sideways rather than squashing its columns, with one extra
+ * header cell appended for the actions column so callers never have to remember the trailing `""`.
+ *
+ * `empty` is deliberately absent: an empty list gets `EmptyState` instead, which has room to say
+ * what to do about it.
+ */
+export function ListTable({
+  head,
+  children,
+  footNote,
+}: {
+  head: ReactNode[];
+  children: ReactNode;
+  footNote?: ReactNode;
+}) {
+  return (
+    <>
+      <div className="overflow-x-auto rounded-2xl border border-rule bg-paper">
+        <table className="w-full min-w-[640px] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-rule">
+              {head.map((h, i) => (
+                <th
+                  key={i}
+                  className="px-4 py-3 text-[0.72rem] font-semibold tracking-wide text-muted uppercase whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
+      {footNote ? <p className="mt-4 max-w-3xl text-[0.84rem] text-muted">{footNote}</p> : null}
+    </>
+  );
+}
+
+/**
+ * Publish state, said the same way on every screen.
+ *
+ * The wording differs by entity — a hidden tour is a "Draft", a hidden FAQ is just "Hidden" — so
+ * the caller supplies the word and this supplies the tone.
+ */
+export function StatusBadge({
+  tone,
+  children,
+}: {
+  tone: "published" | "draft" | "accent" | "muted";
+  children: ReactNode;
+}) {
+  const styles = {
+    published: "bg-green text-white",
+    draft: "bg-cream text-muted",
+    accent: "bg-orange text-white",
+    muted: "bg-mint text-green",
+  }[tone];
+  return (
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold ${styles}`}>
+      {children}
+    </span>
+  );
+}
+
+/** Replaces `Table`'s hardcoded "Nothing here yet." — this one has room to say what to do next. */
+export function EmptyState({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-rule bg-paper px-6 py-16 text-center text-[0.88rem] text-muted">
+      {children}
+    </div>
+  );
+}
+
+/** A link out to the public page this screen edits, styled like a secondary button. */
+export function ViewPublicLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center justify-center gap-2 rounded-[30px] border-[1.5px] border-rule bg-paper px-5 py-2.5 text-[0.84rem] font-semibold text-ink transition-colors hover:border-green hover:text-green"
+    >
+      {children}
+      <AdminIcon name="external" className="h-[15px] w-[15px]" />
+    </a>
+  );
+}
+
+/** Label, optional hint, and the control beneath them. */
+export function Field({
+  label,
+  help,
+  htmlFor,
+  className,
+  children,
+}: {
+  label: string;
+  help?: string;
+  htmlFor?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <label htmlFor={htmlFor} className="text-[0.84rem] font-semibold text-ink">
+        {label}
+      </label>
+      {help ? <p className="mt-0.5 text-[0.76rem] text-muted">{help}</p> : null}
+      <div className="mt-1.5">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * Guarded destructive action.
+ *
+ * Supersedes `DeleteButton`'s two-step arm/confirm, which could say only "Really delete?" — no
+ * room to name what is about to be lost, which matters when the person clicking is the site owner
+ * rather than a developer. Deletes here are not recoverable.
+ */
+export function ConfirmButton({
+  title,
+  description,
+  confirmLabel = "Delete",
+  onConfirm,
+  children = "Delete",
+  disabled,
+}: {
+  title: string;
+  description: ReactNode;
+  confirmLabel?: string;
+  onConfirm: () => void | Promise<void>;
+  children?: ReactNode;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function confirm() {
+    setBusy(true);
+    try {
+      await onConfirm();
+      setOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center justify-center gap-1.5 rounded-[30px] border-[1.5px] border-rust/40 bg-paper px-4 py-1.5 text-[0.78rem] font-semibold text-rust transition-colors hover:bg-rust hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {children}
+      </button>
+      <AdminModal
+        open={open}
+        onClose={() => (busy ? undefined : setOpen(false))}
+        title={title}
+        footer={
+          <>
+            <AdminButton variant="secondary" onClick={() => setOpen(false)} disabled={busy}>
+              Keep it
+            </AdminButton>
+            <AdminButton variant="danger" onClick={() => void confirm()} disabled={busy}>
+              {busy ? "Deleting…" : confirmLabel}
+            </AdminButton>
+          </>
+        }
+      >
+        <div className="px-5 py-4 text-[0.86rem] text-ink">{description}</div>
+      </AdminModal>
+    </>
+  );
 }

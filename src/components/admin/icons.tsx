@@ -32,6 +32,15 @@ const PATHS: Record<string, string> = {
   italic: "M19 4h-9 M14 20H5 M15 4L9 20",
   underline: "M6 3v7a6 6 0 0 0 12 0V3 M4 21h16",
   code: "M9 17l-5-5 5-5 M15 7l5 5-5 5",
+  sparkles: "m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9zM18 15l.9 2.1 2.1.9-2.1.9L18 21l-.9-2.1-2.1-.9 2.1-.9z",
+  trash: "M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2",
+  pencil: "M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16zM14.5 5.5l4 4",
+  arrowLeft: "M19 12H5M11 18l-6-6 6-6",
+  grip: "M9 5h.01M9 12h.01M9 19h.01M15 5h.01M15 12h.01M15 19h.01",
+  table: "M3 5h18v14H3zM3 10h18M3 15h18M9 5v14M15 5v14",
+  quote: "M9 7H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3v1a3 3 0 0 1-3 3M20 7h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3v1a3 3 0 0 1-3 3",
+  listBullet: "M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01",
+  listOrdered: "M10 6h10M10 12h10M10 18h10M4 5h1v4M4 15.5h2M4 18.5h2M4 15.5a1 1 0 0 1 2 0c0 1-2 1.5-2 3h2",
 };
 
 export function AdminIcon({
@@ -43,7 +52,13 @@ export function AdminIcon({
   className?: string;
   strokeWidth?: number;
 }) {
-  const d = PATHS[name] ?? PATHS.dashboard!;
+  const known = PATHS[name];
+  // A typo used to render the dashboard glyph silently, so the wrong icon shipped looking
+  // deliberate. Still fall back — a missing icon must not blank a toolbar — but say so.
+  if (!known && import.meta.env.DEV) {
+    console.warn(`AdminIcon: no glyph named "${name}" — falling back to "dashboard".`);
+  }
+  const d = known ?? PATHS.dashboard!;
   return (
     <svg
       viewBox="0 0 24 24"

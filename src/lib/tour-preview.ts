@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { TourDTO } from "@/lib/content-types";
+import type { DraftChannel } from "@/lib/preview";
 
 /**
  * The bridge behind the admin tour editor's live preview.
@@ -63,3 +64,19 @@ export function sendTourDraft(frame: HTMLIFrameElement | null, tour: TourDTO): v
     window.location.origin,
   );
 }
+
+/** Adapter that lets the shared admin EditorShell own the tour preview without changing
+ * the public route's long-standing message protocol. */
+export const tourPreviewChannel: DraftChannel<TourDTO> = {
+  useDraft: useTourDraft,
+  sendDraft: sendTourDraft,
+  onReady(callback) {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if ((event.data as { type?: string } | null)?.type !== PREVIEW_READY_MESSAGE) return;
+      callback();
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  },
+};

@@ -133,17 +133,34 @@ r("non-admin whoAmI -> isAdmin false", plain.status === 200 && plain.result?.isA
 const plainStats = await callServerFn(ids.adminStats, plainToken);
 r("non-admin blocked from adminStats -> 403", plainStats.status === 403, `status=${plainStats.status}`);
 
-const adminStatsRes = await callServerFn(ids.adminStats, adminToken);
-r("admin reaches adminStats", adminStatsRes.status === 200 && adminStatsRes.result?.tours === 9, `status=${adminStatsRes.status} tours=${adminStatsRes.result?.tours}`);
-
 // ---- the authoritative layer: RLS, evaluated as each real user --------------
 const asPlain = userClient(plainToken);
 const asAdmin = userClient(adminToken);
 
-const before = (await asAdmin.from("tours").select("title").eq("slug", "sundarbans-wildlife-tour").single()).data.title;
-await asPlain.from("tours").update({ title: "hacked-by-plain-user" }).eq("slug", "sundarbans-wildlife-tour");
-const after = (await asAdmin.from("tours").select("title").eq("slug", "sundarbans-wildlife-tour").single()).data.title;
-r("signed-in non-admin cannot edit a tour (RLS)", before === after, `title still "${after}"`);
+// Check the count the stats endpoint reports against the count an admin can actually read,
+// rather than against a seed snapshot. The assertion is "adminStats tells the truth",
+// which is what matters and which survives content being added or removed.
+const actualTours = (await asAdmin.from("tours").select("id")).data?.length ?? -1;
+const adminStatsRes = await callServerFn(ids.adminStats, adminToken);
+r(
+  "admin reaches adminStats",
+  adminStatsRes.status === 200 && adminStatsRes.result?.tours === actualTours,
+  `status=${adminStatsRes.status} tours=${adminStatsRes.result?.tours} actual=${actualTours}`,
+);
+
+// Probe whichever tour exists instead of naming a seed row, so a content change cannot
+// masquerade as an RLS regression.
+const probe = (await asAdmin.from("tours").select("slug").order("slug").limit(1)).data?.[0];
+if (!probe) {
+  r("signed-in non-admin cannot edit a tour (RLS)", false, "no tour to probe — seed at least one");
+} else {
+  const title = async () =>
+    (await asAdmin.from("tours").select("title").eq("slug", probe.slug).maybeSingle()).data?.title;
+  const before = await title();
+  await asPlain.from("tours").update({ title: "hacked-by-plain-user" }).eq("slug", probe.slug);
+  const after = await title();
+  r("signed-in non-admin cannot edit a tour (RLS)", before === after, `title still "${after}"`);
+}
 
 const plainInquiries = await asPlain.from("inquiries").select("id");
 r("non-admin cannot read inquiries (RLS)", (plainInquiries.data?.length ?? 0) === 0);

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
-import { PAGE_SETTINGS_ORDER, SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/components/admin/settings-form";
+import { PAGE_SETTINGS_ORDER, SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/lib/content-schema";
 import { HOME_LAYOUT_KEY } from "@/lib/home-layout";
 
 export const Route = createFileRoute("/_authenticated/admin/settings/")({
@@ -13,7 +13,7 @@ type SettingsRow = { id: string; key: string; value: unknown; description: strin
 /**
  * Site content, edited as forms rather than JSON.
  *
- * The shape of each key lives in settings-form.tsx; this screen is a menu of named
+ * The shape of each key lives in content-schema.ts; this screen is a menu of named
  * sections, each opening its own editor at `/admin/settings/$group`. Any key the schema
  * does not describe still appears at the bottom and opens the same route's raw-JSON
  * fallback, so nothing in the table is unreachable.

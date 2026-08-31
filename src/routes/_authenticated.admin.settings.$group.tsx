@@ -1,17 +1,12 @@
 import { useState } from "react";
-import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
-import { AdminButton, Card, ErrorBanner, PageHeader, SavedNote, useAction } from "@/components/admin/admin-ui";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { AdminButton, ErrorBanner, useAction } from "@/components/admin/admin-ui";
 import { EditorShell } from "@/components/admin/editor-shell";
-import {
-  SETTINGS_SCHEMA,
-  SettingsSections,
-  hydrateSetting,
-  mergeSetting,
-  type SettingsSchema,
-} from "@/components/admin/settings-form";
+import { SettingsSections, hydrateSetting } from "@/components/admin/settings-form";
+import { SETTINGS_SCHEMA, type SettingsSchema } from "@/lib/content-schema";
 import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
-import { adminSaveSetting } from "@/lib/admin-content.functions";
+import { adminPatchSetting } from "@/lib/admin-content.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/settings/$group")({
   component: GroupEditor,
@@ -34,10 +29,23 @@ function serialize(v: unknown): string {
   return JSON.stringify(v);
 }
 
+/** Older standalone pages stored their rich content as `sections`; expose both current aliases. */
+function withStandaloneBody(key: string, value: unknown): unknown {
+  if (!key.startsWith("info_") && !key.startsWith("policy_")) return value;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const row = value as Record<string, unknown>;
+  if (!Array.isArray(row.sections)) return value;
+  return {
+    ...row,
+    ...(row.body === undefined ? { body: row.sections } : {}),
+    ...(row.blocks === undefined ? { blocks: row.sections } : {}),
+  };
+}
+
 function GroupEditor() {
   const { group: groupId } = Route.useParams();
   const rows = useLoaderData({ from: "/_authenticated/admin/settings" }) as SettingsRow[];
-  const stored = rows.find((r) => r.key === groupId)?.value;
+  const stored = withStandaloneBody(groupId, rows.find((r) => r.key === groupId)?.value);
   const schema = SETTINGS_SCHEMA[groupId];
 
   return schema ? (
@@ -50,7 +58,7 @@ function GroupEditor() {
 /**
  * Site content, edited as a form rather than JSON.
  *
- * The shape of each key lives in settings-form.tsx. Every key ships a default in code
+ * The shape of each key lives in content-schema.ts. Every key ships a default in code
  * (src/content/site-defaults.ts) which the stored value merges over, so "Restore original
  * wording" is a local reset of the form, not a delete.
  */
@@ -66,13 +74,19 @@ function SchemaEditor({
   const { run, busy, error } = useAction();
   const initial = hydrateSetting(defaultsFor(settingKey), stored);
   const [draft, setDraft] = useState(initial);
-  const [baseline, setBaseline] = useState(() => serialize(initial));
-  const dirty = serialize(draft) !== baseline;
+  const [baseline, setBaseline] = useState(initial);
+  const dirty = serialize(draft) !== serialize(baseline);
 
   async function save() {
-    const merged = mergeSetting(stored, draft);
-    const ok = await run(() => adminSaveSetting({ data: { key: settingKey, value: merged as never } }));
-    if (ok) setBaseline(serialize(draft));
+    const patch = Object.fromEntries(
+      schema.sections.flatMap((section) =>
+        section.fields.map((field) => [field.key, draft[field.key]] as const),
+      ),
+    );
+    const ok = await run(() =>
+      adminPatchSetting({ data: { key: settingKey, patch: patch as never } }),
+    );
+    if (ok) setBaseline(draft);
   }
 
   return (
@@ -80,12 +94,14 @@ function SchemaEditor({
       title={schema.title}
       blurb={schema.description}
       previewPath={schema.previewPath}
+      previewAnchor={schema.previewAnchor}
       previewDraft={{ [settingKey]: draft }}
       dirty={dirty}
       saving={busy}
       onSave={save}
-      onDiscard={() => setDraft(hydrateSetting(defaultsFor(settingKey), stored))}
+      onDiscard={() => setDraft(baseline)}
       backTo="/admin/settings"
+      backLabel="All site content"
     >
       <ErrorBanner error={error} />
       <div className="mt-4">
@@ -107,8 +123,9 @@ function SchemaEditor({
 
 /** Fallback for keys with no form. Kept so nothing in the settings table becomes uneditable. */
 function RawEditor({ settingKey, stored }: { settingKey: string; stored: unknown }) {
-  const { run, busy, error, saved } = useAction();
+  const { run, busy, error } = useAction();
   const [text, setText] = useState(() => JSON.stringify(stored ?? {}, null, 2));
+  const [baseline, setBaseline] = useState(text);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   async function save() {
@@ -124,31 +141,29 @@ function RawEditor({ settingKey, stored }: { settingKey: string; stored: unknown
       return;
     }
     setJsonError(null);
-    await run(() => adminSaveSetting({ data: { key: settingKey, value: parsed as never } }));
+    const ok = await run(() =>
+      adminPatchSetting({ data: { key: settingKey, patch: parsed as never } }),
+    );
+    if (ok) setBaseline(text);
   }
 
   return (
-    <>
-      <Link
-        to="/admin/settings"
-        className="mb-4 inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green"
-      >
-        ← All site content
-      </Link>
-
-      <PageHeader
-        title={settingKey}
-        subtitle="This entry has no form yet, so it is edited as raw data."
-        actions={
-          <AdminButton onClick={save} disabled={busy}>
-            {busy ? "Saving…" : "Save changes"}
-          </AdminButton>
-        }
-      />
-
+    <EditorShell
+      title={settingKey}
+      blurb="This entry has no form yet, so it is edited as raw data."
+      previewDraft={{ [settingKey]: text }}
+      dirty={text !== baseline}
+      saving={busy}
+      onSave={save}
+      onDiscard={() => {
+        setText(baseline);
+        setJsonError(null);
+      }}
+      backTo="/admin/settings"
+      backLabel="All site content"
+    >
       <ErrorBanner error={error} />
-
-      <Card>
+      <div className="rounded-2xl border border-rule bg-paper p-5">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -161,8 +176,7 @@ function RawEditor({ settingKey, stored }: { settingKey: string; stored: unknown
             {jsonError}
           </p>
         ) : null}
-        <SavedNote show={saved && !error} />
-      </Card>
-    </>
+      </div>
+    </EditorShell>
   );
 }

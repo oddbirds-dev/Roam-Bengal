@@ -17,6 +17,18 @@ const sb = userClient(admin);
 const stamp = Date.now();
 const created = { tours: [], posts: [], testimonials: [], faqs: [], activities: [] };
 
+async function contentCounts() {
+  return {
+    tours: (await sb.from("tours").select("id")).data?.length ?? 0,
+    posts: (await sb.from("blog_posts").select("id")).data?.length ?? 0,
+    testimonials: (await sb.from("testimonials").select("id")).data?.length ?? 0,
+    faqs: (await sb.from("faqs").select("id")).data?.length ?? 0,
+    activities: (await sb.from("activities").select("id")).data?.length ?? 0,
+  };
+}
+
+const baselineCounts = await contentCounts();
+
 async function cleanup() {
   for (const id of created.tours) await callServerFn(ids.adminDeleteTour, { token: admin, method: "POST", data: { id } });
   for (const id of created.posts) await callServerFn(ids.adminDeletePost, { token: admin, method: "POST", data: { id } });
@@ -118,7 +130,7 @@ r("theme form saves", !thRes.failed, String(thRes.error?.message ?? "").slice(0,
 
 // --- Settings screen: the JSON editor round trip ----------------------------
 const listSettings = await callServerFn(ids.adminListSettings, { token: admin });
-r("settings list loads", Array.isArray(listSettings.result) && listSettings.result.length === 12,
+r("settings list loads", Array.isArray(listSettings.result) && ["header", "footer", "homepage"].every((key) => listSettings.result.some((row) => row.key === key)),
   `${listSettings.result?.length} keys`);
 
 const header = (listSettings.result ?? []).find((s) => s.key === "header");
@@ -147,15 +159,9 @@ r("settings restored", restored.cta_label === "Plan Your Trip");
 
 // --- Cleanup ----------------------------------------------------------------
 await cleanup();
-const counts = {
-  tours: (await sb.from("tours").select("id")).data?.length ?? 0,
-  posts: (await sb.from("blog_posts").select("id")).data?.length ?? 0,
-  testimonials: (await sb.from("testimonials").select("id")).data?.length ?? 0,
-  faqs: (await sb.from("faqs").select("id")).data?.length ?? 0,
-  activities: (await sb.from("activities").select("id")).data?.length ?? 0,
-};
+const counts = await contentCounts();
 r("all scratch rows cleaned up",
-  counts.tours === 9 && counts.posts === 9 && counts.testimonials === 9 && counts.faqs === 6 && counts.activities === 5,
+  JSON.stringify(counts) === JSON.stringify(baselineCounts),
   JSON.stringify(counts));
 
 done();

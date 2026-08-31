@@ -1,11 +1,9 @@
-import { createFileRoute, getRouteApi, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PolicyLayout } from "@/components/policy-layout";
 import { INFO_SLUGS, infoDefaults, type InfoSlug } from "@/content/policy-defaults";
-import { mergeSettings } from "@/hooks/use-site-settings";
+import { useSettingGroup } from "@/hooks/use-site-settings";
 import { listPublishedFaqs } from "@/lib/site-content.functions";
-import type { SettingsMap } from "@/lib/content-types";
-
-const rootRoute = getRouteApi("__root__");
+import { faqPreviewChannel } from "@/lib/faq-preview";
 
 /**
  * Standalone info pages the footer links to: /visa-information, /embassy-directory,
@@ -36,10 +34,15 @@ export const Route = createFileRoute("/$infoSlug")({
 });
 
 function InfoRoute() {
-  const { slug, faqs } = Route.useLoaderData();
-  const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
+  const { slug, faqs: saved } = Route.useLoaderData();
 
-  const page = mergeSettings(infoDefaults[slug], stored?.[`info_${slug}`] ?? {});
+  const page = useSettingGroup(`info_${slug}`, infoDefaults[slug]);
+
+  // Same splice the reviews page uses: an unsaved FAQ from the admin editor replaces the saved
+  // row with its id, or is prepended when it has none yet. No `?preview=1` gate needed — there is
+  // no per-FAQ detail route to 404 on, so being in an iframe at all is signal enough.
+  const draft = faqPreviewChannel.useDraft(true);
+  const faqs = draft ? [draft, ...saved.filter((f) => f.id !== draft.id)] : saved;
 
   // The FAQ page builds its blocks from the `faqs` table rather than static copy.
   const withFaqs =

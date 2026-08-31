@@ -25,6 +25,8 @@ const plain = await tokenFor("authtest-plain@example.com");
   if (stale?.length) console.log(`(swept ${stale.length} stale scratch tour(s))`);
 }
 
+const initialTourCount = (await userClient(admin).from("tours").select("id")).data?.length ?? 0;
+
 const SLUG = `scratch-tour-${Date.now()}`;
 const tourPayload = {
   slug: SLUG,
@@ -171,6 +173,6 @@ const themeRows = (await sb.from("tour_activities").select("tour_id").eq("tour_i
 r("theme links cascaded away", themeRows.length === 0);
 
 const finalCount = (await sb.from("tours").select("id")).data?.length ?? 0;
-r("seed tours untouched", finalCount === 9, `${finalCount} tours`);
+r("seed tours untouched", finalCount === initialTourCount, `${finalCount} tours`);
 
 done();

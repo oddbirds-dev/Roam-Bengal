@@ -26,12 +26,13 @@ function Dashboard() {
       icon: "inbox",
       to: "/admin/inquiries",
       // Highlighted while anything is unanswered — the one number that needs action.
-      highlight: stats.newInquiries > 0 || stats.inquiries === 0,
+      highlight: stats.newInquiries > 0,
     },
     { label: "Tours", value: stats.tours, icon: "map", to: "/admin/tours" },
+    { label: "Destinations", value: stats.destinations, icon: "pin", to: "/admin/destinations" },
     { label: "Activities", value: stats.activities, icon: "activity", to: "/admin/activities" },
-    { label: "Blog posts", value: stats.posts, icon: "news", to: "/admin/posts" },
-    { label: "Reviews", value: stats.testimonials, icon: "star", to: "/admin/testimonials" },
+    { label: "Blog posts", value: stats.posts, icon: "news", to: "/admin/blogs" },
+    { label: "Reviews", value: stats.testimonials, icon: "star", to: "/admin/reviews" },
     { label: "FAQs", value: stats.faqs, icon: "help", to: "/admin/faqs" },
   ];
 

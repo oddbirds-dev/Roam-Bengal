@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 import {
   AdminButton,
   Badge,
-  DeleteButton,
+  ConfirmButton,
   ErrorBanner,
   PageHeader,
   useAction,
@@ -15,6 +16,9 @@ import {
 } from "@/lib/admin-content.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/inquiries")({
+  validateSearch: z.object({
+    status: z.enum(["all", "new", "read", "handled"]).optional().catch("all"),
+  }),
   loader: () => adminListInquiries(),
   component: InquiriesScreen,
 });
@@ -29,8 +33,10 @@ const FILTERS = [
 function InquiriesScreen() {
   const inquiries = Route.useLoaderData();
   const { run, busy, error } = useAction();
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("all");
+  const { status: filter = "all" } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [details, setDetails] = useState<Record<string, boolean>>({});
 
   const visible = filter === "all" ? inquiries : inquiries.filter((i) => i.status === filter);
   const newCount = inquiries.filter((i) => i.status === "new").length;
@@ -59,7 +65,13 @@ function InquiriesScreen() {
               key={f.value}
               type="button"
               aria-pressed={filter === f.value}
-              onClick={() => setFilter(f.value)}
+              onClick={() =>
+                navigate({
+                  search: (previous) => ({ ...previous, status: f.value }),
+                  replace: true,
+                  resetScroll: false,
+                })
+              }
               className={`rounded-[30px] border-[1.5px] px-4 py-2 text-[0.82rem] font-semibold transition-colors ${
                 filter === f.value
                   ? "border-green-dark bg-green-dark text-white"
@@ -101,17 +113,28 @@ function InquiriesScreen() {
                 <StatusBadge status={inq.status} />
               </header>
 
-              {inq.tour_slug ? (
-                <p className="mt-3 text-[0.82rem] text-muted">
-                  Interested in <strong className="text-ink">{inq.tour_slug}</strong>
-                </p>
-              ) : null}
+              <button
+                type="button"
+                className="mt-4 text-[0.82rem] font-semibold text-green hover:underline"
+                onClick={() => setDetails((current) => ({ ...current, [inq.id]: !current[inq.id] }))}
+              >
+                {details[inq.id] ? "Hide details" : "Show details"}
+              </button>
 
-              <p className="mt-3 rounded-xl bg-cream p-4 text-[0.88rem] leading-7 whitespace-pre-line">
-                {inq.message}
-              </p>
+              {details[inq.id] ? <div className="mt-4 border-t border-rule pt-4">
+                <div className="grid gap-3 text-[0.82rem] sm:grid-cols-2 lg:grid-cols-3">
+                  <Detail label="Destination" value={inq.destination} />
+                  <Detail label="Tour" value={inq.tour_slug} />
+                  <Detail label="Travellers" value={inq.travelers?.toString()} />
+                  <Detail label="Travel dates" value={inq.start_date} />
+                  <Detail label="Budget" value={inq.budget} />
+                </div>
 
-              <div className="mt-4">
+                {inq.message ? <p className="mt-4 rounded-xl bg-cream p-4 text-[0.88rem] leading-7 whitespace-pre-line">
+                  {inq.message}
+                </p> : null}
+
+                <div className="mt-4">
                 <label
                   htmlFor={`note-${inq.id}`}
                   className="mb-1.5 block text-[0.78rem] font-semibold text-ink"
@@ -125,7 +148,8 @@ function InquiriesScreen() {
                   onChange={(e) => setNotes({ ...notes, [inq.id]: e.target.value })}
                   className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2.5 text-[0.84rem] outline-none focus:border-green"
                 />
-              </div>
+                </div>
+              </div> : null}
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 {(["new", "read", "handled"] as const)
@@ -166,10 +190,16 @@ function InquiriesScreen() {
                 </AdminButton>
 
                 <span className="ml-auto">
-                  <DeleteButton
+                  <ConfirmButton
+                    title={`Delete the inquiry from ${inq.name}?`}
+                    description="You will lose their message and contact details. This cannot be undone."
                     disabled={busy}
-                    onConfirm={() => run(() => adminDeleteInquiry({ data: { id: inq.id } }))}
-                  />
+                    onConfirm={async () => {
+                      await run(() => adminDeleteInquiry({ data: { id: inq.id } }));
+                    }}
+                  >
+                    Delete
+                  </ConfirmButton>
                 </span>
               </div>
 
@@ -183,6 +213,16 @@ function InquiriesScreen() {
         </div>
       )}
     </>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-[0.72rem] font-semibold tracking-wide text-muted uppercase">{label}</p>
+      <p className="mt-0.5 text-ink">{value}</p>
+    </div>
   );
 }
 

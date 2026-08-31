@@ -1,4 +1,5 @@
 import { isUnsafeHref } from "@/lib/sanitize";
+import { slugify } from "@/lib/slugify";
 
 /**
  * Admin-managed web fonts.
@@ -40,12 +41,8 @@ const LEGACY_CLASS = "font-custom";
  * reorderable: an index would silently re-point every span in the database the first time
  * someone dragged a row.
  */
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
+function fontSlug(value: string): string {
+  return slugify(value).slice(0, 40);
 }
 
 /**
@@ -76,7 +73,7 @@ export function resolveCustomFonts(settings: CustomFontSettings | undefined): Cu
     const family = safeFamily(entry?.font_family ?? "");
     if (!family) continue;
     const label = (entry?.label ?? "").trim() || family;
-    const slug = slugify(label) || slugify(family) || String(fonts.length + 1);
+    const slug = fontSlug(label) || fontSlug(family) || String(fonts.length + 1);
     add(`${LEGACY_CLASS}-${slug}`, label, entry?.font_url ?? "", family);
   }
 

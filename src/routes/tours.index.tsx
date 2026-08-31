@@ -14,6 +14,7 @@ import {
   listPublishedTours,
   listTourThemes,
 } from "@/lib/site-content.functions";
+import { activityPreviewChannel } from "@/lib/activity-preview";
 
 const searchSchema = z.object({
   theme: z.string().optional(),
@@ -59,7 +60,11 @@ const TOUR_FRAMES = [
 ];
 
 function ToursIndex() {
-  const { tours, activities, themes } = Route.useLoaderData();
+  const { tours, activities: savedActivities, themes } = Route.useLoaderData();
+  const activityDraft = activityPreviewChannel.useDraft(true);
+  const activities = activityDraft
+    ? [activityDraft, ...savedActivities.filter((activity) => activity.id !== activityDraft.id)]
+    : savedActivities;
   const { theme } = Route.useSearch();
   const navigate = useNavigate({ from: "/tours/" });
   const { tours_page, homepage } = useSiteSettings();

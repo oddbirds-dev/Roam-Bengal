@@ -226,6 +226,24 @@ export interface ActivityDTO {
   description: string | null;
 }
 
+/**
+ * A place a tour goes to. Destinations have no detail route of their own — their photos fill the
+ * homepage picture grid and their names label tours — so this shape exists for the admin editor's
+ * live preview rather than for a public page loader.
+ */
+export interface DestinationDTO {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  region: string | null;
+  imageUrl: string | null;
+  intro: string | null;
+  highlights: string[];
+  bestTime: string | null;
+  sortOrder: number;
+}
+
 export interface BlogPostDTO {
   id: string;
   slug: string;

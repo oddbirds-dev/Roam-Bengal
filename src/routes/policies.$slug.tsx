@@ -5,11 +5,7 @@ import {
   policyDefaults,
   type PolicySlug,
 } from "@/content/policy-defaults";
-import { mergeSettings, useSiteSettings } from "@/hooks/use-site-settings";
-import { getRouteApi } from "@tanstack/react-router";
-import type { SettingsMap } from "@/lib/content-types";
-
-const rootRoute = getRouteApi("__root__");
+import { useSettingGroup, useSiteSettings } from "@/hooks/use-site-settings";
 
 export const Route = createFileRoute("/policies/$slug")({
   loader: ({ params }) => {
@@ -34,10 +30,11 @@ function PolicyRoute() {
   // Touch the settings hook so the header/footer share one source of truth.
   useSiteSettings();
 
-  const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
   // Stored JSON merges field-by-field over the shipped copy, so a partial edit in the
-  // admin panel can never blank out a section it did not touch.
-  const page = mergeSettings(policyDefaults[slug], stored?.[`policy_${slug}`] ?? {});
+  // admin panel can never blank out a section it did not touch. Going through
+  // `useSettingGroup` also applies the admin editor's unsaved draft, which is what makes
+  // the live preview update as you type.
+  const page = useSettingGroup(`policy_${slug}`, policyDefaults[slug]);
 
   return <PolicyLayout page={page} />;
 }

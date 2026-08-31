@@ -4,11 +4,19 @@ import { PhotoFrame } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
 import { GALLERY_FRAMES } from "./palette";
 import type { HomeSectionProps } from "./registry";
+import { destinationPreviewChannel } from "@/lib/destination-preview";
 
 export function GallerySection(_props: HomeSectionProps) {
   const { gallery } = useSiteSettings();
+  const destinationDraft = destinationPreviewChannel.useDraft(true);
+  const photos = destinationDraft?.imageUrl
+    ? [
+        { image_url: destinationDraft.imageUrl, tag: destinationDraft.name || "Destination" },
+        ...gallery.photos.filter((photo) => photo.image_url !== destinationDraft.imageUrl),
+      ].slice(0, gallery.photos.length || 1)
+    : gallery.photos;
   return (
-    <section className="pt-[90px] pb-[90px]">
+    <section id="section-gallery" className="pt-[90px] pb-[90px]">
       <div className="wrap mb-9 flex flex-wrap items-end justify-between gap-[30px]">
         <div>
           <h2 className="mb-3.5 font-kalam text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.3] font-bold">
@@ -29,7 +37,7 @@ export function GallerySection(_props: HomeSectionProps) {
       </div>
 
       <div className="wrap grid grid-cols-2 gap-[18px] nav:grid-cols-4">
-        {gallery.photos.map((photo, i) => (
+        {photos.map((photo, i) => (
           <PhotoFrame
             key={photo.tag}
             src={photo.image_url}

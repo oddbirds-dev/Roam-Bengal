@@ -6,7 +6,7 @@ import {
   httpError,
   type SupabaseAuthContext,
 } from "@/integrations/supabase/auth-middleware";
-import { stripUnsafeHtml } from "@/lib/sanitize";
+import { deepStripUnsafeHtml, stripUnsafeHtml } from "@/lib/sanitize";
 
 /**
  * Admin write API.
@@ -528,12 +528,62 @@ export const adminSaveSetting = createServerFn({ method: "POST" })
       .upsert(
         {
           key: data.key,
-          value: data.value as never,
+          // Every rich-text field an admin can format lands somewhere in this blob; the per-field
+          // zod helpers only reach the keys the schema describes, and a settings row can carry
+          // keys it does not.
+          value: deepStripUnsafeHtml(data.value) as never,
           ...(data.description === undefined ? {} : { description: data.description }),
         },
         { onConflict: "key" },
       );
     orThrow("adminSaveSetting", error);
+    return { ok: true as const };
+  });
+
+/**
+ * Partial update of one `site_settings` row: read, merge, write.
+ *
+ * `adminSaveSetting` replaces the whole `value`, which is correct when one screen owns the whole
+ * row. Two screens own slices of `homepage` — its group editor and the Homepage sections builder
+ * — and with a whole-row write whichever saved second would silently drop the other's
+ * edits. Merging server-side rather than client-side means the base is read at write time, not
+ * whenever the route loader last ran.
+ *
+ * The merge is shallow on purpose: a `list` field is replaced wholesale, because dropping a row
+ * from a list has to survive the save.
+ */
+export const adminPatchSetting = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(
+    z.object({
+      key: z.string().min(1).max(120),
+      patch: z.record(z.string(), JsonValue),
+      description: optionalText(400),
+    }),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: existing, error: readError } = await context.supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", data.key)
+      .maybeSingle();
+    orThrow("adminPatchSetting", readError);
+
+    const base =
+      existing?.value && typeof existing.value === "object" && !Array.isArray(existing.value)
+        ? (existing.value as Record<string, unknown>)
+        : {};
+
+    const { error } = await context.supabase.from("site_settings").upsert(
+      {
+        key: data.key,
+        value: deepStripUnsafeHtml({ ...base, ...data.patch }) as never,
+        ...(data.description === undefined ? {} : { description: data.description }),
+      },
+      { onConflict: "key" },
+    );
+    orThrow("adminPatchSetting", error);
     return { ok: true as const };
   });
 

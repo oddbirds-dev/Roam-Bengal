@@ -55,6 +55,15 @@
 
   /* The reference designs use a single 980px breakpoint (plus 640px on contact). */
   --breakpoint-nav: 980px;
+
+  /* Admin chrome. The panel sits on its own faintly cool ground rather than `paper`, so a white
+     Card reads as a raised surface. The two sidebar widths are tokens because three files —
+     the shell, the editor shell, and the tour editor — must agree on the left offset exactly;
+     as literals they had already drifted into `w-55`/`lg:left-55`/`lg:pl-55` triplets that
+     nothing tied together. */
+  --color-admin-bg: #f6f8f6;
+  --spacing-sidebar: 13.75rem;
+  --spacing-sidebar-collapsed: 4.75rem;
 }
 
 @layer base {

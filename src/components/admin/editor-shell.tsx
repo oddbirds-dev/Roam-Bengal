@@ -1,32 +1,45 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useBlocker } from "@tanstack/react-router";
-import { AdminButton, useSidebarCollapsed } from "@/components/admin/admin-ui";
+import { AdminButton } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import { PreviewPane, usePreviewPane } from "@/components/admin/preview-pane";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { settingsPreviewChannel } from "@/hooks/use-site-settings";
+import type { DraftChannel } from "@/lib/preview";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 const PREVIEW_PREF = "admin:preview-open";
 
 /**
- * The frame every `site_settings` content editor shares: the form on the left, a live view
- * of the real page on the right, and one save bar that always says whether there is
- * anything unsaved. Fills the admin shell's `<main>` edge to edge (`fixed inset-0 top-14`,
- * offset by the sidebar's current width) so the save bar stays pinned to the bottom of the
- * viewport instead of scrolling away with a long form.
+ * The frame *every* content editor shares: the form on the left, a live view of the real page on
+ * the right, and one save bar that always says whether there is anything unsaved. Fills the admin
+ * shell's relative `<main>` edge to edge so
+ * the save bar stays pinned to the bottom of the viewport instead of scrolling away with a long
+ * form.
+ *
+ * Originally settings-only, which is why the panel ended up with three different editor chromes
+ * and an unsaved-changes guard on only one of them. It is now generic over the preview channel, so
+ * a tour, a blog post or a destination gets the same frame — and the same `useBlocker` — as a
+ * settings group.
+ *
+ * `backTo` renders a router link; `onBack` renders a button, for the list screens that toggle
+ * list↔form in place rather than navigating.
  */
-export function EditorShell({
+export function EditorShell<T = Record<string, unknown>>({
   title,
   blurb,
   previewPath,
+  previewAnchor,
+  previewChannel,
   previewDraft,
   dirty,
   saving,
   onSave,
   onDiscard,
+  onBack,
   backTo,
-  backLabel = "← All site content",
+  backLabel = "Back",
+  footer,
   children,
 }: {
   title: string;
@@ -34,19 +47,29 @@ export function EditorShell({
   /** Public route path the preview loads, e.g. `/` or `/tours`. Omitted where there's no
    *  single page this content visibly affects — the form then fills the full width. */
   previewPath?: string;
-  /** Every `site_settings` row this screen can edit, with its unsaved draft merged in. */
-  previewDraft: Record<string, unknown>;
+  /** Element id on that page to scroll to and flash once the preview is ready. */
+  previewAnchor?: string;
+  /** Which draft bridge to push edits down. Defaults to the `site_settings` one. */
+  previewChannel?: DraftChannel<T>;
+  /** The unsaved draft, in whatever shape `previewChannel` carries. */
+  previewDraft: T;
   dirty: boolean;
   saving: boolean;
   onSave: () => void;
   onDiscard: () => void;
+  /** Back as a button — for a list screen toggling list↔form without navigating. */
+  onBack?: () => void;
+  /** Back as a link — for a screen that really is a separate route. */
   backTo?: string;
   backLabel?: string;
+  /** Rendered under the form, outside the field stack. Where a Delete lives. */
+  footer?: ReactNode;
   children: ReactNode;
 }) {
-  const sidebarCollapsed = useSidebarCollapsed();
   const wide = useMediaQuery("(min-width: 1024px)");
-  const pane = usePreviewPane(settingsPreviewChannel, previewDraft);
+  const channel = (previewChannel ??
+    (settingsPreviewChannel as unknown as DraftChannel<T>)) as DraftChannel<T>;
+  const pane = usePreviewPane(channel, previewDraft, 180, previewAnchor);
   const [dragging, setDragging] = useState(false);
 
   // Read the stored preference after mount: on the server there is no localStorage, and
@@ -82,28 +105,33 @@ export function EditorShell({
     disabled: !dirty,
   });
 
+  const backClass =
+    "inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green";
+
+  const back = onBack ? (
+    <button type="button" onClick={onBack} className={backClass}>
+      <AdminIcon name="arrowLeft" className="h-[15px] w-[15px]" />
+      {backLabel}
+    </button>
+  ) : backTo ? (
+    <Link to={backTo as never} className={backClass}>
+      <AdminIcon name="arrowLeft" className="h-[15px] w-[15px]" />
+      {backLabel}
+    </Link>
+  ) : null;
+
   const form = (
     <>
-      {backTo ? (
-        <Link
-          to={backTo as never}
-          className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green"
-        >
-          {backLabel}
-        </Link>
-      ) : null}
-      <h1 className={`font-display text-[1.7rem] text-green ${backTo ? "mt-4" : ""}`}>{title}</h1>
+      {back}
+      <h1 className={`font-display text-[1.7rem] text-green ${back ? "mt-4" : ""}`}>{title}</h1>
       <p className="mt-1 max-w-xl text-[0.86rem] text-muted">{blurb}</p>
       <div className="mt-6">{children}</div>
+      {footer ? <div className="mt-8 border-t border-rule pt-6">{footer}</div> : null}
     </>
   );
 
   return (
-    <div
-      className={`fixed inset-0 top-14 z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
-        sidebarCollapsed ? "lg:left-19" : "lg:left-55"
-      }`}
-    >
+    <div className="absolute inset-0 z-10 flex flex-col bg-admin-bg">
       <div className="min-h-0 flex-1 p-4">
         {previewPath && wide && pane.open ? (
           <ResizablePanelGroup

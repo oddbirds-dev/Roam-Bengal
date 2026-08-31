@@ -6,11 +6,10 @@ import { EditorShell } from "@/components/admin/editor-shell";
 import { SortableList, SortableRow } from "@/components/admin/sortable-list";
 import {
   FieldControl,
-  HOMEPAGE_SECTION_FIELDS,
   hydrateSetting,
-  mergeSetting,
 } from "@/components/admin/settings-form";
-import { adminSaveSetting } from "@/lib/admin-content.functions";
+import { HOMEPAGE_SECTION_FIELDS } from "@/lib/content-schema";
+import { adminPatchSetting, adminSaveSetting } from "@/lib/admin-content.functions";
 import {
   HOME_LAYOUT_KEY,
   resolveHomeLayout,
@@ -47,8 +46,8 @@ function HomepageSectionsScreen() {
   const [expanded, setExpanded] = useState<HomeSectionId | null>(null);
   const { run, busy, error } = useAction();
 
-  const [baseline, setBaseline] = useState(() => JSON.stringify([initialLayout, initialCopy]));
-  const dirty = JSON.stringify([layout, copy]) !== baseline;
+  const [baseline, setBaseline] = useState(() => ({ layout: initialLayout, copy: initialCopy }));
+  const dirty = JSON.stringify([layout, copy]) !== JSON.stringify([baseline.layout, baseline.copy]);
 
   function reorder(nextIds: string[]) {
     const byId = new Map(layout.map((entry) => [entry.id, entry]));
@@ -62,20 +61,25 @@ function HomepageSectionsScreen() {
   }
 
   function discard() {
-    setLayout(initialLayout);
-    setCopy(initialCopy);
+    setLayout(baseline.layout);
+    setCopy(baseline.copy);
   }
 
   async function save() {
+    const homepagePatch = Object.fromEntries(
+      Object.values(HOMEPAGE_SECTION_FIELDS)
+        .flat()
+        .map((field) => [field.key, copy[field.key]] as const),
+    );
     // Two independent rows (different keys), so the calls can run concurrently rather than
     // paying two round trips back-to-back.
     const ok = await run(() =>
       Promise.all([
         adminSaveSetting({ data: { key: HOME_LAYOUT_KEY, value: serializeHomeLayout(layout) } }),
-        adminSaveSetting({ data: { key: "homepage", value: mergeSetting(storedCopy, copy) as never } }),
+        adminPatchSetting({ data: { key: "homepage", patch: homepagePatch as never } }),
       ]),
     );
-    if (ok) setBaseline(JSON.stringify([layout, copy]));
+    if (ok) setBaseline({ layout, copy });
   }
 
   return (
@@ -83,6 +87,19 @@ function HomepageSectionsScreen() {
       title="Homepage sections"
       blurb="Drag a block by its handle to move it up or down the page. Switch one off to hide it without deleting anything, or press Edit to change its wording and photos."
       previewPath="/"
+      previewAnchor={
+        expanded === "popularTours"
+          ? "packages"
+          : expanded === "reviews"
+            ? "reviews"
+            : expanded === "gallery"
+              ? "section-gallery"
+              : expanded === "whyChooseUs"
+                ? "section-why-choose-us"
+                : expanded === "dreamCta"
+                  ? "contact"
+                  : undefined
+      }
       previewDraft={{ [HOME_LAYOUT_KEY]: serializeHomeLayout(layout), homepage: copy }}
       dirty={dirty}
       saving={busy}

@@ -1,20 +1,19 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState, type ReactNode } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import {
   AdminButton,
   ErrorBanner,
   useAction,
-  useSidebarCollapsed,
 } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
+import { TourFormShell } from "@/components/admin/tour-form";
 import {
   AddButton,
   GroupedListField,
   inputBase,
   KeyValueField,
   Label,
-  RichTextEditor,
   NumberField,
   RelatedContentField,
   reorder,
@@ -26,9 +25,9 @@ import {
   TextField,
   Toggle,
 } from "@/components/admin/fields";
+import { RichTextarea } from "@/components/admin/rich-textarea";
 import { GalleryField, ImageField } from "@/components/admin/image-upload";
 import { invalidateLinkTargets } from "@/components/admin/link-picker";
-import { PreviewDivider, PreviewPane, type DeviceId } from "@/components/admin/preview-pane";
 import {
   adminGetTour,
   adminListActivities,
@@ -52,7 +51,8 @@ import {
   type TourCategory,
 } from "@/lib/content-types";
 import { toTourDTO } from "@/lib/tour-dto";
-import { PREVIEW_READY_MESSAGE, sendTourDraft } from "@/lib/tour-preview";
+import { tourPreviewChannel } from "@/lib/tour-preview";
+import { slugify } from "@/lib/slugify";
 
 export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
   // Only consulted for a brand-new tour — picks which category the "+ New tour" link
@@ -153,11 +153,10 @@ function TourEditor() {
   const { tour, activities, destinations, themes, siteFaqs, isNew } = Route.useLoaderData();
   const { category: newCategory } = Route.useSearch();
   const navigate = useNavigate();
-  const { run, busy, error, saved } = useAction();
+  const { run, busy, error } = useAction();
   // Fixed positioning takes this pane out of the shell's padded main column, so the
   // sidebar's collapsed state — set from within the shell — has to be read independently
   // to keep the left offset from leaving a gap (or clipping) against the actual rail width.
-  const sidebarCollapsed = useSidebarCollapsed();
 
   // A brand-new tour starts from the template set in Site content → Tour editor template.
   // An existing tour uses whatever it was saved with, so changing the template later never
@@ -198,68 +197,12 @@ function TourEditor() {
   const current = useMemo(() => serialize({ form, themeIds }), [form, themeIds]);
   const dirty = current !== baseline;
 
-  const [previewOpen, setPreviewOpen] = useState(true);
-  const [device, setDevice] = useState<DeviceId>("desktop");
-  const [split, setSplit] = useState(50);
-  const [dragging, setDragging] = useState(false);
-  const [frameKey, setFrameKey] = useState(0);
-  const [frameSlug, setFrameSlug] = useState(() => previewSlug(form));
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const splitRef = useRef<HTMLDivElement>(null);
-
   // The preview renders the *unsaved* form, mapped through the same row → DTO function
   // the public loader uses, so what the pane shows is what saving would produce.
   const draftTour = useMemo(
     () => toTourDTO({ ...form, id: tour?.id ?? "preview" }),
     [form, tour?.id],
   );
-  const draftRef = useRef(draftTour);
-  draftRef.current = draftTour;
-
-  // Debounced: typing a title should not post thirty messages a second.
-  useEffect(() => {
-    if (!previewOpen) return;
-    const id = window.setTimeout(() => sendTourDraft(frameRef.current, draftTour), 180);
-    return () => window.clearTimeout(id);
-  }, [draftTour, previewOpen]);
-
-  // The iframe finishes loading long after this component mounted, so it announces
-  // itself and gets whatever the form holds at that moment.
-  useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      if ((event.data as { type?: string } | null)?.type !== PREVIEW_READY_MESSAGE) return;
-      sendTourDraft(frameRef.current, draftRef.current);
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  function reloadPreview() {
-    setFrameSlug(previewSlug(form));
-    setFrameKey((k) => k + 1);
-  }
-
-  /** Drag the divider. The iframe stops swallowing the pointer while this runs. */
-  function startResize(event: React.PointerEvent) {
-    const bounds = splitRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    event.preventDefault();
-    setDragging(true);
-
-    const onMove = (e: PointerEvent) => {
-      const pct = ((e.clientX - bounds.left) / bounds.width) * 100;
-      setSplit(Math.min(72, Math.max(28, pct)));
-    };
-    const onUp = () => {
-      setDragging(false);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-  }
-
   function discard() {
     const previous = JSON.parse(baseline) as EditorState;
     setForm(previous.form);
@@ -282,48 +225,27 @@ function TourEditor() {
     setBaseline(serialize({ form: payload, themeIds }));
     // The link picker caches its list per session; `router.invalidate()` doesn't reach it.
     invalidateLinkTargets();
-    reloadPreview();
-
     // A new tour lives at a placeholder route until it has an id.
     if (isNew) await navigate({ to: "/admin/tours/$id", params: { id: result.id } });
   }
 
   return (
-    <div
-      className={`fixed inset-0 top-14 z-10 flex flex-col bg-[#F6F8F6] transition-[left] ${
-        sidebarCollapsed ? "lg:left-19" : "lg:left-55"
-      }`}
+    <TourFormShell
+      title={isNew ? "New tour" : "Edit tour"}
+      blurb={isNew ? "Fill in the basics; you can add detail after saving." : form.title || "Untitled tour"}
+      previewPath={`/tours/${previewSlug(form)}`}
+      previewChannel={tourPreviewChannel}
+      previewDraft={draftTour}
+      dirty={dirty || isNew}
+      saving={busy}
+      onSave={() => void save()}
+      onDiscard={discard}
+      backTo="/admin/tours"
+      backLabel="Tours"
     >
-      <div
-        ref={splitRef}
-        className="flex min-h-0 flex-1 flex-col lg:flex-row"
-        style={{ ["--form-split" as string]: previewOpen ? `${split}%` : "100%" }}
-      >
-        {/* Form pane */}
-        <div className="min-h-0 w-full flex-1 overflow-y-auto lg:w-[var(--form-split)] lg:flex-none">
-          <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
-            <Link
-              to="/admin/tours"
-              className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-muted transition-colors hover:text-green"
-            >
-              ← Tours
-            </Link>
-            <h1 className="mt-4 font-display text-[2rem] font-bold text-green-dark italic">
-              {isNew ? "New tour" : "Edit tour"}
-            </h1>
-            <p className="mt-1 text-[0.86rem] text-muted">
-              {isNew
-                ? "Fill in the basics — you can add detail after saving."
-                : form.title || "Untitled tour"}
-            </p>
-
-            {error ? (
-              <div className="mt-5">
-                <ErrorBanner error={error} />
-              </div>
-            ) : null}
-
-            <div className="mt-8 flex flex-col gap-8 pb-10">
+      <div>
+        {error ? <ErrorBanner error={error} /> : null}
+        <div className="mt-8 flex flex-col gap-8 pb-10">
               <FormSection>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <TextField
@@ -768,58 +690,10 @@ function TourEditor() {
                   />
                 </FormSection>
               ) : null}
-            </div>
-          </div>
-        </div>
-
-        {previewOpen ? <PreviewDivider onPointerDown={startResize} /> : null}
-
-        {previewOpen ? (
-          <PreviewPane
-            path={`/tours/${frameSlug}`}
-            label={`Preview · /tours/${form.slug || slugify(form.title) || "new"}`}
-            pane={{
-              open: previewOpen,
-              setOpen: setPreviewOpen,
-              device,
-              setDevice,
-              dragging,
-              frameKey,
-              frameRef,
-              splitRef,
-              startResize,
-              reload: reloadPreview,
-              splitValue: previewOpen ? `${split}%` : "100%",
-            }}
-          />
-        ) : null}
-      </div>
-
-      {/* Action bar */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-t border-rule bg-white px-5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] sm:px-6">
-        <div className="flex items-center gap-5 text-[0.85rem] text-muted">
-          <span className={dirty ? "font-semibold text-ink" : ""}>
-            {busy ? "Saving…" : dirty ? "Unsaved changes" : "Everything is saved"}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPreviewOpen((open) => !open)}
-            className="hidden items-center gap-1.5 transition-colors hover:text-ink lg:flex"
-          >
-            <AdminIcon name={previewOpen ? "eyeOff" : "eye"} className="h-4 w-4" />
-            {previewOpen ? "Hide preview" : "Show preview"}
-          </button>
-        </div>
-        <div className="flex items-center gap-3">
-          <AdminButton variant="secondary" onClick={discard} disabled={!dirty || busy}>
-            Discard
-          </AdminButton>
-          <AdminButton onClick={save} disabled={busy || (!dirty && !isNew)}>
-            {busy ? "Saving…" : saved && !dirty ? "Saved" : "Save changes"}
-          </AdminButton>
         </div>
       </div>
-    </div>
+
+    </TourFormShell>
   );
 }
 
@@ -904,7 +778,7 @@ function TourFaqsField({
               </div>
               <div>
                 <span className="mb-1 block text-[0.72rem] font-medium text-muted">Answer</span>
-                <RichTextEditor
+                <RichTextarea
                   rows={3}
                   value={row.answer}
                   onChange={(v) => setField(i, "answer", v)}
@@ -1081,13 +955,6 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     sort_order: Number(row.sort_order ?? 0),
     hidden_sections: list(row.hidden_sections) as string[],
   };
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 /**

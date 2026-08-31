@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AdminIcon } from "@/components/admin/icons";
 import type { DraftChannel } from "@/lib/preview";
+import { sendPreviewFocus } from "@/lib/preview-focus";
 
 /**
  * Shared split-pane live-preview UI: an iframe of the real public page, kept in sync with
@@ -22,7 +23,13 @@ const DEVICES = [
 
 export type DeviceId = (typeof DEVICES)[number]["id"];
 
-export function usePreviewPane<T>(channel: DraftChannel<T>, draft: T, debounceMs = 180) {
+export function usePreviewPane<T>(
+  channel: DraftChannel<T>,
+  draft: T,
+  debounceMs = 180,
+  /** Element id in the previewed page to scroll to and flash. */
+  focusAnchor?: string,
+) {
   const [open, setOpen] = useState(true);
   const [device, setDevice] = useState<DeviceId>("desktop");
   const [split, setSplit] = useState(50);
@@ -42,9 +49,22 @@ export function usePreviewPane<T>(channel: DraftChannel<T>, draft: T, debounceMs
   }, [draft, open, debounceMs]);
 
   useEffect(
-    () => channel.onReady(() => channel.sendDraft(frameRef.current, draftRef.current)),
-    [channel],
+    () =>
+      channel.onReady(() => {
+        channel.sendDraft(frameRef.current, draftRef.current);
+        // Sent on ready rather than on mount: the iframe finishes loading long after the editor
+        // did, and an anchor posted before the document exists scrolls nothing.
+        if (focusAnchor) sendPreviewFocus(frameRef.current, focusAnchor);
+      }),
+    [channel, focusAnchor],
   );
+
+  // A later anchor change (the editor switched groups without remounting) re-focuses without
+  // waiting for another ready handshake.
+  useEffect(() => {
+    if (!open || !focusAnchor) return;
+    sendPreviewFocus(frameRef.current, focusAnchor);
+  }, [open, focusAnchor]);
 
   function reload() {
     setFrameKey((k) => k + 1);

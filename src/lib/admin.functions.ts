@@ -36,6 +36,7 @@ export interface AdminStats {
   testimonials: number;
   faqs: number;
   activities: number;
+  destinations: number;
   inquiries: number;
   newInquiries: number;
   subscribers: number;
@@ -60,6 +61,7 @@ export const adminStats = createServerFn({ method: "GET" })
       testimonials,
       faqs,
       activities,
+      destinations,
       inquiries,
       newInquiries,
       subscribers,
@@ -70,6 +72,7 @@ export const adminStats = createServerFn({ method: "GET" })
       count("testimonials"),
       count("faqs"),
       count("activities"),
+      count("destinations"),
       count("inquiries"),
       sb.from("inquiries").select("*", { head: true, count: "exact" }).eq("status", "new"),
       count("newsletter_subscribers"),
@@ -82,6 +85,7 @@ export const adminStats = createServerFn({ method: "GET" })
       testimonials: testimonials.count ?? 0,
       faqs: faqs.count ?? 0,
       activities: activities.count ?? 0,
+      destinations: destinations.count ?? 0,
       inquiries: inquiries.count ?? 0,
       newInquiries: newInquiries.count ?? 0,
       subscribers: subscribers.count ?? 0,

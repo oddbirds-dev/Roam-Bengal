@@ -7,11 +7,11 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
-import { setSidebarCollapsed, useSidebarCollapsed } from "@/components/admin/admin-ui";
+import { Toaster, setSidebarCollapsed, useSidebarCollapsed } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
-import { SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/components/admin/settings-form";
+import { SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/lib/content-schema";
 import { supabase } from "@/integrations/supabase/client";
-import { whoAmI } from "@/lib/admin.functions";
+import { adminStats, whoAmI } from "@/lib/admin.functions";
 
 /**
  * Admin shell: fixed sidebar, top bar, content column.
@@ -25,11 +25,16 @@ export const Route = createFileRoute("/_authenticated/admin")({
     if (!me.isAdmin) throw redirect({ to: "/" });
     return { me };
   },
-  loader: ({ context }) => context.me,
+  // Loaded at the layout rather than the dashboard so the sidebar can show a live inquiry badge
+  // on every admin page. `staleTime` keeps this from re-running its count queries on every
+  // sibling-route navigation; a mutation that changes the count calls `router.invalidate()`,
+  // which bypasses staleTime and refreshes the badge immediately regardless.
+  loader: async ({ context }) => ({ me: context.me, stats: await adminStats() }),
+  staleTime: 60_000,
   component: AdminShell,
 });
 
-type NavItem = { label: string; to: string; icon: string };
+type NavItem = { label: string; to: string; icon: string; badge?: "newInquiries" };
 type NavGroup = { heading: string; items: readonly NavItem[] };
 
 // Grouped so the person using this can tell "things people sent me" apart from "things I
@@ -39,18 +44,17 @@ const NAV: readonly NavGroup[] = [
     heading: "Overview",
     items: [
       { label: "Dashboard", to: "/admin", icon: "dashboard" },
-      { label: "Inquiries", to: "/admin/inquiries", icon: "inbox" },
+      { label: "Inquiries", to: "/admin/inquiries", icon: "inbox", badge: "newInquiries" },
     ],
   },
   {
     heading: "Your content",
     items: [
       { label: "Tours", to: "/admin/tours", icon: "map" },
-      // No Destinations entry: the table exists but no destination pages ship in v1
-      // (PRD §16), so editing them would produce content with nowhere to appear.
-      { label: "Activities", to: "/admin/activities", icon: "activity" },
-      { label: "Blogs", to: "/admin/posts", icon: "news" },
-      { label: "Reviews", to: "/admin/testimonials", icon: "star" },
+      { label: "Destinations", to: "/admin/destinations", icon: "pin" },
+      { label: "Activities", to: "/admin/activities", icon: "sparkles" },
+      { label: "Blogs", to: "/admin/blogs", icon: "news" },
+      { label: "Reviews", to: "/admin/reviews", icon: "star" },
       { label: "FAQs", to: "/admin/faqs", icon: "help" },
     ],
   },
@@ -58,8 +62,8 @@ const NAV: readonly NavGroup[] = [
     heading: "Your website",
     items: [
       { label: "Site content", to: "/admin/settings", icon: "gear" },
-      { label: "Links", to: "/admin/links", icon: "search" },
-      { label: "SEO", to: "/admin/seo", icon: "external" },
+      { label: "SEO", to: "/admin/seo", icon: "search" },
+      { label: "Links", to: "/admin/links", icon: "link" },
     ],
   },
 ];
@@ -75,7 +79,7 @@ const CONTENT_LINKS = [
 ];
 
 function AdminShell() {
-  const me = Route.useLoaderData();
+  const { me, stats } = Route.useLoaderData();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
@@ -94,12 +98,14 @@ function AdminShell() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F6F8F6]">
+    <div className="min-h-screen bg-admin-bg">
+      <Toaster />
+
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-55 flex-col border-r border-rule bg-paper transition-[transform,width] lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-sidebar flex-col border-r border-rule bg-paper transition-[transform,width] lg:translate-x-0 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } ${collapsed ? "lg:w-19" : ""}`}
+        } ${collapsed ? "lg:w-sidebar-collapsed" : ""}`}
       >
         <div
           className={`flex h-14 shrink-0 items-center gap-2 border-b border-rule px-5 ${
@@ -155,6 +161,7 @@ function AdminShell() {
                   const exact = item.to === "/admin";
                   const active = exact ? pathname === item.to : pathname.startsWith(item.to);
                   const subNav = item.to === "/admin/settings" && active && !collapsed;
+                  const count = item.badge ? stats[item.badge] : 0;
                   return (
                     <div key={item.to}>
                       <Link
@@ -167,10 +174,26 @@ function AdminShell() {
                             : "text-ink/70 hover:bg-mint/60 hover:text-green"
                         } ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
                       >
-                        <AdminIcon name={item.icon} />
+                        <span className="relative flex shrink-0 items-center">
+                          <AdminIcon name={item.icon} />
+                          {/* No room for a count at the collapsed width, so a waiting inquiry
+                              shows as a dot in the icon's corner instead. */}
+                          {count > 0 && collapsed ? (
+                            <span className="absolute -top-0.5 -right-0.5 hidden h-2 w-2 rounded-full bg-orange lg:block" />
+                          ) : null}
+                        </span>
                         <span className={`flex-1 ${collapsed ? "lg:hidden" : ""}`}>
                           {item.label}
                         </span>
+                        {count > 0 ? (
+                          <span
+                            className={`grid min-w-5 place-items-center rounded-full bg-orange px-1.5 py-0.5 text-[0.65rem] font-bold text-white ${
+                              collapsed ? "lg:hidden" : ""
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        ) : null}
                         {active && !subNav ? (
                           <AdminIcon
                             name="chevron"
@@ -235,7 +258,7 @@ function AdminShell() {
       ) : null}
 
       {/* Main column */}
-      <div className={`transition-[padding] ${collapsed ? "lg:pl-19" : "lg:pl-55"}`}>
+      <div className={`transition-[padding] ${collapsed ? "lg:pl-sidebar-collapsed" : "lg:pl-sidebar"}`}>
         <header className="flex h-14 items-center justify-between border-b border-rule bg-paper px-5 sm:px-8">
           <button
             type="button"
@@ -270,7 +293,7 @@ function AdminShell() {
           </div>
         </header>
 
-        <main id="main" className="px-5 py-8 sm:px-8">
+        <main id="main" className="relative min-h-[calc(100vh-3.5rem)] px-5 py-8 sm:px-8">
           <Outlet />
         </main>
       </div>

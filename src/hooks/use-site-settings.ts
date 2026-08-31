@@ -18,9 +18,12 @@ type SettingsDraftMap = Record<string, unknown>;
  * The settings admin editor only ever has one screen open at a time, so unlike a tour or
  * post preview there is no page/slug to gate this on — being embedded in an iframe at all
  * (`useDraft`'s own `window.parent === window` check) is exactly the signal that a preview
- * is live. Every public page already calls `useSiteSettings()`, so wiring the channel in
- * here, once, reaches all of them for free instead of threading `?preview=1` through six
- * different routes.
+ * is live. Wiring the channel in here, once, covers every page that reads its copy through
+ * `useSiteSettings()` instead of threading `?preview=1` through six different routes.
+ *
+ * It does NOT reach a page that pulls a single keyed row off the root loader itself — the
+ * standalone `info_*` / `policy_*` pages do exactly that. Those call `useSettingGroup()`
+ * below, which applies the same draft.
  */
 export const settingsPreviewChannel = createDraftChannel<SettingsDraftMap>("settings");
 
@@ -56,6 +59,21 @@ export function useSiteSettings(): SiteDefaults {
   const draft = settingsPreviewChannel.useDraft(true);
   const withDraft = draft ? { ...stored, ...draft } : stored;
   return mergeSettings(siteDefaults, withDraft ?? {});
+}
+
+/**
+ * One `site_settings` row, merged over its defaults, with the unsaved admin draft applied.
+ *
+ * The standalone `info_*` / `policy_*` pages do not get their body copy through
+ * `useSiteSettings()` — they read a single keyed row straight off the root loader — so the
+ * draft channel wired into `useSiteSettings` never reached them and their editor preview
+ * rendered only saved content. Use this instead of reaching for the loader data directly.
+ */
+export function useSettingGroup<T>(key: string, defaults: T): T {
+  const stored = rootRoute.useLoaderData() as SettingsMap | undefined;
+  const draft = settingsPreviewChannel.useDraft(true);
+  const value = draft && key in draft ? draft[key] : stored?.[key];
+  return mergeSettings(defaults, value ?? {});
 }
 
 /**

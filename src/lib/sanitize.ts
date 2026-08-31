@@ -73,3 +73,22 @@ export function stripUnsafeHtml(value: string): string {
       )
   );
 }
+
+/**
+ * Same choke point as `stripUnsafeHtml`, but for the free-form JSON that `site_settings` rows
+ * hold. Every rich-text field an admin can format now goes through here on save, however deep it
+ * sits in a `sections`/`list`/`rows` structure — the per-field zod helpers only reach the fields
+ * the schema happens to describe, and a settings row can carry keys it does not.
+ */
+export function deepStripUnsafeHtml<T>(value: T): T {
+  if (typeof value === "string") return stripUnsafeHtml(value) as T;
+  if (Array.isArray(value)) return value.map(deepStripUnsafeHtml) as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = deepStripUnsafeHtml(v);
+    }
+    return out as T;
+  }
+  return value;
+}

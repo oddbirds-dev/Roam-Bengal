@@ -13,6 +13,7 @@ import { getAllSettings } from "@/lib/site-content.functions";
 import { mergeSettings, useSiteSettings } from "@/hooks/use-site-settings";
 import { siteDefaults } from "@/content/site-defaults";
 import { customFontCss, customFontUrls, resolveCustomFonts } from "@/lib/custom-fonts";
+import { usePreviewFocus } from "@/lib/preview-focus";
 
 export const Route = createRootRoute({
   // Header and footer copy lives in `site_settings`, so every page needs it. Loading it
@@ -51,6 +52,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  usePreviewFocus(true);
   return (
     <RootDocument>
       <Outlet />
