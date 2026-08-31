@@ -37,6 +37,11 @@
   --color-ink: #20291f;
   --color-paper: #ffffff;
   --color-mint: #eaf4ec;
+  /* The orange-side counterpart to `mint`: the warm tint the homepage gradients already
+     land on (`TOURS_BG`, `STORY_BG` and `DREAM_BG` in components/home/palette.ts all run
+     `#EAF4EC → #FDF0E4`). Pairs with `rust` for text at a readable contrast; `orange` and
+     `accent` are both too light to sit on it as body copy. */
+  --color-peach: #fdf0e4;
   --color-cream: #fbf7f0;
   /* Page background for the tour detail pages — a touch pinker than `cream`. */
   --color-sand: #f9f3ef;
@@ -56,12 +61,17 @@
   /* The reference designs use a single 980px breakpoint (plus 640px on contact). */
   --breakpoint-nav: 980px;
 
-  /* Admin chrome. The panel sits on its own faintly cool ground rather than `paper`, so a white
-     Card reads as a raised surface. The two sidebar widths are tokens because three files —
-     the shell, the editor shell, and the tour editor — must agree on the left offset exactly;
-     as literals they had already drifted into `w-55`/`lg:left-55`/`lg:pl-55` triplets that
-     nothing tied together. */
-  --color-admin-bg: #f6f8f6;
+  /* Admin chrome. The panel sits on a ground rather than `paper` so a white Card reads as a
+     raised surface — the same paper-on-cream separation the public pages already use. It was
+     briefly its own cool grey (#f6f8f6), which was the one colour in the admin panel that
+     belonged to no palette and made the panel read as a different product; it now points at
+     `cream`. Kept as its own token rather than writing `bg-cream` at the two call sites so the
+     admin ground stays one deliberate decision.
+
+     The two sidebar widths are tokens because three files — the shell, the editor shell, and
+     the tour editor — must agree on the left offset exactly; as literals they had already
+     drifted into `w-55`/`lg:left-55`/`lg:pl-55` triplets that nothing tied together. */
+  --color-admin-bg: var(--color-cream);
   --spacing-sidebar: 13.75rem;
   --spacing-sidebar-collapsed: 4.75rem;
 }

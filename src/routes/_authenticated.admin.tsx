@@ -170,8 +170,8 @@ function AdminShell() {
                         title={collapsed ? item.label : undefined}
                         className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors ${
                           active
-                            ? "bg-mint font-semibold text-green"
-                            : "text-ink/70 hover:bg-mint/60 hover:text-green"
+                            ? "bg-peach font-semibold text-rust"
+                            : "text-ink/70 hover:bg-peach/60 hover:text-rust"
                         } ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
                       >
                         <span className="relative flex shrink-0 items-center">
@@ -208,8 +208,8 @@ function AdminShell() {
                             <Link
                               key={link.to}
                               to={link.to as never}
-                              className={`truncate rounded px-2 py-1 text-[0.78rem] transition-colors hover:bg-mint/60 hover:text-green ${
-                                pathname === link.to ? "font-semibold text-green" : "text-ink/70"
+                              className={`truncate rounded px-2 py-1 text-[0.78rem] transition-colors hover:bg-peach/60 hover:text-rust ${
+                                pathname === link.to ? "font-semibold text-rust" : "text-ink/70"
                               }`}
                             >
                               {link.label}
