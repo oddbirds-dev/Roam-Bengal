@@ -30,7 +30,7 @@ function Dashboard() {
     },
     { label: "Tours", value: stats.tours, icon: "map", to: "/admin/tours" },
     { label: "Destinations", value: stats.destinations, icon: "pin", to: "/admin/destinations" },
-    { label: "Activities", value: stats.activities, icon: "activity", to: "/admin/activities" },
+    { label: "Activities", value: stats.activities, icon: "sparkles", to: "/admin/activities" },
     { label: "Blog posts", value: stats.posts, icon: "news", to: "/admin/blogs" },
     { label: "Reviews", value: stats.testimonials, icon: "star", to: "/admin/reviews" },
     { label: "FAQs", value: stats.faqs, icon: "help", to: "/admin/faqs" },

@@ -1,6 +1,5 @@
 import { Card } from "@/components/admin/admin-ui";
 import {
-  BlockListField,
   DraggableRepeaterField,
   GroupedListField,
   LinkGroupField,
@@ -14,7 +13,6 @@ import {
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
 import {
-  asBlocks,
   asGroups,
   asLinkGroups,
   asLinks,
@@ -156,8 +154,6 @@ export function FieldControl({
       );
     case "linkGroups":
       return <LinkGroupField label={field.label} hint={field.hint} values={asLinkGroups(value)} onChange={onChange} />;
-    case "blocks":
-      return <BlockListField label={field.label} hint={field.hint} values={asBlocks(value)} onChange={onChange} />;
     case "groups":
       return (
         <GroupedListField

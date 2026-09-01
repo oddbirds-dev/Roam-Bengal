@@ -1,6 +1,5 @@
 import { createElement, type ReactNode } from "react";
 import {
-  type ContentBlock,
   type GroupRow,
   type LinkRow,
   type RepeaterColumn,
@@ -75,7 +74,6 @@ export type SettingsField =
       /** Offers an icon picker per group. */
       icons?: readonly { value: string; label: string }[];
     }
-  | { kind: "blocks"; key: string; label: string; hint?: string }
   | {
       kind: "rows";
       key: string;
@@ -1019,10 +1017,10 @@ function pageSchema(title: string, path: string, description: string): SettingsS
         ],
       },
       {
-        title: "Page sections",
+        title: "Page content",
         description:
-          "Each section has a heading, and any mix of paragraphs and bullet points beneath it.",
-        fields: [{ kind: "blocks", key: "blocks", label: "Sections" }],
+          "The body of the page. Use the heading menu for sub-headings, and the toolbar for lists, tables, links and highlighted boxes.",
+        fields: [{ kind: "textarea", key: "body", label: "Page content", rows: 24 }],
       },
       {
         title: "Questions box at the bottom",
@@ -1120,20 +1118,6 @@ const asLinkGroups = (v: unknown): { title: string; links: LinkRow[] }[] =>
     ? v.map((row) => ({ title: asText(asObject(row).title), links: asLinks(asObject(row).links) }))
     : [];
 
-const asBlocks = (v: unknown): ContentBlock[] =>
-  Array.isArray(v)
-    ? v.map((row) => {
-        const b = asObject(row);
-        return {
-          heading: asText(b.heading),
-          // Both lists are optional in the shipped defaults — a section may be all prose
-          // or all bullets — so a missing key becomes an empty list, not undefined.
-          paragraphs: asTextList(b.paragraphs),
-          items: asTextList(b.items),
-        };
-      })
-    : [];
-
 // `icon` is carried through rather than dropped: this coercion runs on load, so anything
 // it discards is discarded again on the next save.
 const asGroups = (v: unknown): GroupRow[] =>
@@ -1148,4 +1132,4 @@ const asGroups = (v: unknown): GroupRow[] =>
 
 export type SettingsObject = Obj;
 
-export { asObject, asText, asTextList, asRows, asLinks, asLinkGroups, asBlocks, asGroups };
+export { asObject, asText, asTextList, asRows, asLinks, asLinkGroups, asGroups };

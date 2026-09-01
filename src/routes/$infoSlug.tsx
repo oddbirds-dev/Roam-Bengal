@@ -49,6 +49,9 @@ function InfoRoute() {
     slug === "travel-faqs" && faqs.length
       ? {
           ...page,
+          // `PolicyLayout` prefers `body` over `blocks`, so a rich-text body saved for this key
+          // would hide the questions entirely. The table is the content here, so drop it.
+          body: undefined,
           blocks: faqs.map((f) => ({
             heading: f.question,
             paragraphs: [f.answer],

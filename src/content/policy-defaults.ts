@@ -19,6 +19,14 @@ export interface PolicyPage {
   eyebrow: string;
   title: string;
   subhead: string;
+  /**
+   * The page body as rich-text HTML — what the admin editor now writes.
+   *
+   * Optional because the defaults below are still authored as `blocks`, which is the shape these
+   * pages shipped in. `PolicyLayout` prefers `body` and falls back to `blocks`, so a page keeps
+   * rendering until someone saves it through the editor (which converts it).
+   */
+  body?: string;
   blocks: PolicyBlock[];
   contact_heading: string;
   contact_body: string;

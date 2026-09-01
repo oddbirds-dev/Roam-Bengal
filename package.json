@@ -12,6 +12,8 @@
     "test:auth": "node scripts/auth-smoke.mjs",
     "test:admin": "node scripts/admin-smoke.mjs",
     "test:cms": "node scripts/cms-smoke.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "test:rich-text": "node scripts/rich-text-inline-smoke.mjs",
     "test:users:seed": "node scripts/test-users.mjs seed",
     "test:users:teardown": "node scripts/test-users.mjs teardown"
@@ -52,6 +54,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/markdown-to-jsx": "^7.0.0",
     "@types/node": "^26.1.2",

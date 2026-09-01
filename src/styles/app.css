@@ -213,6 +213,8 @@
    are styled by the `a` override in format-text.tsx, so links match everywhere on the
    site rather than only inside this container. */
 @layer components {
+  /* Typography for admin-authored rich text — blog bodies and the info/policy page body.
+     Named for its first caller; it is the shared definition, not a blog-only one. */
   .blog-body {
     color: color-mix(in oklab, var(--color-ink) 85%, transparent);
     line-height: 1.75;

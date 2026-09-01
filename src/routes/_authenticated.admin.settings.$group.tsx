@@ -3,10 +3,11 @@ import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { AdminButton, ErrorBanner, useAction } from "@/components/admin/admin-ui";
 import { EditorShell } from "@/components/admin/editor-shell";
 import { SettingsSections, hydrateSetting } from "@/components/admin/settings-form";
-import { SETTINGS_SCHEMA, type SettingsSchema } from "@/lib/content-schema";
+import { SETTINGS_SCHEMA, asObject, type SettingsSchema } from "@/lib/content-schema";
 import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminPatchSetting } from "@/lib/admin-content.functions";
+import { blocksToHtml } from "@/lib/info-sections-to-html";
 
 export const Route = createFileRoute("/_authenticated/admin/settings/$group")({
   component: GroupEditor,
@@ -29,17 +30,28 @@ function serialize(v: unknown): string {
   return JSON.stringify(v);
 }
 
-/** Older standalone pages stored their rich content as `sections`; expose both current aliases. */
+/**
+ * These pages used to be edited as a list of `blocks` (or, on rows pasted from the reference
+ * implementation, `sections`) and are now one rich-text `body`. Rows saved before the switch —
+ * and the shipped defaults in `src/content/policy-defaults.ts`, which are still written in the
+ * block shape — are flattened to HTML on the way into the editor, so an old page opens styled
+ * rather than blank.
+ *
+ * Read-side only: nothing writes `blocks` any more, and the original array is left on the row
+ * untouched, so this is reversible until someone saves.
+ */
 function withStandaloneBody(key: string, value: unknown): unknown {
   if (!key.startsWith("info_") && !key.startsWith("policy_")) return value;
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const row = value as Record<string, unknown>;
-  if (!Array.isArray(row.sections)) return value;
-  return {
-    ...row,
-    ...(row.body === undefined ? { body: row.sections } : {}),
-    ...(row.blocks === undefined ? { blocks: row.sections } : {}),
-  };
+
+  // An existing body wins: once the page has been saved in the new shape, the stale block array
+  // beside it is history, not content.
+  if (typeof row.body === "string" && row.body.trim()) return value;
+
+  const legacy = Array.isArray(row.blocks) ? row.blocks : row.sections;
+  const body = blocksToHtml(legacy);
+  return body ? { ...row, body } : value;
 }
 
 function GroupEditor() {
@@ -72,7 +84,12 @@ function SchemaEditor({
   stored: unknown;
 }) {
   const { run, busy, error } = useAction();
-  const initial = hydrateSetting(defaultsFor(settingKey), stored);
+  // Run the legacy conversion over the *merged* value, not just the stored row: the shipped
+  // defaults are still written as blocks, so a page nobody has saved yet would otherwise open
+  // with an empty body.
+  const hydrate = (row: unknown) =>
+    asObject(withStandaloneBody(settingKey, hydrateSetting(defaultsFor(settingKey), row)));
+  const initial = hydrate(stored);
   const [draft, setDraft] = useState(initial);
   const [baseline, setBaseline] = useState(initial);
   const dirty = serialize(draft) !== serialize(baseline);
@@ -112,7 +129,7 @@ function SchemaEditor({
         <span className="text-[0.78rem] text-muted">Want the wording it came with?</span>
         <AdminButton
           variant="secondary"
-          onClick={() => setDraft(hydrateSetting(defaultsFor(settingKey), {}))}
+          onClick={() => setDraft(hydrate({}))}
         >
           Restore original wording
         </AdminButton>
