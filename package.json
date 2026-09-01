@@ -54,7 +54,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/markdown-to-jsx": "^7.0.0",
     "@types/node": "^26.1.2",

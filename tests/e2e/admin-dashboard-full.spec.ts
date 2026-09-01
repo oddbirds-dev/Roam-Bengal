@@ -119,7 +119,7 @@ test.describe("admin dashboard — comprehensive coverage", () => {
 
     await main(page).getByRole("link").filter({ hasText: /^Tours/ }).first().click();
     await expect(page).toHaveURL(/\/admin\/tours$/);
-    await expect(main(page).getByRole("heading", { name: "Tours" })).toBeVisible();
+    await expect(main(page).getByRole("heading", { name: "Tours", level: 1 })).toBeVisible();
   });
 
   // ── 2. Inquiries ─────────────────────────────────────────────────────────
@@ -247,8 +247,8 @@ test.describe("admin dashboard — comprehensive coverage", () => {
     await expect(page.getByRole("button", { name: "+ New redirect" })).toBeVisible();
 
     await page.getByRole("button", { name: "Orphans", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Orphaned posts" })).toBeVisible();
     await expect(page.getByText(/no other post links to/i)).toBeVisible();
-    await expect(page.getByRole("table")).toBeVisible();
 
     await page.getByRole("button", { name: "Robots.txt", exact: true }).click();
     await expect(page.locator("textarea")).toBeVisible();
@@ -376,7 +376,7 @@ test.describe("admin dashboard — comprehensive coverage", () => {
     await goto(page, "/admin/settings/tours_page");
     await expect(page.getByRole("heading", { name: "Tours page", level: 1 })).toBeVisible();
 
-    const frame = page.getByTitle("Preview");
+    const frame = page.locator('iframe[title="Preview"]');
     await expect(frame).toBeVisible();
     await expect(frame).toHaveAttribute("src", /\/tours\?preview=1$/);
 
