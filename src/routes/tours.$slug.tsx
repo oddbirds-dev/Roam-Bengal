@@ -5,7 +5,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { TourCard, formatPrice } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
-import { FormatText } from "@/components/ui/format-text";
+import { FormatDocument, FormatText } from "@/components/ui/format-text";
 import { TourPricing } from "@/components/tour/tour-pricing";
 import { BestValueTours } from "@/components/tour/best-value-tours";
 import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
@@ -462,7 +462,7 @@ function TourDetail() {
                         key={w}
                         className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
                       >
-                        {w}
+                        <FormatDocument>{w}</FormatDocument>
                       </div>
                     ))}
                   </div>
