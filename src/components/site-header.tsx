@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, normalizePath } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 /**
@@ -69,7 +69,7 @@ export function SiteHeader({
           {header.nav.map((item) => (
             <Link
               key={item.to}
-              to={item.to}
+              to={normalizePath(item.to)}
               className={`relative pb-1.5 transition-colors ${
                 onDark ? "text-white/90 hover:text-white" : "text-ink hover:text-green"
               }`}
@@ -141,7 +141,7 @@ export function SiteHeader({
             {header.nav.map((item) => (
               <Link
                 key={item.to}
-                to={item.to}
+                to={normalizePath(item.to)}
                 className="border-b border-rule py-3 text-[1.05rem] font-medium"
                 activeProps={{ className: "text-green font-semibold" }}
                 activeOptions={{ exact: item.to === "/" }}

@@ -76,7 +76,7 @@ export function ButtonLink({
   return (
     // `to` is a runtime string from site_settings, so it cannot be statically checked
     // against the route tree. Unknown paths land on the 404 page.
-    <Link to={to as never} search={search as never} className={cls} {...rest}>
+    <Link to={normalizePath(to) as never} search={search as never} className={cls} {...rest}>
       {children}
     </Link>
   );
@@ -89,6 +89,18 @@ export function isExternal(to: string) {
     to.startsWith("tel:") ||
     to.startsWith("#")
   );
+}
+
+/**
+ * Admin-entered paths (site_settings nav/footer/CTA links) are free-text, so a link
+ * saved without its leading "/" (e.g. "blog" instead of "/blog") resolves relative to
+ * whatever page it's clicked from instead of the intended route, landing on the 404
+ * page everywhere except the homepage. Normalize before handing it to `<Link to>`.
+ */
+export function normalizePath(to: string) {
+  const trimmed = to.trim();
+  if (!trimmed || isExternal(trimmed) || trimmed.startsWith("/")) return trimmed;
+  return `/${trimmed}`;
 }
 
 /** Same pill, as a real <button> — for form submits and filter pills. */

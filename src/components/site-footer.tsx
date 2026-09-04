@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
-import { isExternal } from "@/components/ui/button";
+import { isExternal, normalizePath } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function SiteFooter() {
@@ -49,7 +49,7 @@ export function SiteFooter() {
               ) : (
                 <Link
                   key={link.label}
-                  to={link.to}
+                  to={normalizePath(link.to)}
                   className="mb-2.5 block text-[0.87rem] opacity-85 transition-opacity hover:opacity-100"
                 >
                   {link.label}
