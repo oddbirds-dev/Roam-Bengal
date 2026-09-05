@@ -131,7 +131,7 @@ export function EditorShell<T = Record<string, unknown>>({
   );
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col bg-admin-bg">
+    <div className="absolute inset-0 z-10 flex flex-col overflow-hidden bg-admin-bg">
       <div className="min-h-0 flex-1 p-4">
         {previewPath && wide && pane.open ? (
           <ResizablePanelGroup

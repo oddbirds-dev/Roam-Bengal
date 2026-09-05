@@ -1,5 +1,6 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { RichTextarea } from "@/components/admin/rich-textarea";
+import { AdminIcon } from "@/components/admin/icons";
 import {
   LinkPicker,
   useLinkTargets,
@@ -92,6 +93,29 @@ export function TextField({
   );
 }
 
+/** Splits on `**bold**` runs for the live bold-preview overlay in `TextArea`. The `**`
+ *  markers become their own "marker" segments rather than disappearing — see the comment
+ *  at the call site for why they're rendered invisible instead of just left out. */
+function splitBoldSegments(text: string): { text: string; kind: "plain" | "bold" | "marker" }[] {
+  const segments: { text: string; kind: "plain" | "bold" | "marker" }[] = [];
+  const re = /\*\*([^*]+)\*\*/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text))) {
+    if (match.index > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, match.index), kind: "plain" });
+    }
+    segments.push({ text: "**", kind: "marker" });
+    segments.push({ text: match[1] ?? "", kind: "bold" });
+    segments.push({ text: "**", kind: "marker" });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length || segments.length === 0) {
+    segments.push({ text: text.slice(lastIndex), kind: "plain" });
+  }
+  return segments;
+}
+
 export function TextArea({
   label,
   value,
@@ -100,6 +124,7 @@ export function TextArea({
   rows = 4,
   placeholder,
   plain,
+  boldButton,
 }: {
   label: string;
   value: string;
@@ -111,22 +136,141 @@ export function TextArea({
    *  robots.txt, a meta description. Formatting it would corrupt it, so these get a plain
    *  textarea with no toolbar. */
   plain?: boolean;
+  /** Adds a "Bold" button above a `plain` textarea that wraps the selection in `**`.
+   *  For fields where the plain text itself is later rendered with `FormatText`, so
+   *  `**word**` markers still show as bold — without the HTML-emitting rich editor. */
+  boldButton?: boolean;
 }) {
   const id = useFieldId(label);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  const toggleBold = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const { selectionStart, selectionEnd } = el;
+    const selected = value.slice(selectionStart, selectionEnd);
+    // A prior click may have left the selection on just the inner text (markers just
+    // outside it), so a plain `selected.startsWith("**")` check would never see the
+    // markers again and every click would wrap it in another layer of `**`.
+    const selectionHasMarkers =
+      selected.length >= 4 && selected.startsWith("**") && selected.endsWith("**");
+    const surroundedByMarkers =
+      value.slice(selectionStart - 2, selectionStart) === "**" &&
+      value.slice(selectionEnd, selectionEnd + 2) === "**";
+
+    let next: string;
+    let newStart: number;
+    let inner: string;
+    if (selectionHasMarkers) {
+      inner = selected.slice(2, -2);
+      next = `${value.slice(0, selectionStart)}${inner}${value.slice(selectionEnd)}`;
+      newStart = selectionStart;
+    } else if (surroundedByMarkers) {
+      inner = selected;
+      next = `${value.slice(0, selectionStart - 2)}${inner}${value.slice(selectionEnd + 2)}`;
+      newStart = selectionStart - 2;
+    } else {
+      inner = selected || "bold text";
+      next = `${value.slice(0, selectionStart)}**${inner}**${value.slice(selectionEnd)}`;
+      newStart = selectionStart + 2;
+    }
+    onChange(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(newStart, newStart + inner.length);
+    });
+  };
+
+  const syncBackdropScroll = () => {
+    if (backdropRef.current && textareaRef.current) {
+      backdropRef.current.scrollTop = textareaRef.current.scrollTop;
+      backdropRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
+
+  // Assigning a controlled textarea's `.value` can silently reset its own scroll position
+  // (a browser quirk, not a "scroll" event) — re-sync after every render so the backdrop
+  // never drifts out of step while typing past the visible rows.
+  useEffect(() => {
+    syncBackdropScroll();
+  });
+
   return (
     <div>
       <Label htmlFor={id} hint={hint}>
         {label}
       </Label>
       {plain ? (
-        <textarea
-          id={id}
-          rows={rows}
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${inputBase} resize-y font-mono text-[0.8rem]`}
-        />
+        boldButton ? (
+          <div className="flex flex-col overflow-hidden rounded-[10px] border border-rule bg-paper transition-colors focus-within:border-green focus-within:ring-2 focus-within:ring-green/15">
+            <div className="flex items-center gap-1 border-b border-rule bg-cream/40 px-2 py-1">
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggleBold}
+                title="Bold the selected text"
+                className="flex h-6 w-6 items-center justify-center rounded text-ink hover:bg-rule"
+              >
+                <AdminIcon name="bold" className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="relative">
+              {/* Renders `**word**` in bold underneath the real textarea, whose own text is
+               *  made transparent — the classic overlay trick, so what you see while typing
+               *  matches the page. The `**` markers are rendered as their own transparent
+               *  spans rather than left out entirely: they still occupy their character
+               *  cells (same monospace width), which is what keeps every later character
+               *  lined up with the invisible textarea text sitting on top — actually
+               *  removing them would shift the rest of the line out of alignment. */}
+              <div
+                ref={backdropRef}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre-wrap break-words px-3.5 py-2.5 font-mono text-[0.8rem] leading-[1.5] text-ink"
+              >
+                {splitBoldSegments(value).map((seg, i) => {
+                  if (seg.kind === "bold") {
+                    return (
+                      <strong key={i} className="font-bold">
+                        {seg.text}
+                      </strong>
+                    );
+                  }
+                  if (seg.kind === "marker") {
+                    return (
+                      <span key={i} className="text-transparent">
+                        {seg.text}
+                      </span>
+                    );
+                  }
+                  return <span key={i}>{seg.text}</span>;
+                })}
+                {value.endsWith("\n") ? " " : null}
+              </div>
+              <textarea
+                id={id}
+                ref={textareaRef}
+                rows={rows}
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => onChange(e.target.value)}
+                onScroll={syncBackdropScroll}
+                className="relative w-full resize-y bg-transparent px-3.5 py-2.5 font-mono text-[0.8rem] leading-[1.5] text-transparent caret-ink outline-none selection:bg-green/20 selection:text-transparent selection:[-webkit-text-fill-color:transparent] placeholder:text-muted"
+                style={{ WebkitTextFillColor: "transparent" }}
+              />
+            </div>
+          </div>
+        ) : (
+          <textarea
+            id={id}
+            ref={textareaRef}
+            rows={rows}
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            className={`${inputBase} resize-y font-mono text-[0.8rem]`}
+          />
+        )
       ) : (
         <RichTextarea
           id={id}

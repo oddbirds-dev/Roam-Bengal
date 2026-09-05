@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -216,13 +215,13 @@ function TourDetail() {
                 <Section id="overview" title="📜 Trip Overview">
                   {tour.overview ? (
                     <>
-                      <ReadMore>
+                      <div className="flex flex-col gap-4">
                         {overviewParagraphs(tour.overview).map((p, i) => (
-                            <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
-                              <FormatText>{p}</FormatText>
-                            </p>
+                          <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
+                            <FormatText>{p}</FormatText>
+                          </p>
                         ))}
-                      </ReadMore>
+                      </div>
                       {tour.overviewTip ? (
                           <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
                             💡 <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
@@ -294,31 +293,29 @@ function TourDetail() {
                   title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
                 >
                   {tour.itinerary.length ? (
-                    <ReadMore>
-                      <ol className="flex flex-col gap-6">
-                        {tour.itinerary.map((day, i) => (
-                          <li key={day.day} className="relative flex gap-4">
-                            {i < tour.itinerary.length - 1 ? (
-                              <span
-                                aria-hidden="true"
-                                className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
-                              />
-                            ) : null}
-                            <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
-                              {day.day}
-                            </span>
-                            <div>
-                              <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
-                                {day.title}
-                              </h3>
-                              <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
-                                <FormatText>{day.detail}</FormatText>
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </ReadMore>
+                    <ol className="flex flex-col gap-6">
+                      {tour.itinerary.map((day, i) => (
+                        <li key={day.day} className="relative flex gap-4">
+                          {i < tour.itinerary.length - 1 ? (
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
+                            />
+                          ) : null}
+                          <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
+                            {day.day}
+                          </span>
+                          <div>
+                            <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                              {day.title}
+                            </h3>
+                            <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
+                              <FormatText>{day.detail}</FormatText>
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
                   ) : (
                     <EmptyNote />
                   )}
@@ -662,46 +659,6 @@ function Section({
       <h2 className="mb-4 font-display text-[1.35rem] text-green">{title}</h2>
       <div className="flex flex-col gap-4">{children}</div>
     </section>
-  );
-}
-
-/** Collapses a tall passage behind a fade with a "See more" toggle, so a long overview
- *  does not push the tabs and the rest of the page far down before a reader has decided
- *  to read it. */
-function ReadMore({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = useState(false);
-  // Starts true so the clamp (and its fade) hold on the server-rendered markup — before
-  // hydration can measure anything — rather than flashing the full passage open first.
-  const [overflowing, setOverflowing] = useState(true);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Measured once, while still collapsed, so a short overview never grows a pointless
-  // toggle just because a reader could click it.
-  useEffect(() => {
-    if (ref.current) setOverflowing(ref.current.scrollHeight > ref.current.clientHeight + 1);
-  }, [children]);
-
-  return (
-    <div>
-      <div
-        ref={ref}
-        className={`relative overflow-hidden ${expanded ? "" : "max-h-[240px]"}`}
-      >
-        <div className="flex flex-col gap-4">{children}</div>
-        {!expanded && overflowing ? (
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-paper to-transparent" />
-        ) : null}
-      </div>
-      {overflowing ? (
-        <button
-          type="button"
-          onClick={() => setExpanded((e) => !e)}
-          className="mt-3 text-[0.85rem] font-semibold text-green-dark hover:underline"
-        >
-          {expanded ? "See less" : "See more"}
-        </button>
-      ) : null}
-    </div>
   );
 }
 

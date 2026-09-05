@@ -694,10 +694,14 @@ function TourEditor() {
                   open={openSections.highlights}
                   onToggle={() => toggleSection("highlights")}
                 >
-                  <StringListField
+                  <TextArea
                     label="Highlights"
-                    values={form.highlights}
-                    onChange={(v) => set("highlights", v)}
+                    hint="One per line. Select text and click B to bold it."
+                    rows={8}
+                    plain
+                    boldButton
+                    value={form.highlights.join("\n")}
+                    onChange={(v) => set("highlights", v.split("\n"))}
                   />
                 </FormSection>
               ) : null}
@@ -782,9 +786,10 @@ function TourEditor() {
                 >
                   <TextArea
                     label="Advice blocks"
-                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
+                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items. Select text and click B to bold it."
                     rows={8}
                     plain
+                    boldButton
                     value={serializeAdvice(form.advice)}
                     onChange={(v) => set("advice", parseAdvice(v))}
                   />
@@ -817,10 +822,14 @@ function TourEditor() {
                   open={openSections.why_us}
                   onToggle={() => toggleSection("why_us")}
                 >
-                  <StringListField
+                  <TextArea
                     label="Why choose us for this tour"
-                    values={form.why_items}
-                    onChange={(v) => set("why_items", v)}
+                    hint="One per line. Select text and click B to bold it."
+                    rows={8}
+                    plain
+                    boldButton
+                    value={form.why_items.join("\n")}
+                    onChange={(v) => set("why_items", v.split("\n"))}
                   />
                 </FormSection>
               ) : null}
