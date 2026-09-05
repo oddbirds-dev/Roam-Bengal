@@ -50,11 +50,15 @@ const optionalText = (max: number) =>
     .nullish()
     .transform((v) => (typeof v === "string" ? stripUnsafeHtml(v) : v));
 const safeText = (max: number) => z.string().max(max).transform(stripUnsafeHtml);
+/** Free-form admin copy: still sanitized, but intentionally not capped by character count. */
+const unrestrictedText = () => z.string().transform(stripUnsafeHtml);
 const textArray = (max = 400) =>
   z
     .array(z.string().max(max))
     .default([])
     .transform((v) => v.map(stripUnsafeHtml));
+const unrestrictedTextArray = () =>
+  z.array(z.string()).default([]).transform((v) => v.map(stripUnsafeHtml));
 
 /** Surfaces the Postgres message to the admin UI — acceptable behind the admin gate,
  *  where a constraint name is genuinely the most useful thing to show. */
@@ -79,10 +83,8 @@ const ItineraryDay = z.object({
 });
 
 const GlanceEntry = z.object({
-  when: safeText(120),
-  // Rich-text markup is included in the stored value; allow longer editorial copy
-  // without preventing unrelated tour edits from being saved.
-  detail: safeText(1200),
+  when: unrestrictedText(),
+  detail: unrestrictedText(),
 });
 
 const AddonEntry = z.object({
@@ -111,8 +113,8 @@ const AccessibilityEntry = z.object({
 });
 
 const AdviceBlock = z.object({
-  title: safeText(240),
-  items: textArray(1200),
+  title: unrestrictedText(),
+  items: unrestrictedTextArray(),
 });
 
 const TourFaq = z.object({
