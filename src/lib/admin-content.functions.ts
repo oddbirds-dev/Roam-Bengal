@@ -80,7 +80,9 @@ const ItineraryDay = z.object({
 
 const GlanceEntry = z.object({
   when: safeText(120),
-  detail: safeText(600),
+  // Rich-text markup is included in the stored value; allow longer editorial copy
+  // without preventing unrelated tour edits from being saved.
+  detail: safeText(1200),
 });
 
 const AddonEntry = z.object({
@@ -109,8 +111,8 @@ const AccessibilityEntry = z.object({
 });
 
 const AdviceBlock = z.object({
-  title: safeText(120),
-  items: textArray(600),
+  title: safeText(240),
+  items: textArray(1200),
 });
 
 const TourFaq = z.object({

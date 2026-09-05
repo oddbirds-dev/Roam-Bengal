@@ -745,7 +745,7 @@ function TourEditor() {
                     title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
                     columns={[
                       { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
-                      { key: "title", label: "Title", span: 10 },
+                      { key: "title", label: "Title", span: 10, className: "font-body text-base" },
                       { key: "detail", label: "Detail", type: "rich-text" },
                     ]}
                   />

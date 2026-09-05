@@ -573,6 +573,8 @@ export interface RepeaterColumn<T> {
   options?: readonly { value: string; label: string }[];
   /** Grid width in a 12-column row. Defaults to full width. */
   span?: number;
+  /** Optional presentation classes for the cell control (for example, a specific font size). */
+  className?: string;
   /** Schema for a list nested inside this cell. */
   nested?: {
     columns: RepeaterColumn<Record<string, unknown>>[];
@@ -669,7 +671,7 @@ function RepeaterColumnsGrid<T extends Record<string, unknown>>({
               onChange={(e) =>
                 onFieldChange(col.key, col.type === "number" ? Number(e.target.value) : e.target.value)
               }
-              className={inputBase}
+              className={`${inputBase} ${col.className ?? ""}`}
             />
           )}
         </div>
