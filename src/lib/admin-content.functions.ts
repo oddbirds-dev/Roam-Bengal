@@ -70,8 +70,8 @@ function orThrow(label: string, error: { message: string; code?: string } | null
 // ---------------------------------------------------------------------------
 
 const ItineraryDay = z.object({
-  // Starts at 0: day-tour itineraries are numbered steps that begin at zero, and the
-  // editor seeds each new row with the current row count.
+  // Zero remains valid for older rows; the current editor starts at 1 and continues from
+  // the highest existing step/day number.
   day: z.coerce.number().int().min(0).max(365),
   title: z.string().max(200),
   detail: z.string().max(4000),

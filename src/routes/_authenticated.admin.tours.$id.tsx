@@ -729,7 +729,11 @@ function TourEditor() {
                     label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
                     values={form.itinerary}
                     onChange={(v) => set("itinerary", v)}
-                    blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
+                    blank={() => ({
+                      day: nextItineraryNumber(form.itinerary),
+                      title: "",
+                      detail: "",
+                    })}
                     title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
                     columns={[
                       { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
@@ -1241,4 +1245,14 @@ function parseGlance(text: string): { when: string; detail: string }[] {
         detail: line.slice(separator.index + separator[0].length).trim(),
       };
     });
+}
+
+/** Continue from the largest saved step/day rather than the row count. This avoids a
+ * duplicate after rows are deleted, reordered, or manually renumbered. */
+function nextItineraryNumber(itinerary: { day: number }[]): number {
+  const highest = itinerary.reduce(
+    (max, row) => (Number.isFinite(row.day) ? Math.max(max, row.day) : max),
+    0,
+  );
+  return highest + 1;
 }
