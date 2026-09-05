@@ -291,14 +291,24 @@ function TourDetail() {
                           <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
                             {day.day}
                           </span>
-                          <div>
-                            <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
-                              {day.title}
-                            </h3>
-                            <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
-                              <FormatText>{day.detail}</FormatText>
-                            </p>
-                          </div>
+                          <details className="group min-w-0 flex-1">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-green/40 [&::-webkit-details-marker]:hidden">
+                              <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                                {day.title}
+                              </h3>
+                              <span
+                                aria-hidden="true"
+                                className="shrink-0 text-green transition-transform group-open:rotate-90"
+                              >
+                                ›
+                              </span>
+                            </summary>
+                            {day.detail ? (
+                              <div className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
+                                <FormatDocument>{day.detail}</FormatDocument>
+                              </div>
+                            ) : null}
+                          </details>
                         </li>
                       ))}
                   </ol>

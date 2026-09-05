@@ -75,7 +75,7 @@ const ItineraryDay = z.object({
   // the highest existing step/day number.
   day: z.coerce.number().int().min(0).max(365),
   title: z.string().max(200),
-  detail: z.string().max(4000),
+  detail: safeText(4000),
 });
 
 const GlanceEntry = z.object({

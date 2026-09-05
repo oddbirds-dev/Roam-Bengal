@@ -746,7 +746,7 @@ function TourEditor() {
                     columns={[
                       { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
                       { key: "title", label: "Title", span: 10 },
-                      { key: "detail", label: "Detail", type: "textarea" },
+                      { key: "detail", label: "Detail", type: "rich-text" },
                     ]}
                   />
                 </FormSection>
@@ -1244,12 +1244,8 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
   };
 }
 
-/**
- * Advice blocks as one text box: a blank line between blocks, first line of each is the
- * heading, the rest are items. `serializeAdvice(parseAdvice(x)) === x` for any `x` —
- * no trimming or dropping empty lines — otherwise the field fights the cursor the moment
- * a block boundary (a blank line) is only half-typed.
- */
+/** Advice blocks stay in one rich textbox. Empty paragraphs separate blocks; the first
+ * populated paragraph in each block is its formatted heading. */
 function normalizeInline(value: string): string {
   return marked.parseInline(value || "") as string;
 }

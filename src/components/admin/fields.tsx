@@ -567,7 +567,7 @@ export function StringListField({
 export interface RepeaterColumn<T> {
   key: keyof T & string;
   label: string;
-  type?: "text" | "textarea" | "number" | "select" | "color" | "list";
+  type?: "text" | "textarea" | "rich-text" | "number" | "select" | "color" | "list";
   placeholder?: string;
   /** Choices for `type: "select"`. */
   options?: readonly { value: string; label: string }[];
@@ -619,6 +619,14 @@ function RepeaterColumnsGrid<T extends Record<string, unknown>>({
               placeholder={col.placeholder}
               onChange={(event) => onFieldChange(col.key, event.target.value)}
               className={`${inputBase} resize-y`}
+            />
+          ) : col.type === "rich-text" ? (
+            <RichTextarea
+              rows={5}
+              value={String(row[col.key] ?? "")}
+              placeholder={col.placeholder}
+              ariaLabel={col.label}
+              onChange={(value) => onFieldChange(col.key, value)}
             />
           ) : col.type === "select" ? (
             <select
