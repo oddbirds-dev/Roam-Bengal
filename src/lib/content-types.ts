@@ -217,6 +217,11 @@ export interface TourDTO {
   mapEmbed: string | null;
   videoUrl: string | null;
   relatedSlugs: string[];
+  relatedPostSlugs: string[];
+  /** Sections switched off in the editor's "Sections" picker. See lib/tour-sections.ts —
+   *  the public page uses this to still show a section (empty) that was deliberately
+   *  turned on but not yet written, rather than only ever content-driven. */
+  hiddenSections: string[];
 }
 
 export interface ActivityDTO {

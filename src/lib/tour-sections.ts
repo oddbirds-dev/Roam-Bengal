@@ -14,22 +14,30 @@
  */
 
 export type TourSectionId =
+  | "seo"
   | "pricing"
   | "rating"
   | "images"
   | "themes"
   | "facts"
   | "overview"
+  | "highlights"
+  | "glance"
   | "itinerary"
   | "included"
-  | "advice"
-  | "extras";
+  | "key_notes"
+  | "why_us"
+  | "faq"
+  | "extras"
+  | "blog_suggestions";
 
 /**
  * The parts of the tour form the content checks read. Declared structurally so this module
  * does not import from the route it serves — the editor's `TourForm` satisfies it.
  */
 export interface TourSectionFields {
+  meta_title: string;
+  meta_description: string;
   price_usd: number | null;
   price_bdt: number | null;
   discount_price_usd: number | null;
@@ -63,6 +71,7 @@ export interface TourSectionFields {
   map_embed: string;
   video_url: string;
   related_slugs: readonly string[];
+  related_post_slugs: readonly string[];
 }
 
 export interface TourSection {
@@ -80,9 +89,15 @@ const some = (values: readonly string[]) => values.some((v) => v.trim() !== "");
 
 export const TOUR_SECTIONS: readonly TourSection[] = [
   {
+    id: "seo",
+    label: "Meta SEO",
+    hint: "The search-result title and description for this tour's page.",
+    hasContent: (f) => f.meta_title.trim() !== "" || f.meta_description.trim() !== "",
+  },
+  {
     id: "pricing",
     label: "Pricing",
-    hint: "Prices, discounts, and group price tiers.",
+    hint: "Prices, discounts, group price tiers, and the offer cards.",
     hasContent: (f) =>
       f.price_usd !== null ||
       f.price_bdt !== null ||
@@ -90,7 +105,8 @@ export const TOUR_SECTIONS: readonly TourSection[] = [
       f.child_price_usd !== null ||
       f.discount_child_price_usd !== null ||
       f.price_note.trim() !== "" ||
-      f.price_tiers.length > 0,
+      f.price_tiers.length > 0 ||
+      f.offers.length > 0,
   },
   {
     id: "rating",
@@ -124,42 +140,64 @@ export const TOUR_SECTIONS: readonly TourSection[] = [
   },
   {
     id: "overview",
-    label: "Overview & highlights",
-    hint: "The opening description, the good-to-know tip, and the highlight list.",
-    hasContent: (f) =>
-      f.overview.trim() !== "" || f.overview_tip.trim() !== "" || some(f.highlights),
+    label: "Tour Introduction / Overview",
+    hint: "The opening description and the good-to-know tip.",
+    hasContent: (f) => f.overview.trim() !== "" || f.overview_tip.trim() !== "",
+  },
+  {
+    id: "highlights",
+    label: "Tour Highlights",
+    hint: "The short bullet list of what makes this tour worth booking.",
+    hasContent: (f) => some(f.highlights),
+  },
+  {
+    id: "glance",
+    label: "Itinerary at a Glance",
+    hint: "The quick when/what schedule, and optional add-ons.",
+    hasContent: (f) => f.glance.length > 0 || f.addons.length > 0,
   },
   {
     id: "itinerary",
-    label: "Itinerary",
-    hint: "Day-by-day plan, the at-a-glance schedule, and add-ons. Rarely needed on a day tour.",
-    hasContent: (f) => f.itinerary.length > 0 || f.glance.length > 0 || f.addons.length > 0,
+    label: "Full-Day Itinerary (Step by Step)",
+    hint: "The day-by-day (or step-by-step) plan. Rarely needed on a short day tour.",
+    hasContent: (f) => f.itinerary.length > 0,
   },
   {
     id: "included",
-    label: "What's included",
-    hint: "Inclusions, exclusions, and the offer cards.",
-    hasContent: (f) => some(f.inclusions) || some(f.exclusions) || f.offers.length > 0,
+    label: "Inclusions & Exclusions",
+    hint: "What's covered by the price, and what isn't.",
+    hasContent: (f) => some(f.inclusions) || some(f.exclusions),
   },
   {
-    id: "advice",
-    label: "Advice & responsibilities",
-    hint: "Travel advice blocks, accessibility notes, the pledge, and why-choose-us lines.",
-    hasContent: (f) =>
-      f.advice.length > 0 ||
-      f.accessibility.length > 0 ||
-      some(f.pledge) ||
-      some(f.why_items),
+    id: "key_notes",
+    label: "Key Notes",
+    hint: "Travel advice blocks, accessibility notes, and the responsible-travel pledge.",
+    hasContent: (f) => f.advice.length > 0 || f.accessibility.length > 0 || some(f.pledge),
+  },
+  {
+    id: "why_us",
+    label: "Why Choose Roam Bengal for This Tour?",
+    hint: "The short list of reasons to book this tour with us.",
+    hasContent: (f) => some(f.why_items),
+  },
+  {
+    id: "faq",
+    label: "Package-Specific FAQ",
+    hint: "Questions and answers specific to this tour.",
+    hasContent: (f) => f.faqs.length > 0,
   },
   {
     id: "extras",
-    label: "FAQs, map & video",
-    hint: "Tour FAQs, the map embed, a video, and related tours.",
+    label: "Map, video & related tours",
+    hint: "The map embed, a video, and the “You Might Also Like” tours.",
     hasContent: (f) =>
-      f.faqs.length > 0 ||
-      f.map_embed.trim() !== "" ||
-      f.video_url.trim() !== "" ||
-      f.related_slugs.length > 0,
+      f.map_embed.trim() !== "" || f.video_url.trim() !== "" || f.related_slugs.length > 0,
+  },
+  {
+    id: "blog_suggestions",
+    label: "Blog Suggestions (for SEO & Internal Linking)",
+    hint: "Blog posts to cross-link from this tour, shown as “From the Blog”.",
+    hasContent: (f) => f.related_post_slugs.length > 0,
   },
 ];
 

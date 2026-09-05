@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,18 +9,20 @@ import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
 import { TourPricing } from "@/components/tour/tour-pricing";
 import { BestValueTours } from "@/components/tour/best-value-tours";
-import { getTourBySlug, listPublishedTours } from "@/lib/site-content.functions";
+import { getTourBySlug, listPublishedPosts, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
 import { toTourDTO } from "@/lib/tour-dto";
 import { useTourDraft } from "@/lib/tour-preview";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import type { TourSectionId } from "@/lib/tour-sections";
 import {
   TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
   TOUR_FACT_META,
   overviewParagraphs,
   plainText,
+  type BlogPostDTO,
   type TourDTO,
   type TourFactKey,
 } from "@/lib/content-types";
@@ -38,21 +41,24 @@ export const Route = createFileRoute("/tours/$slug")({
   },
   loaderDeps: ({ search }) => ({ preview: search.preview === true }),
   loader: async ({ params, deps }) => {
-    const [tour, allTours] = await Promise.all([
+    const [tour, allTours, allPosts] = await Promise.all([
       getTourBySlug({ data: { slug: params.slug } }),
       listPublishedTours(),
+      listPublishedPosts(),
     ]);
     // A previewed tour is usually a draft, and a brand-new one has no row at all —
     // in preview mode the real content arrives from the parent window, so an empty
     // shell is the correct starting state rather than a 404.
     if (!tour) {
-      if (deps.preview) return { tour: blankTour(params.slug), allTours, seoMeta: null };
+      if (deps.preview) {
+        return { tour: blankTour(params.slug), allTours, allPosts, seoMeta: null };
+      }
       throw notFound();
     }
 
     const seoMeta = await getSeoMeta({ data: { entity_type: "tour", entity_id: tour.id } });
 
-    return { tour, allTours, seoMeta };
+    return { tour, allTours, allPosts, seoMeta };
   },
   head: ({ loaderData }) => {
     const tour = loaderData?.tour;
@@ -81,7 +87,7 @@ const TABS = [
 ] as const;
 
 function TourDetail() {
-  const { tour: saved, allTours } = Route.useLoaderData();
+  const { tour: saved, allTours, allPosts } = Route.useLoaderData();
   const { preview } = Route.useSearch();
   const { tour_pricing } = useSiteSettings();
 
@@ -90,6 +96,7 @@ function TourDetail() {
   const tour = draft ?? saved;
 
   const related = resolveRelated(tour, allTours);
+  const relatedPosts = resolveRelatedPosts(tour, allPosts);
   const bestValuePicks = allTours
     .filter((t) => t.slug !== tour.slug && !related.some((r) => r.slug === t.slug))
     .sort((a, b) => (a.priceUsd ?? Infinity) - (b.priceUsd ?? Infinity));
@@ -205,90 +212,116 @@ function TourDetail() {
             </div>
 
             <div className="mt-10 flex flex-col gap-12">
-              {tour.overview ? (
+              {tour.overview || isOn(tour, "overview") ? (
                 <Section id="overview" title="📜 Trip Overview">
-                  {overviewParagraphs(tour.overview).map((p, i) => (
-                      <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
-                        <FormatText>{p}</FormatText>
-                      </p>
-                  ))}
-                  {tour.overviewTip ? (
-                      <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
-                        💡 <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
-                      </div>
-                  ) : null}
+                  {tour.overview ? (
+                    <>
+                      <ReadMore>
+                        {overviewParagraphs(tour.overview).map((p, i) => (
+                            <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
+                              <FormatText>{p}</FormatText>
+                            </p>
+                        ))}
+                      </ReadMore>
+                      {tour.overviewTip ? (
+                          <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">
+                            💡 <strong>Good to know:</strong> <FormatText>{tour.overviewTip}</FormatText>
+                          </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.highlights.length ? (
+              {tour.highlights.length || isOn(tour, "highlights") ? (
                 <Section id="highlights" title="⭐ Trip Highlights">
-                  <ul className="flex flex-col gap-2.5">
-                    {tour.highlights.map((h) => (
-                      <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
-                        <span className="mt-0.5 text-green-bright">✓</span>
-                        <FormatText>{h}</FormatText>
-                      </li>
-                    ))}
-                  </ul>
+                  {tour.highlights.length ? (
+                    <ul className="flex flex-col gap-2.5">
+                      {tour.highlights.map((h) => (
+                        <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
+                          <span className="mt-0.5 text-green-bright">✓</span>
+                          <FormatText>{h}</FormatText>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.glance.length ? (
+              {tour.glance.length || isOn(tour, "glance") ? (
                 <Section id="glance" title="📍 Journey at a Glance">
-                  <ul className="flex flex-col gap-2.5">
-                    {tour.glance.map((g) => (
-                      <li key={g.when} className="text-[0.9rem] leading-6">
-                        <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
-                      </li>
-                    ))}
-                  </ul>
+                  {tour.glance.length ? (
+                    <ul className="flex flex-col gap-2.5">
+                      {tour.glance.map((g) => (
+                        <li key={g.when} className="text-[0.9rem] leading-6">
+                          <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.addons.length ? (
+              {tour.addons.length || isOn(tour, "glance") ? (
                 <Section id="addons" title="➕ Optional Add-Ons">
-                  <div className="flex flex-col gap-3">
-                    {tour.addons.map((a) => (
-                      <div
-                        key={a.title}
-                        className="rounded-xl border border-rule p-4 text-[0.9rem] leading-6"
-                      >
-                        <span aria-hidden="true">{a.icon}</span>{" "}
-                        <strong className="text-green-dark">{a.title}:</strong> <FormatText>{a.detail}</FormatText>
-                      </div>
-                    ))}
-                  </div>
+                  {tour.addons.length ? (
+                    <div className="flex flex-col gap-3">
+                      {tour.addons.map((a) => (
+                        <div
+                          key={a.title}
+                          className="rounded-xl border border-rule p-4 text-[0.9rem] leading-6"
+                        >
+                          <span aria-hidden="true">{a.icon}</span>{" "}
+                          <strong className="text-green-dark">{a.title}:</strong> <FormatText>{a.detail}</FormatText>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.itinerary.length ? (
+              {tour.itinerary.length || isOn(tour, "itinerary") ? (
                 <Section
                   id="itinerary"
                   title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
                 >
-                  <ol className="flex flex-col gap-6">
-                    {tour.itinerary.map((day, i) => (
-                      <li key={day.day} className="relative flex gap-4">
-                        {i < tour.itinerary.length - 1 ? (
-                          <span
-                            aria-hidden="true"
-                            className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
-                          />
-                        ) : null}
-                        <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
-                          {day.day}
-                        </span>
-                        <div>
-                          <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
-                            {day.title}
-                          </h3>
-                          <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
-                            <FormatText>{day.detail}</FormatText>
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
+                  {tour.itinerary.length ? (
+                    <ReadMore>
+                      <ol className="flex flex-col gap-6">
+                        {tour.itinerary.map((day, i) => (
+                          <li key={day.day} className="relative flex gap-4">
+                            {i < tour.itinerary.length - 1 ? (
+                              <span
+                                aria-hidden="true"
+                                className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
+                              />
+                            ) : null}
+                            <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
+                              {day.day}
+                            </span>
+                            <div>
+                              <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                                {day.title}
+                              </h3>
+                              <p className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
+                                <FormatText>{day.detail}</FormatText>
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </ReadMore>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
@@ -332,104 +365,94 @@ function TourDetail() {
                   has tiers, so the prose fallback above still covers older tours. */}
               <TourPricing tour={tour} />
 
-              {tour.inclusions.length || tour.exclusions.length ? (
-                <Section id="inclusions" title="🛑 What's Included">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="rounded-xl border border-green-bright/40 bg-mint p-5">
-                      <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                        ✅ Included
-                      </h3>
-                      <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                        {tour.inclusions.map((i) => (
-                          <li key={i}>• <FormatText>{i}</FormatText></li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="rounded-xl border border-rust/30 bg-rust/5 p-5">
-                      <h3 className="font-display text-[0.98rem] font-bold text-rust">
-                        ❌ Not Included
-                      </h3>
-                      <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                        {tour.exclusions.map((i) => (
-                          <li key={i}>• <FormatText>{i}</FormatText></li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </Section>
-              ) : null}
 
-              {tour.accessibility.length ? (
+              {tour.accessibility.length || isOn(tour, "key_notes") ? (
                 <Section id="accessibility" title="♿ Accessibility & Special Requests">
-                  <ul className="flex flex-col gap-2.5 rounded-xl bg-cream p-5">
-                    {tour.accessibility.map((a) => (
-                      <li key={a.label} className="text-[0.88rem] leading-6">
-                        <strong className="text-green-dark">{a.label}:</strong> <FormatText>{a.detail}</FormatText>
-                      </li>
-                    ))}
-                  </ul>
+                  {tour.accessibility.length ? (
+                    <ul className="flex flex-col gap-2.5 rounded-xl bg-cream p-5">
+                      {tour.accessibility.map((a) => (
+                        <li key={a.label} className="text-[0.88rem] leading-6">
+                          <strong className="text-green-dark">{a.label}:</strong> <FormatText>{a.detail}</FormatText>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.advice.length ? (
+              {tour.advice.length || isOn(tour, "key_notes") ? (
                 <Section id="advice" title="🎯 Trip Advice & Responsibilities">
-                  <div className="flex flex-col gap-5">
-                    {tour.advice.map((block) => (
-                      <div key={block.title} className="rounded-xl border border-rule p-5">
-                        <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                          {block.title}
-                        </h3>
-                        <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                          {block.items.map((i) => (
-                            <li key={i}>• <FormatText>{i}</FormatText></li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
+                  {tour.advice.length ? (
+                    <div className="flex flex-col gap-5">
+                      {tour.advice.map((block) => (
+                        <div key={block.title} className="rounded-xl border border-rule p-5">
+                          <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
+                            {block.title}
+                          </h3>
+                          <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
+                            {block.items.map((i) => (
+                              <li key={i}>• <FormatText>{i}</FormatText></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.pledge.length ? (
+              {tour.pledge.length || isOn(tour, "key_notes") ? (
                 <Section id="pledge" title="🌍 Responsible Travel Pledge">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {tour.pledge.map((p) => (
-                      <div
-                        key={p}
-                        className="rounded-xl bg-mint p-4 text-[0.86rem] leading-6"
-                      >
-                        {p}
-                      </div>
-                    ))}
-                  </div>
+                  {tour.pledge.length ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {tour.pledge.map((p) => (
+                        <div
+                          key={p}
+                          className="rounded-xl bg-mint p-4 text-[0.86rem] leading-6"
+                        >
+                          {p}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.faqs.length ? (
+              {tour.faqs.length || isOn(tour, "faq") ? (
                 <Section id="faq" title="❓ Frequently Asked Questions">
-                  <div className="flex flex-col gap-3">
-                    {tour.faqs.map((faq) => (
-                      <details
-                        key={faq.question}
-                        className="group rounded-xl border border-rule p-5"
-                      >
-                        <summary className="cursor-pointer list-none font-display text-[0.98rem] font-bold text-green-dark">
-                          {faq.question}
-                        </summary>
-                        <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
-                          <FormatText>{faq.answer}</FormatText>
-                        </p>
-                      </details>
-                    ))}
-                  </div>
+                  {tour.faqs.length ? (
+                    <div className="flex flex-col gap-3">
+                      {tour.faqs.map((faq) => (
+                        <details
+                          key={faq.question}
+                          className="group rounded-xl border border-rule p-5"
+                        >
+                          <summary className="cursor-pointer list-none font-display text-[0.98rem] font-bold text-green-dark">
+                            {faq.question}
+                          </summary>
+                          <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
+                            <FormatText>{faq.answer}</FormatText>
+                          </p>
+                        </details>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.mapEmbed ? (
+              {tour.mapEmbed || isOn(tour, "extras") ? (
                 <Section id="map" title="🗺️ Tour Map">
                   <div className="aspect-video overflow-hidden rounded-xl border border-rule">
                     <iframe
-                      src={tour.mapEmbed}
+                      src={tour.mapEmbed || "https://maps.google.com/maps?q=Bangladesh&z=7&output=embed"}
                       title={`${tour.title} route map`}
                       className="h-full w-full"
                       loading="lazy"
@@ -439,33 +462,41 @@ function TourDetail() {
                 </Section>
               ) : null}
 
-              {tour.videoUrl ? (
+              {tour.videoUrl || isOn(tour, "extras") ? (
                 <Section id="video" title="📽️ Tour Video">
-                  <div className="aspect-video overflow-hidden rounded-xl border border-rule">
-                    <iframe
-                      src={tour.videoUrl}
-                      title={`${tour.title} video`}
-                      className="h-full w-full"
-                      loading="lazy"
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
+                  {tour.videoUrl ? (
+                    <div className="aspect-video overflow-hidden rounded-xl border border-rule">
+                      <iframe
+                        src={tour.videoUrl}
+                        title={`${tour.title} video`}
+                        className="h-full w-full"
+                        loading="lazy"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
 
-              {tour.whyItems.length ? (
+              {tour.whyItems.length || isOn(tour, "why_us") ? (
                 <Section id="why-tour" title="🌟 Why Choose Roam Bengal for This Tour">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {tour.whyItems.map((w) => (
-                      <div
-                        key={w}
-                        className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
-                      >
-                        <FormatDocument>{w}</FormatDocument>
-                      </div>
-                    ))}
-                  </div>
+                  {tour.whyItems.length ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {tour.whyItems.map((w) => (
+                        <div
+                          key={w}
+                          className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
+                        >
+                          <FormatDocument>{w}</FormatDocument>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyNote />
+                  )}
                 </Section>
               ) : null}
             </div>
@@ -517,6 +548,43 @@ function TourDetail() {
               </ButtonLink>
             </div>
 
+            {tour.inclusions.length || tour.exclusions.length || isOn(tour, "included") ? (
+              <div
+                id="inclusions"
+                className="mt-6 scroll-mt-24 rounded-2xl border border-rule bg-paper p-6 shadow-sm"
+              >
+                <h2 className="mb-4 font-display text-[1.05rem] font-bold text-green-dark">
+                  🛑 What's Included
+                </h2>
+                {tour.inclusions.length || tour.exclusions.length ? (
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <h3 className="font-display text-[0.9rem] font-bold text-green-dark">
+                        ✅ Included
+                      </h3>
+                      <ul className="mt-2 flex flex-col gap-1.5 text-[0.82rem] leading-6">
+                        {tour.inclusions.map((i) => (
+                          <li key={i}>• <FormatText>{i}</FormatText></li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="font-display text-[0.9rem] font-bold text-rust">
+                        ❌ Not Included
+                      </h3>
+                      <ul className="mt-2 flex flex-col gap-1.5 text-[0.82rem] leading-6">
+                        {tour.exclusions.map((i) => (
+                          <li key={i}>• <FormatText>{i}</FormatText></li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <EmptyNote />
+                )}
+              </div>
+            ) : null}
+
             {bestValuePicks.length ? (
               <div className="mt-6">
                 <BestValueTours tours={bestValuePicks} />
@@ -534,6 +602,34 @@ function TourDetail() {
               <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((r) => (
                   <TourCard key={r.id} tour={r} />
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {relatedPosts.length ? (
+          <section className="py-16">
+            <div className="wrap">
+              <h2 className="mb-8 font-display text-[1.6rem] text-green">From the Blog</h2>
+              <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    to="/blog/$slug"
+                    params={{ slug: post.slug }}
+                    className="group flex flex-col gap-3"
+                  >
+                    <PhotoFrame
+                      src={post.coverImage}
+                      alt={post.title}
+                      gradient={gradientFor(post.slug)}
+                      className="aspect-[16/10] w-full rounded-2xl"
+                    />
+                    <h3 className="font-display text-[1.05rem] leading-snug font-bold text-ink group-hover:text-green">
+                      {post.title}
+                    </h3>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -569,14 +665,66 @@ function Section({
   );
 }
 
+/** Collapses a tall passage behind a fade with a "See more" toggle, so a long overview
+ *  does not push the tabs and the rest of the page far down before a reader has decided
+ *  to read it. */
+function ReadMore({ children }: { children: React.ReactNode }) {
+  const [expanded, setExpanded] = useState(false);
+  // Starts true so the clamp (and its fade) hold on the server-rendered markup — before
+  // hydration can measure anything — rather than flashing the full passage open first.
+  const [overflowing, setOverflowing] = useState(true);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Measured once, while still collapsed, so a short overview never grows a pointless
+  // toggle just because a reader could click it.
+  useEffect(() => {
+    if (ref.current) setOverflowing(ref.current.scrollHeight > ref.current.clientHeight + 1);
+  }, [children]);
+
+  return (
+    <div>
+      <div
+        ref={ref}
+        className={`relative overflow-hidden ${expanded ? "" : "max-h-[240px]"}`}
+      >
+        <div className="flex flex-col gap-4">{children}</div>
+        {!expanded && overflowing ? (
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-paper to-transparent" />
+        ) : null}
+      </div>
+      {overflowing ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="mt-3 text-[0.85rem] font-semibold text-green-dark hover:underline"
+        >
+          {expanded ? "See less" : "See more"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** Whether the editor's "Sections" picker has this one switched on for the tour, regardless
+ *  of whether it has content yet — see lib/tour-sections.ts. */
+function isOn(tour: TourDTO, id: TourSectionId): boolean {
+  return !tour.hiddenSections.includes(id);
+}
+
+/** Shown in place of a toggled-on section's body when nothing has been written yet, so an
+ *  empty section reads as "not written yet" rather than a rendering bug. */
+function EmptyNote() {
+  return <p className="text-[0.85rem] text-muted italic">Details coming soon.</p>;
+}
+
 function hasSection(tour: TourDTO, id: string): boolean {
   switch (id) {
     case "overview":
-      return Boolean(tour.overview);
+      return Boolean(tour.overview) || isOn(tour, "overview");
     case "highlights":
-      return tour.highlights.length > 0;
+      return tour.highlights.length > 0 || isOn(tour, "highlights");
     case "itinerary":
-      return tour.itinerary.length > 0;
+      return tour.itinerary.length > 0 || isOn(tour, "itinerary");
     // `#cost` is the pricing block when tiers exist, and the older price/offers prose
     // otherwise — either way the tab has somewhere to scroll to.
     case "cost":
@@ -584,15 +732,15 @@ function hasSection(tour: TourDTO, id: string): boolean {
         tour.priceTiers.length > 0 || tour.offers.length > 0 || tour.priceUsd !== null
       );
     case "inclusions":
-      return tour.inclusions.length > 0 || tour.exclusions.length > 0;
+      return tour.inclusions.length > 0 || tour.exclusions.length > 0 || isOn(tour, "included");
     case "advice":
-      return tour.advice.length > 0;
+      return tour.advice.length > 0 || isOn(tour, "key_notes");
     case "faq":
-      return tour.faqs.length > 0;
+      return tour.faqs.length > 0 || isOn(tour, "faq");
     case "map":
-      return Boolean(tour.mapEmbed);
+      return Boolean(tour.mapEmbed) || isOn(tour, "extras");
     case "video":
-      return Boolean(tour.videoUrl);
+      return Boolean(tour.videoUrl) || isOn(tour, "extras");
     default:
       return false;
   }
@@ -637,4 +785,16 @@ function resolveRelated(tour: TourDTO, all: TourDTO[]): TourDTO[] {
     if (picked.length) return picked.slice(0, 3);
   }
   return others.slice(0, 3);
+}
+
+/** Curated `relatedPostSlugs` win; otherwise fall back to `listPublishedPosts`' own order.
+ *  Mirrors `resolveRelated` above. */
+function resolveRelatedPosts(tour: TourDTO, allPosts: BlogPostDTO[]): BlogPostDTO[] {
+  if (tour.relatedPostSlugs.length) {
+    const picked = tour.relatedPostSlugs
+      .map((slug) => allPosts.find((p) => p.slug === slug))
+      .filter((p): p is BlogPostDTO => Boolean(p));
+    if (picked.length) return picked.slice(0, 3);
+  }
+  return allPosts.slice(0, 3);
 }

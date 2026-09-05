@@ -15,6 +15,7 @@ import {
   listTourThemes,
 } from "@/lib/site-content.functions";
 import { activityPreviewChannel } from "@/lib/activity-preview";
+import type { TourCategory } from "@/lib/content-types";
 
 const searchSchema = z.object({
   theme: z.string().optional(),
@@ -45,6 +46,16 @@ export const Route = createFileRoute("/tours/")({
 
 const BANNER_BG = "linear-gradient(160deg, #1E5F3B 0%, #123D26 100%)";
 const DREAM_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
+
+/** Stacking order for the category sections below the theme filter. Holiday is included
+ *  even though there is no quick-create button for it in the admin, so a tour saved with
+ *  that category is never simply dropped from the listing. */
+const CATEGORY_ORDER: TourCategory[] = ["day-tour", "multi-day", "holiday"];
+const CATEGORY_LABELS: Record<TourCategory, string> = {
+  "day-tour": "Day Tours",
+  "multi-day": "Multi-Day Tours",
+  holiday: "Holiday Tours",
+};
 
 /** `.tour-photo-frame` colours, cycled down the listing in reference order. */
 const TOUR_FRAMES = [
@@ -157,14 +168,27 @@ function ToursIndex() {
         </section>
 
         {visible.length ? (
-          <div className="wide grid gap-[26px] px-5 pb-[60px] nav:grid-cols-3 nav:px-10 nav:pb-[90px]">
-            {visible.map((tour, i) => (
-              <TourCard
-                key={tour.id}
-                tour={tour}
-                gradientCss={TOUR_FRAMES[i % TOUR_FRAMES.length]}
-              />
-            ))}
+          <div className="wide flex flex-col gap-16 px-5 pb-[60px] nav:px-10 nav:pb-[90px]">
+            {CATEGORY_ORDER.map((category) => {
+              const group = visible.filter((t) => t.category === category);
+              if (!group.length) return null;
+              return (
+                <div key={category}>
+                  <h2 className="mb-6 font-display text-[1.4rem] font-bold text-green-dark">
+                    {CATEGORY_LABELS[category]}
+                  </h2>
+                  <div className="grid gap-[26px] nav:grid-cols-3">
+                    {group.map((tour, i) => (
+                      <TourCard
+                        key={tour.id}
+                        tour={tour}
+                        gradientCss={TOUR_FRAMES[i % TOUR_FRAMES.length]}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="wide px-5 pb-[60px] nav:px-10 nav:pb-[90px]">

@@ -523,6 +523,7 @@ export type Database = {
           price_usd: number | null;
           primary_destination_slug: string | null;
           rating: number | null;
+          related_post_slugs: string[];
           related_slugs: string[];
           reviews_count: number;
           slug: string;
@@ -573,6 +574,7 @@ export type Database = {
           price_usd?: number | null;
           primary_destination_slug?: string | null;
           rating?: number | null;
+          related_post_slugs?: string[];
           related_slugs?: string[];
           reviews_count?: number;
           slug: string;
@@ -623,6 +625,7 @@ export type Database = {
           price_usd?: number | null;
           primary_destination_slug?: string | null;
           rating?: number | null;
+          related_post_slugs?: string[];
           related_slugs?: string[];
           reviews_count?: number;
           slug?: string;

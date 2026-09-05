@@ -163,6 +163,7 @@ const TourInput = z.object({
   map_embed: optionalText(2000),
   video_url: optionalText(2000),
   related_slugs: z.array(slug).max(12).default([]),
+  related_post_slugs: z.array(slug).max(12).default([]),
   is_published: z.boolean().default(true),
   sort_order: z.coerce.number().int().min(0).max(9999).default(0),
   // Editor-only: which sections of the form this tour hides. See lib/tour-sections.ts.

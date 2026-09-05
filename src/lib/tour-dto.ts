@@ -65,6 +65,8 @@ export function toTourDTO(row: TourRowLike): TourDTO {
     mapEmbed: text(row.map_embed),
     videoUrl: text(row.video_url),
     relatedSlugs: strArr(row.related_slugs),
+    relatedPostSlugs: strArr(row.related_post_slugs),
+    hiddenSections: strArr(row.hidden_sections),
   };
 }
 

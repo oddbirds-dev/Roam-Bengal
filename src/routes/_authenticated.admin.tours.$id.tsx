@@ -36,6 +36,7 @@ import {
   adminSetTourThemes,
   adminUpsertTour,
 } from "@/lib/admin-content.functions";
+import { adminSaveSeoMeta, getSeoMeta } from "@/lib/seo.functions";
 import { listTourThemes } from "@/lib/site-content.functions";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
@@ -67,7 +68,11 @@ export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
       listTourThemes(),
       adminListFaqs(),
     ]);
-    return { tour, activities, destinations, themes, siteFaqs, isNew };
+    // A brand-new tour has no id yet, so there is nothing to look up an SEO row by.
+    const seoMeta = tour
+      ? await getSeoMeta({ data: { entity_type: "tour", entity_id: tour.id } })
+      : null;
+    return { tour, activities, destinations, themes, siteFaqs, isNew, seoMeta };
   },
   component: TourEditorRoute,
 });
@@ -134,6 +139,11 @@ function emptyTour() {
     map_embed: "",
     video_url: "",
     related_slugs: [] as string[],
+    related_post_slugs: [] as string[],
+    // Editor-only: mirrors the tour's `seo_meta` row (a separate table, keyed by
+    // entity_type/entity_id), not a `tours` column. See save() and the loader's seoMeta.
+    meta_title: "",
+    meta_description: "",
     is_published: false,
     sort_order: 0,
     // Which sections of this form the tour hides. Editor-only — see lib/tour-sections.ts.
@@ -150,7 +160,8 @@ interface EditorState {
 }
 
 function TourEditor() {
-  const { tour, activities, destinations, themes, siteFaqs, isNew } = Route.useLoaderData();
+  const { tour, activities, destinations, themes, siteFaqs, isNew, seoMeta } =
+    Route.useLoaderData();
   const { category: newCategory } = Route.useSearch();
   const navigate = useNavigate();
   const { run, busy, error } = useAction();
@@ -167,6 +178,9 @@ function TourEditor() {
     ...emptyTour(),
     ...(newCategory ? { category: newCategory } : {}),
     ...(tour ? hydrate(tour) : { hidden_sections: [...tour_editor.hidden_sections] }),
+    ...(seoMeta
+      ? { meta_title: seoMeta.meta_title ?? "", meta_description: seoMeta.meta_description ?? "" }
+      : {}),
   }));
   const [themeIds, setThemeIds] = useState<string[]>(() => {
     if (!tour) return [];
@@ -183,6 +197,18 @@ function TourEditor() {
    *  that still holds something keeps showing on the site — which is what the warning
    *  beside its toggle says. */
   const shows = (id: TourSectionId) => !form.hidden_sections.includes(id);
+
+  // Which titled sections are expanded. A new tour opens everything, since there is
+  // nothing yet to collapse and every field needs to be reachable while first filling
+  // it in; an existing tour opens only sections that already have content, so a mature
+  // tour is not one long scroll of empty accordions.
+  const [openSections, setOpenSections] = useState<Record<TourSectionId, boolean>>(() =>
+    Object.fromEntries(
+      TOUR_SECTIONS.map((s) => [s.id, isNew || s.hasContent(form, themeIds.length)]),
+    ) as Record<TourSectionId, boolean>,
+  );
+  const toggleSection = (id: TourSectionId) =>
+    setOpenSections((o) => ({ ...o, [id]: !o[id] }));
 
   // Accommodation/arrival/departure are rarely needed for a single-day tour, so they
   // start collapsed — unless the tour already has one set, in which case hiding it would
@@ -209,6 +235,38 @@ function TourEditor() {
     setThemeIds(previous.themeIds);
   }
 
+  // Only the SEO title/description are edited here; every other seo_meta column (focus
+  // keyphrase, OG/Twitter, robots, cornerstone, schema type — all set at /admin/seo) is
+  // carried over unchanged so this compact editor can never clobber them.
+  async function saveSeoMeta(tourId: string) {
+    const wantsSeo = form.meta_title.trim() !== "" || form.meta_description.trim() !== "";
+    if (!seoMeta && !wantsSeo) return true;
+    const saved = await run(() =>
+      adminSaveSeoMeta({
+        data: {
+          entity_type: "tour",
+          entity_id: tourId,
+          focus_keyphrase: seoMeta?.focus_keyphrase ?? null,
+          extra_keyphrases: seoMeta?.extra_keyphrases ?? [],
+          synonyms: seoMeta?.synonyms ?? [],
+          meta_title: form.meta_title.trim() || null,
+          meta_description: form.meta_description.trim() || null,
+          canonical_url: seoMeta?.canonical_url ?? null,
+          og_title: seoMeta?.og_title ?? null,
+          og_description: seoMeta?.og_description ?? null,
+          og_image: seoMeta?.og_image ?? null,
+          twitter_title: seoMeta?.twitter_title ?? null,
+          twitter_description: seoMeta?.twitter_description ?? null,
+          twitter_image: seoMeta?.twitter_image ?? null,
+          robots_noindex: seoMeta?.robots_noindex ?? false,
+          cornerstone: seoMeta?.cornerstone ?? false,
+          schema_type: seoMeta?.schema_type ?? null,
+        },
+      }),
+    );
+    return Boolean(saved);
+  }
+
   async function save() {
     const payload = { ...form, slug: form.slug.trim() || slugify(form.title) };
     const result = await run(() =>
@@ -220,6 +278,8 @@ function TourEditor() {
       adminSetTourThemes({ data: { tourId: result.id, activityIds: themeIds } }),
     );
     if (!linked) return;
+
+    if (!(await saveSeoMeta(result.id))) return;
 
     setForm((f) => ({ ...f, slug: payload.slug }));
     setBaseline(serialize({ form: payload, themeIds }));
@@ -333,8 +393,67 @@ function TourEditor() {
                 onChange={(v) => set("hidden_sections", v)}
               />
 
+              <div className="-mb-3 flex items-center justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenSections(
+                      Object.fromEntries(TOUR_SECTIONS.map((s) => [s.id, true])) as Record<
+                        TourSectionId,
+                        boolean
+                      >,
+                    )
+                  }
+                  className="text-[0.78rem] font-semibold text-green-dark hover:underline"
+                >
+                  Expand all
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenSections(
+                      Object.fromEntries(TOUR_SECTIONS.map((s) => [s.id, false])) as Record<
+                        TourSectionId,
+                        boolean
+                      >,
+                    )
+                  }
+                  className="text-[0.78rem] font-semibold text-muted hover:underline"
+                >
+                  Collapse all
+                </button>
+              </div>
+
+              {shows("seo") ? (
+                <FormSection
+                  title="Meta SEO"
+                  description="The search-result title and description for this tour's page."
+                  open={openSections.seo}
+                  onToggle={() => toggleSection("seo")}
+                >
+                  <TextField
+                    label="SEO title"
+                    hint="Falls back to the tour title when blank."
+                    value={form.meta_title}
+                    onChange={(v) => set("meta_title", v)}
+                  />
+                  <TextArea
+                    label="Meta description"
+                    hint="Shown under the title in search results. For the focus keyphrase, Open Graph, Twitter card, and other advanced SEO controls, see Admin → SEO."
+                    rows={3}
+                    plain
+                    value={form.meta_description}
+                    onChange={(v) => set("meta_description", v)}
+                  />
+                </FormSection>
+              ) : null}
+
               {shows("pricing") ? (
-                <FormSection title="Pricing">
+                <FormSection
+                  title="Pricing"
+                  open={openSections.pricing}
+                  onToggle={() => toggleSection("pricing")}
+                >
                   <div className="grid gap-5 sm:grid-cols-2">
                     <NumberField
                       label="Price USD"
@@ -399,6 +518,12 @@ function TourEditor() {
                       },
                     ]}
                   />
+                  <GroupedListField
+                    label="Offer cards"
+                    hint="The three cards under Tour Price & Offers."
+                    values={form.offers}
+                    onChange={(v) => set("offers", v)}
+                  />
                 </FormSection>
               ) : null}
 
@@ -406,6 +531,8 @@ function TourEditor() {
                 <FormSection
                   title="Rating & ordering"
                   description="Social proof and the four figures on a tour card."
+                  open={openSections.rating}
+                  onToggle={() => toggleSection("rating")}
                 >
                   <div className="grid gap-5 sm:grid-cols-2">
                     <NumberField
@@ -452,7 +579,11 @@ function TourEditor() {
               ) : null}
 
               {shows("images") ? (
-                <FormSection title="Images">
+                <FormSection
+                  title="Images"
+                  open={openSections.images}
+                  onToggle={() => toggleSection("images")}
+                >
                   <ImageField
                     label="Hero image"
                     hint="Leads the tour page gallery and every card. Falls back to the first gallery image."
@@ -472,6 +603,8 @@ function TourEditor() {
                 <FormSection
                   title="Themes"
                   description="Drives the filter pills on the public /tours page."
+                  open={openSections.themes}
+                  onToggle={() => toggleSection("themes")}
                 >
                   <div className="flex flex-wrap gap-2">
                     {activities.map((activity) => {
@@ -504,6 +637,8 @@ function TourEditor() {
                 <FormSection
                   title="Trip facts"
                   description="Any field left blank falls back to a derived default."
+                  open={openSections.facts}
+                  onToggle={() => toggleSection("facts")}
                 >
                   <KeyValueField
                     label="Facts"
@@ -531,7 +666,11 @@ function TourEditor() {
               ) : null}
 
               {shows("overview") ? (
-                <FormSection title="Overview & highlights">
+                <FormSection
+                  title="Tour Introduction / Overview"
+                  open={openSections.overview}
+                  onToggle={() => toggleSection("overview")}
+                >
                   <TextArea
                     label="Overview"
                     hint="Leave a blank line between paragraphs."
@@ -546,6 +685,15 @@ function TourEditor() {
                     value={form.overview_tip}
                     onChange={(v) => set("overview_tip", v)}
                   />
+                </FormSection>
+              ) : null}
+
+              {shows("highlights") ? (
+                <FormSection
+                  title="Tour Highlights"
+                  open={openSections.highlights}
+                  onToggle={() => toggleSection("highlights")}
+                >
                   <TextArea
                     label="Highlights"
                     hint="One per line."
@@ -556,20 +704,12 @@ function TourEditor() {
                 </FormSection>
               ) : null}
 
-              {shows("itinerary") ? (
-                <FormSection title="Itinerary">
-                  <RepeaterField
-                    label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
-                    values={form.itinerary}
-                    onChange={(v) => set("itinerary", v)}
-                    blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
-                    title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
-                    columns={[
-                      { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
-                      { key: "title", label: "Title", span: 10 },
-                      { key: "detail", label: "Detail", type: "textarea" },
-                    ]}
-                  />
+              {shows("glance") ? (
+                <FormSection
+                  title="Itinerary at a Glance"
+                  open={openSections.glance}
+                  onToggle={() => toggleSection("glance")}
+                >
                   <RepeaterField
                     label="Journey at a glance"
                     values={form.glance}
@@ -594,8 +734,33 @@ function TourEditor() {
                 </FormSection>
               ) : null}
 
+              {shows("itinerary") ? (
+                <FormSection
+                  title="Full-Day Itinerary (Step by Step)"
+                  open={openSections.itinerary}
+                  onToggle={() => toggleSection("itinerary")}
+                >
+                  <RepeaterField
+                    label={isDayTour ? "Full-day itinerary (step by step)" : "Itinerary days"}
+                    values={form.itinerary}
+                    onChange={(v) => set("itinerary", v)}
+                    blank={() => ({ day: form.itinerary.length, title: "", detail: "" })}
+                    title={(row) => (isDayTour ? `Step ${row.day}` : `Day ${row.day}`)}
+                    columns={[
+                      { key: "day", label: isDayTour ? "Step" : "Day", type: "number", span: 2 },
+                      { key: "title", label: "Title", span: 10 },
+                      { key: "detail", label: "Detail", type: "textarea" },
+                    ]}
+                  />
+                </FormSection>
+              ) : null}
+
               {shows("included") ? (
-                <FormSection title="What's included">
+                <FormSection
+                  title="Inclusions & Exclusions"
+                  open={openSections.included}
+                  onToggle={() => toggleSection("included")}
+                >
                   <div className="grid gap-6 sm:grid-cols-2">
                     <TextArea
                       label="Inclusions"
@@ -612,17 +777,15 @@ function TourEditor() {
                       onChange={(v) => set("exclusions", v.split("\n"))}
                     />
                   </div>
-                  <GroupedListField
-                    label="Offer cards"
-                    hint="The three cards under Tour Price & Offers."
-                    values={form.offers}
-                    onChange={(v) => set("offers", v)}
-                  />
                 </FormSection>
               ) : null}
 
-              {shows("advice") ? (
-                <FormSection title="Advice & responsibilities">
+              {shows("key_notes") ? (
+                <FormSection
+                  title="Key Notes"
+                  open={openSections.key_notes}
+                  onToggle={() => toggleSection("key_notes")}
+                >
                   <TextArea
                     label="Advice blocks"
                     hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
@@ -650,6 +813,15 @@ function TourEditor() {
                     values={form.pledge}
                     onChange={(v) => set("pledge", v)}
                   />
+                </FormSection>
+              ) : null}
+
+              {shows("why_us") ? (
+                <FormSection
+                  title="Why Choose Roam Bengal for This Tour?"
+                  open={openSections.why_us}
+                  onToggle={() => toggleSection("why_us")}
+                >
                   <TextArea
                     label="Why choose us for this tour"
                     hint="One per line."
@@ -660,13 +832,26 @@ function TourEditor() {
                 </FormSection>
               ) : null}
 
-              {shows("extras") ? (
-                <FormSection title="FAQs, map & video">
+              {shows("faq") ? (
+                <FormSection
+                  title="Package-Specific FAQ"
+                  open={openSections.faq}
+                  onToggle={() => toggleSection("faq")}
+                >
                   <TourFaqsField
                     values={form.faqs}
                     onChange={(v) => set("faqs", v)}
                     faqOptions={siteFaqs}
                   />
+                </FormSection>
+              ) : null}
+
+              {shows("extras") ? (
+                <FormSection
+                  title="Map, video & related tours"
+                  open={openSections.extras}
+                  onToggle={() => toggleSection("extras")}
+                >
                   <div className="grid gap-5 sm:grid-cols-2">
                     <TextField
                       label="Map embed URL"
@@ -687,6 +872,22 @@ function TourEditor() {
                     kind="tour"
                     values={form.related_slugs}
                     onChange={(v) => set("related_slugs", v)}
+                  />
+                </FormSection>
+              ) : null}
+
+              {shows("blog_suggestions") ? (
+                <FormSection
+                  title="Blog Suggestions (for SEO & Internal Linking)"
+                  open={openSections.blog_suggestions}
+                  onToggle={() => toggleSection("blog_suggestions")}
+                >
+                  <RelatedContentField
+                    label="Suggested blog posts"
+                    hint="Shown as “From the Blog” on the tour page. Leave empty to pick automatically."
+                    kind="post"
+                    values={form.related_post_slugs}
+                    onChange={(v) => set("related_post_slugs", v)}
                   />
                 </FormSection>
               ) : null}
@@ -874,21 +1075,53 @@ function SectionPicker({
 function FormSection({
   title,
   description,
+  open = true,
+  onToggle,
   children,
 }: {
   title?: string;
   description?: string;
+  /** Ignored unless `onToggle` is also given — see `collapsible` below. */
+  open?: boolean;
+  /** Presence (not just truthiness) makes the section a collapsible accordion, so a
+   *  caller can add a title without opting into collapse behavior. */
+  onToggle?: () => void;
   children: ReactNode;
 }) {
+  const collapsible = Boolean(title && onToggle);
   return (
     <section className={title ? "border-t border-rule pt-7" : ""}>
       {title ? (
-        <header className="mb-5">
-          <h2 className="font-display text-[1.05rem] font-bold text-green-dark">{title}</h2>
-          {description ? <p className="mt-1 text-[0.8rem] text-muted">{description}</p> : null}
-        </header>
+        collapsible ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={open}
+            className="flex w-full items-center justify-between gap-3 text-left"
+          >
+            <span>
+              <span className="block font-display text-[1.05rem] font-bold text-green-dark">
+                {title}
+              </span>
+              {description ? (
+                <span className="mt-1 block text-[0.8rem] text-muted">{description}</span>
+              ) : null}
+            </span>
+            <AdminIcon
+              name="chevron"
+              className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? "rotate-90" : ""}`}
+            />
+          </button>
+        ) : (
+          <header className="mb-5">
+            <h2 className="font-display text-[1.05rem] font-bold text-green-dark">{title}</h2>
+            {description ? <p className="mt-1 text-[0.8rem] text-muted">{description}</p> : null}
+          </header>
+        )
       ) : null}
-      <div className="flex flex-col gap-5">{children}</div>
+      {open ? (
+        <div className={`flex flex-col gap-5 ${collapsible ? "mt-5" : ""}`}>{children}</div>
+      ) : null}
     </section>
   );
 }
@@ -951,6 +1184,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     map_embed: text(row.map_embed),
     video_url: text(row.video_url),
     related_slugs: list(row.related_slugs) as string[],
+    related_post_slugs: list(row.related_post_slugs) as string[],
     is_published: Boolean(row.is_published),
     sort_order: Number(row.sort_order ?? 0),
     hidden_sections: list(row.hidden_sections) as string[],
