@@ -364,7 +364,7 @@ function TourDetail() {
                     {tour.advice.map((block) => (
                       <div key={block.title} className="rounded-xl border border-rule p-5">
                         <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                          {block.title}
+                          <FormatText>{block.title}</FormatText>
                         </h3>
                         <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
                           {block.items.map((i) => (
@@ -449,7 +449,7 @@ function TourDetail() {
                         key={w}
                         className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
                       >
-                        <FormatDocument>{w}</FormatDocument>
+                        <FormatText>{w}</FormatText>
                       </div>
                     ))}
                   </div>

@@ -49,6 +49,7 @@ const optionalText = (max: number) =>
     .max(max)
     .nullish()
     .transform((v) => (typeof v === "string" ? stripUnsafeHtml(v) : v));
+const safeText = (max: number) => z.string().max(max).transform(stripUnsafeHtml);
 const textArray = (max = 400) =>
   z
     .array(z.string().max(max))
@@ -78,8 +79,8 @@ const ItineraryDay = z.object({
 });
 
 const GlanceEntry = z.object({
-  when: z.string().max(120),
-  detail: z.string().max(600),
+  when: safeText(120),
+  detail: safeText(600),
 });
 
 const AddonEntry = z.object({
@@ -108,7 +109,7 @@ const AccessibilityEntry = z.object({
 });
 
 const AdviceBlock = z.object({
-  title: z.string().max(120),
+  title: safeText(120),
   items: textArray(600),
 });
 

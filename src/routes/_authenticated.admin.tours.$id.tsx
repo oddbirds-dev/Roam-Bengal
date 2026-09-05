@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { marked } from "marked";
 import { z } from "zod";
 import {
   AdminButton,
@@ -189,7 +190,12 @@ function TourEditor() {
     const slugs = themes[tour.slug] ?? [];
     return activities.filter((a) => slugs.includes(a.slug)).map((a) => a.id);
   });
-  const [glanceText, setGlanceText] = useState(() => serializeGlance(form.glance));
+  const [highlightsDocument, setHighlightsDocument] = useState(() =>
+    serializeInlineLines(form.highlights),
+  );
+  const [glanceDocument, setGlanceDocument] = useState(() => serializeGlance(form.glance));
+  const [adviceDocument, setAdviceDocument] = useState(() => serializeAdvice(form.advice));
+  const [whyDocument, setWhyDocument] = useState(() => serializeInlineLines(form.why_items));
 
   const set = <K extends keyof TourForm>(key: K, value: TourForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -236,7 +242,10 @@ function TourEditor() {
     const previous = JSON.parse(baseline) as EditorState;
     setForm(previous.form);
     setThemeIds(previous.themeIds);
-    setGlanceText(serializeGlance(previous.form.glance));
+    setHighlightsDocument(serializeInlineLines(previous.form.highlights));
+    setGlanceDocument(serializeGlance(previous.form.glance));
+    setAdviceDocument(serializeAdvice(previous.form.advice));
+    setWhyDocument(serializeInlineLines(previous.form.why_items));
   }
 
   // Only the SEO title/description are edited here; every other seo_meta column (focus
@@ -674,14 +683,15 @@ function TourEditor() {
                   open={openSections.highlights}
                   onToggle={() => toggleSection("highlights")}
                 >
-                  <TextArea
+                  <InlineLinesField
                     label="Highlights"
-                    hint="One per line. Select text and click B to bold it."
+                    hint="One per line. Select text to format it."
                     rows={8}
-                    plain
-                    boldButton
-                    value={form.highlights.join("\n")}
-                    onChange={(v) => set("highlights", v.split("\n"))}
+                    value={highlightsDocument}
+                    onChange={(value) => {
+                      setHighlightsDocument(value);
+                      set("highlights", parseInlineLines(value, false));
+                    }}
                   />
                 </FormSection>
               ) : null}
@@ -692,17 +702,15 @@ function TourEditor() {
                   open={openSections.glance}
                   onToggle={() => toggleSection("glance")}
                 >
-                  <TextArea
+                  <InlineLinesField
                     label="Journey at a glance"
-                    hint="One stop per line: time — what happens. You can also use –, - or |. Select text and click B to bold it."
+                    hint="One stop per line: time — what happens. You can also use –, - or |."
                     rows={10}
-                    plain
-                    boldButton
                     boldLinePrefixPattern={GLANCE_SEPARATOR_PATTERN}
-                    value={glanceText}
-                    onChange={(v) => {
-                      setGlanceText(v);
-                      set("glance", parseGlance(v));
+                    value={glanceDocument}
+                    onChange={(value) => {
+                      setGlanceDocument(value);
+                      set("glance", parseGlance(value));
                     }}
                   />
                   <RepeaterField
@@ -771,14 +779,15 @@ function TourEditor() {
                   open={openSections.key_notes}
                   onToggle={() => toggleSection("key_notes")}
                 >
-                  <TextArea
+                  <InlineLinesField
                     label="Advice blocks"
-                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items. Select text and click B to bold it."
+                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
                     rows={8}
-                    plain
-                    boldButton
-                    value={serializeAdvice(form.advice)}
-                    onChange={(v) => set("advice", parseAdvice(v))}
+                    value={adviceDocument}
+                    onChange={(value) => {
+                      setAdviceDocument(value);
+                      set("advice", parseAdvice(value));
+                    }}
                   />
                   <RepeaterField
                     label="Accessibility notes"
@@ -809,14 +818,15 @@ function TourEditor() {
                   open={openSections.why_us}
                   onToggle={() => toggleSection("why_us")}
                 >
-                  <TextArea
+                  <InlineLinesField
                     label="Why choose us for this tour"
-                    hint="One per line. Select text and click B to bold it."
+                    hint="One per line. Select text to format it."
                     rows={8}
-                    plain
-                    boldButton
-                    value={form.why_items.join("\n")}
-                    onChange={(v) => set("why_items", v.split("\n"))}
+                    value={whyDocument}
+                    onChange={(value) => {
+                      setWhyDocument(value);
+                      set("why_items", parseInlineLines(value, false));
+                    }}
                   />
                 </FormSection>
               ) : null}
@@ -1139,6 +1149,36 @@ function FormSection({
   );
 }
 
+function InlineLinesField({
+  label,
+  hint,
+  rows,
+  value,
+  onChange,
+  boldLinePrefixPattern,
+}: {
+  label: string;
+  hint?: string;
+  rows: number;
+  value: string;
+  onChange: (value: string) => void;
+  boldLinePrefixPattern?: RegExp;
+}) {
+  return (
+    <div>
+      <Label hint={hint}>{label}</Label>
+      <RichTextarea
+        mode="inline-lines"
+        rows={rows}
+        value={value}
+        onChange={onChange}
+        ariaLabel={label}
+        boldLinePrefixPattern={boldLinePrefixPattern}
+      />
+    </div>
+  );
+}
+
 /** The preview iframe's URL. Frozen between reloads so typing cannot reload the frame. */
 function previewSlug(form: TourForm): string {
   return form.slug.trim() || slugify(form.title) || "new";
@@ -1210,16 +1250,57 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
  * no trimming or dropping empty lines — otherwise the field fights the cursor the moment
  * a block boundary (a blank line) is only half-typed.
  */
-function serializeAdvice(advice: { title: string; items: string[] }[]): string {
-  return advice.map((block) => [block.title, ...block.items].join("\n")).join("\n\n");
+function normalizeInline(value: string): string {
+  return marked.parseInline(value || "") as string;
 }
 
-function parseAdvice(text: string): { title: string; items: string[] }[] {
-  if (!text.trim()) return [];
-  return text.split(/\n\s*\n/).map((block) => {
-    const [title = "", ...items] = block.split("\n");
-    return { title, items };
-  });
+function serializeInlineLines(lines: string[]): string {
+  return lines
+    .map((line) => `<p>${line ? normalizeInline(line) : "<br>"}</p>`)
+    .join("");
+}
+
+function inlineParagraphs(documentHtml: string): { html: string; text: string }[] {
+  if (!documentHtml) return [];
+  const root = document.createElement("div");
+  root.innerHTML = documentHtml;
+  return Array.from(root.children).map((paragraph) => ({
+    html: paragraph.textContent?.trim() ? paragraph.innerHTML : "",
+    text: paragraph.textContent ?? "",
+  }));
+}
+
+function parseInlineLines(documentHtml: string, keepEmpty = true): string[] {
+  return inlineParagraphs(documentHtml)
+    .filter((line) => keepEmpty || line.text.trim() !== "")
+    .map((line) => line.html);
+}
+
+function serializeAdvice(advice: { title: string; items: string[] }[]): string {
+  return serializeInlineLines(
+    advice.flatMap((block, index) => [
+      ...(index ? [""] : []),
+      block.title,
+      ...block.items,
+    ]),
+  );
+}
+
+function parseAdvice(documentHtml: string): { title: string; items: string[] }[] {
+  const blocks: { title: string; items: string[] }[] = [];
+  let current: string[] = [];
+  const flush = () => {
+    if (!current.length) return;
+    const [title = "", ...items] = current;
+    blocks.push({ title, items });
+    current = [];
+  };
+  for (const line of inlineParagraphs(documentHtml)) {
+    if (!line.text.trim()) flush();
+    else current.push(line.html);
+  }
+  flush();
+  return blocks;
 }
 
 /** Journey-at-a-glance rows as one compact text box. The first spaced dash or pipe
@@ -1227,24 +1308,72 @@ function parseAdvice(text: string): { title: string; items: string[] }[] {
  *  description-only content, so partially typed lines do not disappear from the preview. */
 function serializeGlance(glance: { when: string; detail: string }[]): string {
   return glance
-    .map(({ when, detail }) => (when && detail ? `${when} — ${detail}` : when || detail))
-    .join("\n");
+    .map(({ when, detail }) => {
+      const formattedWhen = when ? `<strong>${normalizeInline(when)}</strong>` : "";
+      const formattedDetail = detail ? normalizeInline(detail) : "";
+      const line =
+        formattedWhen && formattedDetail
+          ? `${formattedWhen} — ${formattedDetail}`
+          : formattedWhen || formattedDetail;
+      return `<p>${line || "<br>"}</p>`;
+    })
+    .join("");
 }
 
-function parseGlance(text: string): { when: string; detail: string }[] {
-  return text
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line) => {
-      const separator = GLANCE_SEPARATOR_PATTERN.exec(line);
+function parseGlance(documentHtml: string): { when: string; detail: string }[] {
+  const root = document.createElement("div");
+  root.innerHTML = documentHtml;
+  return Array.from(root.children)
+    .filter((paragraph) => Boolean(paragraph.textContent?.trim()))
+    .map((paragraph) => {
+      const text = paragraph.textContent ?? "";
+      GLANCE_SEPARATOR_PATTERN.lastIndex = 0;
+      const separator = GLANCE_SEPARATOR_PATTERN.exec(text);
       if (!separator || separator.index === undefined) {
-        return { when: "", detail: line.trim() };
+        return { when: "", detail: sliceInlineHtml(paragraph, 0, text.length) };
       }
       return {
-        when: line.slice(0, separator.index).trim(),
-        detail: line.slice(separator.index + separator[0].length).trim(),
+        when: sliceInlineHtml(paragraph, 0, separator.index),
+        detail: sliceInlineHtml(
+          paragraph,
+          separator.index + separator[0].length,
+          text.length,
+        ),
       };
     });
+}
+
+/** Clone a text range while retaining every inline mark which crosses the boundary. */
+function sliceInlineHtml(element: Element, rawStart: number, rawEnd: number): string {
+  const text = element.textContent ?? "";
+  const selected = text.slice(rawStart, rawEnd);
+  const leading = selected.match(/^\s*/)?.[0].length ?? 0;
+  const trailing = selected.match(/\s*$/)?.[0].length ?? 0;
+  const start = rawStart + leading;
+  const end = Math.max(start, rawEnd - trailing);
+  if (start === end) return "";
+
+  const range = document.createRange();
+  const startBoundary = textBoundary(element, start);
+  const endBoundary = textBoundary(element, end);
+  range.setStart(startBoundary.node, startBoundary.offset);
+  range.setEnd(endBoundary.node, endBoundary.offset);
+  const wrapper = document.createElement("div");
+  wrapper.append(range.cloneContents());
+  return wrapper.innerHTML;
+}
+
+function textBoundary(element: Element, offset: number): { node: Node; offset: number } {
+  const walker = document.createTreeWalker(element, 4);
+  let traversed = 0;
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent?.length ?? 0;
+    if (offset <= traversed + length) return { node, offset: offset - traversed };
+    traversed += length;
+    node = walker.nextNode();
+  }
+  return { node: element, offset: element.childNodes.length };
 }
 
 /** Continue from the largest saved step/day rather than the row count. This avoids a

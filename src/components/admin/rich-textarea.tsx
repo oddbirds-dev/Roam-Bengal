@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, getMarkRange, useEditor, useEditorState } from "@tiptap/react";
+import { Extension } from "@tiptap/core";
+import { Plugin } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -31,6 +33,38 @@ interface PickerState {
   editing: boolean;
 }
 
+const BoldLinePrefix = Extension.create<{ pattern: RegExp }>({
+  name: "boldLinePrefix",
+  addOptions: () => ({ pattern: /$^/ }),
+  addProseMirrorPlugins() {
+    const pattern = this.options.pattern;
+    return [
+      new Plugin({
+        appendTransaction(transactions, _oldState, newState) {
+          if (!transactions.some((transaction) => transaction.docChanged)) return null;
+          const bold = newState.schema.marks.bold;
+          if (!bold) return null;
+          const transaction = newState.tr;
+          newState.doc.descendants((node, position) => {
+            if (node.type.name !== "paragraph") return;
+            pattern.lastIndex = 0;
+            const separator = pattern.exec(node.textContent);
+            if (!separator || separator.index <= 0) return;
+            const from = position + 1;
+            const to = from + separator.index;
+            let fullyBold = true;
+            node.nodesBetween(0, separator.index, (child) => {
+              if (child.isText && !bold.isInSet(child.marks)) fullyBold = false;
+            });
+            if (!fullyBold) transaction.addMark(from, to, bold.create());
+          });
+          return transaction.docChanged ? transaction : null;
+        },
+      }),
+    ];
+  },
+});
+
 /** TipTap-backed WYSIWYG. Values are emitted as HTML; legacy Markdown is normalized on load. */
 export function RichTextarea({
   id,
@@ -39,6 +73,8 @@ export function RichTextarea({
   placeholder,
   onChange,
   ariaLabel,
+  mode = "document",
+  boldLinePrefixPattern,
 }: {
   id?: string;
   rows?: number;
@@ -46,7 +82,10 @@ export function RichTextarea({
   placeholder?: string;
   onChange: (value: string) => void;
   ariaLabel?: string;
+  mode?: "document" | "inline-lines";
+  boldLinePrefixPattern?: RegExp;
 }) {
+  const inlineLines = mode === "inline-lines";
   const { custom_fonts } = useSiteSettings();
   const customFonts = resolveCustomFonts(custom_fonts);
   const customFontKey = customFonts.map((font) => font.className).join("|");
@@ -68,14 +107,24 @@ export function RichTextarea({
       immediatelyRender: false,
       extensions: [
         StarterKit.configure({
-          heading: { levels: [...HEADING_LEVELS] },
+          heading: inlineLines ? false : { levels: [...HEADING_LEVELS] },
+          bulletList: inlineLines ? false : undefined,
+          orderedList: inlineLines ? false : undefined,
+          listItem: inlineLines ? false : undefined,
+          listKeymap: inlineLines ? false : undefined,
+          blockquote: inlineLines ? false : undefined,
+          codeBlock: inlineLines ? false : undefined,
+          horizontalRule: inlineLines ? false : undefined,
           link: { openOnClick: false, autolink: true, HTMLAttributes: { rel: null, target: null } },
         }),
-        TableKit.configure({ table: { resizable: false } }),
+        ...(inlineLines ? [] : [TableKit.configure({ table: { resizable: false } })]),
         createFontClassMark(customFonts.map((font) => font.className)),
         ColorClassMark,
         FontSizeMark,
         CustomColorMark,
+        ...(inlineLines && boldLinePrefixPattern
+          ? [BoldLinePrefix.configure({ pattern: boldLinePrefixPattern })]
+          : []),
         Placeholder.configure({ placeholder: placeholder ?? "" }),
       ],
       content: marked.parse(value || "") as string,
@@ -96,7 +145,7 @@ export function RichTextarea({
         },
       },
     },
-    [customFontKey],
+    [customFontKey, inlineLines, boldLinePrefixPattern?.source],
   );
 
   useEffect(() => {
@@ -208,24 +257,28 @@ export function RichTextarea({
   return (
     <div className="flex flex-col overflow-hidden rounded-[10px] border border-rule bg-paper transition-colors focus-within:border-green focus-within:ring-2 focus-within:ring-green/15">
       <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-cream/40 px-2.5 py-1.5">
-        <select
-          title="Paragraph or sub-heading"
-          disabled={showSource}
-          value={toolbarState.headingLevel}
-          onChange={(event) => {
-            const level = Number(event.target.value);
-            const chain = editor.chain().focus();
-            if (level === 0) chain.setParagraph().run();
-            else chain.setNode("heading", { level }).run();
-          }}
-          className={select}
-        >
-          <option value={0}>Normal text</option>
-          {HEADING_LEVELS.map((level) => (
-            <option key={level} value={level}>Sub-heading {level - 1}</option>
-          ))}
-        </select>
-        <span className="h-4 w-px bg-rule" />
+        {!inlineLines ? (
+          <>
+            <select
+              title="Paragraph or sub-heading"
+              disabled={showSource}
+              value={toolbarState.headingLevel}
+              onChange={(event) => {
+                const level = Number(event.target.value);
+                const chain = editor.chain().focus();
+                if (level === 0) chain.setParagraph().run();
+                else chain.setNode("heading", { level }).run();
+              }}
+              className={select}
+            >
+              <option value={0}>Normal text</option>
+              {HEADING_LEVELS.map((level) => (
+                <option key={level} value={level}>Sub-heading {level - 1}</option>
+              ))}
+            </select>
+            <span className="h-4 w-px bg-rule" />
+          </>
+        ) : null}
         <select
           title="Font"
           disabled={showSource}
@@ -303,34 +356,40 @@ export function RichTextarea({
             className="h-4 w-4 cursor-pointer border-0 bg-transparent p-0"
           />
         </label>
-        <span className="h-4 w-px bg-rule" />
-        <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Bulleted list" aria-pressed={toolbarState.bulletList} className={`${button} ${toolbarState.bulletList ? active : ""}`}>
-          <AdminIcon name="listBullet" className="h-3.5 w-3.5" />
-        </button>
-        <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Numbered list" aria-pressed={toolbarState.orderedList} className={`${button} ${toolbarState.orderedList ? active : ""}`}>
-          <AdminIcon name="listOrdered" className="h-3.5 w-3.5" />
-        </button>
-        <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Highlighted quote" aria-pressed={toolbarState.blockquote} className={`${button} ${toolbarState.blockquote ? active : ""}`}>
-          <AdminIcon name="quote" className="h-3.5 w-3.5" />
-        </button>
+        {!inlineLines ? (
+          <>
+            <span className="h-4 w-px bg-rule" />
+            <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Bulleted list" aria-pressed={toolbarState.bulletList} className={`${button} ${toolbarState.bulletList ? active : ""}`}>
+              <AdminIcon name="listBullet" className="h-3.5 w-3.5" />
+            </button>
+            <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Numbered list" aria-pressed={toolbarState.orderedList} className={`${button} ${toolbarState.orderedList ? active : ""}`}>
+              <AdminIcon name="listOrdered" className="h-3.5 w-3.5" />
+            </button>
+            <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Highlighted quote" aria-pressed={toolbarState.blockquote} className={`${button} ${toolbarState.blockquote ? active : ""}`}>
+              <AdminIcon name="quote" className="h-3.5 w-3.5" />
+            </button>
+          </>
+        ) : null}
         <span className="h-4 w-px bg-rule" />
         <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={openLinkPicker} title="Insert or edit a link" className={button}>
           <AdminIcon name="link" className="h-3.5 w-3.5" />
         </button>
-        {toolbarState.inTable ? (
+        {!inlineLines && toolbarState.inTable ? (
           <>
             <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().addRowAfter().run()} title="Add table row" className={button}><AdminIcon name="plus" className="h-3.5 w-3.5" /></button>
             <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add table column" className={button}><AdminIcon name="table" className="h-3.5 w-3.5" /></button>
             <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().deleteTable().run()} title="Delete table" className={`${button} text-rust`}><AdminIcon name="trash" className="h-3.5 w-3.5" /></button>
           </>
-        ) : (
+        ) : !inlineLines ? (
           <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="Insert table" className={button}>
             <AdminIcon name="table" className="h-3.5 w-3.5" />
           </button>
-        )}
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setShowSource((current) => !current)} title={showSource ? "Back to formatted view" : "Edit HTML source"} aria-pressed={showSource} className={`${button} ${showSource ? active : ""}`}>
-          <AdminIcon name="code" className="h-3.5 w-3.5" />
-        </button>
+        ) : null}
+        {!inlineLines ? (
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setShowSource((current) => !current)} title={showSource ? "Back to formatted view" : "Edit HTML source"} aria-pressed={showSource} className={`${button} ${showSource ? active : ""}`}>
+            <AdminIcon name="code" className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
       </div>
 
       {showSource ? (
