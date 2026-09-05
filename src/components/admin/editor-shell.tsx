@@ -132,11 +132,11 @@ export function EditorShell<T = Record<string, unknown>>({
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col overflow-hidden bg-admin-bg">
-      <div className="min-h-0 flex-1 p-4">
+      <div className="min-h-0 flex-1">
         {previewPath && wide && pane.open ? (
           <ResizablePanelGroup
             orientation="horizontal"
-            className="h-full overflow-hidden rounded-2xl border border-rule bg-paper"
+            className="h-full overflow-hidden bg-paper"
           >
             <ResizablePanel defaultSize="45" minSize="30">
               <div className="h-full overflow-y-auto p-6">{form}</div>
@@ -159,7 +159,7 @@ export function EditorShell<T = Record<string, unknown>>({
             </ResizablePanel>
           </ResizablePanelGroup>
         ) : (
-          <div className="h-full overflow-y-auto rounded-2xl border border-rule bg-paper p-6">
+          <div className="h-full overflow-y-auto bg-paper p-6">
             <div className="mx-auto max-w-3xl">{form}</div>
           </div>
         )}

@@ -116,6 +116,26 @@ function splitBoldSegments(text: string): { text: string; kind: "plain" | "bold"
   return segments;
 }
 
+function renderBoldSegments(text: string, keyPrefix: string, forceBold = false) {
+  return splitBoldSegments(text).map((seg, i) => {
+    if (seg.kind === "marker") {
+      return (
+        <span key={`${keyPrefix}-${i}`} className="text-transparent">
+          {seg.text}
+        </span>
+      );
+    }
+    if (seg.kind === "bold" || forceBold) {
+      return (
+        <strong key={`${keyPrefix}-${i}`} className="font-bold">
+          {seg.text}
+        </strong>
+      );
+    }
+    return <span key={`${keyPrefix}-${i}`}>{seg.text}</span>;
+  });
+}
+
 export function TextArea({
   label,
   value,
@@ -125,6 +145,7 @@ export function TextArea({
   placeholder,
   plain,
   boldButton,
+  boldLinePrefixPattern,
 }: {
   label: string;
   value: string;
@@ -140,6 +161,9 @@ export function TextArea({
    *  For fields where the plain text itself is later rendered with `FormatText`, so
    *  `**word**` markers still show as bold — without the HTML-emitting rich editor. */
   boldButton?: boolean;
+  /** When set, the part of every line before the first match is semantically bold in the
+   *  public layout, so the editor preview mirrors that weight without changing the text. */
+  boldLinePrefixPattern?: RegExp;
 }) {
   const id = useFieldId(label);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -228,23 +252,20 @@ export function TextArea({
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre-wrap break-words px-3.5 py-2.5 font-mono text-[0.8rem] leading-[1.5] text-ink"
               >
-                {splitBoldSegments(value).map((seg, i) => {
-                  if (seg.kind === "bold") {
-                    return (
-                      <strong key={i} className="font-bold">
-                        {seg.text}
-                      </strong>
-                    );
-                  }
-                  if (seg.kind === "marker") {
-                    return (
-                      <span key={i} className="text-transparent">
-                        {seg.text}
-                      </span>
-                    );
-                  }
-                  return <span key={i}>{seg.text}</span>;
-                })}
+                {boldLinePrefixPattern
+                  ? value.split("\n").map((line, lineIndex, lines) => {
+                      const separator = line.search(boldLinePrefixPattern);
+                      const prefix = separator === -1 ? line : line.slice(0, separator);
+                      const remainder = separator === -1 ? "" : line.slice(separator);
+                      return (
+                        <span key={lineIndex}>
+                          {renderBoldSegments(prefix, `prefix-${lineIndex}`, separator !== -1)}
+                          {renderBoldSegments(remainder, `remainder-${lineIndex}`)}
+                          {lineIndex < lines.length - 1 ? "\n" : null}
+                        </span>
+                      );
+                    })
+                  : renderBoldSegments(value, "text")}
                 {value.endsWith("\n") ? " " : null}
               </div>
               <textarea

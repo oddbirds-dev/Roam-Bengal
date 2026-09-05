@@ -245,9 +245,13 @@ function TourDetail() {
               {tour.glance.length ? (
                 <Section id="glance" title="📍 Journey at a Glance">
                   <ul className="flex flex-col gap-2.5">
-                    {tour.glance.map((g) => (
-                      <li key={g.when} className="text-[0.9rem] leading-6">
-                        <strong className="text-green-dark">{g.when}</strong> — <FormatText>{g.detail}</FormatText>
+                    {tour.glance.map((g, index) => (
+                      <li key={`${g.when}-${g.detail}-${index}`} className="text-[0.9rem] leading-6">
+                        {g.when ? (
+                          <strong className="text-green-dark"><FormatText>{g.when}</FormatText></strong>
+                        ) : null}
+                        {g.when && g.detail ? " — " : null}
+                        {g.detail ? <FormatText>{g.detail}</FormatText> : null}
                       </li>
                     ))}
                   </ul>

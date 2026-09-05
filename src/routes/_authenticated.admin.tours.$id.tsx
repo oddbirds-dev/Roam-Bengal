@@ -55,6 +55,8 @@ import { toTourDTO } from "@/lib/tour-dto";
 import { tourPreviewChannel } from "@/lib/tour-preview";
 import { slugify } from "@/lib/slugify";
 
+const GLANCE_SEPARATOR_PATTERN = /\s+(?:—|–|-|\|)\s+/;
+
 export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
   // Only consulted for a brand-new tour — picks which category the "+ New tour" link
   // pre-selects so single-day and multi-day both land on an already-correct form.
@@ -187,6 +189,7 @@ function TourEditor() {
     const slugs = themes[tour.slug] ?? [];
     return activities.filter((a) => slugs.includes(a.slug)).map((a) => a.id);
   });
+  const [glanceText, setGlanceText] = useState(() => serializeGlance(form.glance));
 
   const set = <K extends keyof TourForm>(key: K, value: TourForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -233,6 +236,7 @@ function TourEditor() {
     const previous = JSON.parse(baseline) as EditorState;
     setForm(previous.form);
     setThemeIds(previous.themeIds);
+    setGlanceText(serializeGlance(previous.form.glance));
   }
 
   // Only the SEO title/description are edited here; every other seo_meta column (focus
@@ -688,15 +692,18 @@ function TourEditor() {
                   open={openSections.glance}
                   onToggle={() => toggleSection("glance")}
                 >
-                  <RepeaterField
+                  <TextArea
                     label="Journey at a glance"
-                    values={form.glance}
-                    onChange={(v) => set("glance", v)}
-                    blank={() => ({ when: "", detail: "" })}
-                    columns={[
-                      { key: "when", label: "When", placeholder: "Day 1, Morning", span: 4 },
-                      { key: "detail", label: "What happens", span: 8 },
-                    ]}
+                    hint="One stop per line: time — what happens. You can also use –, - or |. Select text and click B to bold it."
+                    rows={10}
+                    plain
+                    boldButton
+                    boldLinePrefixPattern={GLANCE_SEPARATOR_PATTERN}
+                    value={glanceText}
+                    onChange={(v) => {
+                      setGlanceText(v);
+                      set("glance", parseGlance(v));
+                    }}
                   />
                   <RepeaterField
                     label="Optional add-ons"
@@ -1209,4 +1216,29 @@ function parseAdvice(text: string): { title: string; items: string[] }[] {
     const [title = "", ...items] = block.split("\n");
     return { title, items };
   });
+}
+
+/** Journey-at-a-glance rows as one compact text box. The first spaced dash or pipe
+ *  separates the time from the description; a line without one remains valid as
+ *  description-only content, so partially typed lines do not disappear from the preview. */
+function serializeGlance(glance: { when: string; detail: string }[]): string {
+  return glance
+    .map(({ when, detail }) => (when && detail ? `${when} — ${detail}` : when || detail))
+    .join("\n");
+}
+
+function parseGlance(text: string): { when: string; detail: string }[] {
+  return text
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line) => {
+      const separator = GLANCE_SEPARATOR_PATTERN.exec(line);
+      if (!separator || separator.index === undefined) {
+        return { when: "", detail: line.trim() };
+      }
+      return {
+        when: line.slice(0, separator.index).trim(),
+        detail: line.slice(separator.index + separator[0].length).trim(),
+      };
+    });
 }

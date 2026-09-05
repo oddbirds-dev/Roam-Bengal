@@ -216,9 +216,9 @@ export function PreviewPane({
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 justify-center overflow-hidden p-4">
+      <div className="flex min-h-0 flex-1 justify-center overflow-hidden">
         <div
-          className="h-full w-full overflow-hidden rounded-xl border border-rule bg-white shadow-sm"
+          className="h-full w-full overflow-hidden border border-rule bg-white shadow-sm"
           style={{ maxWidth: DEVICES.find((d) => d.id === pane.device)?.width }}
         >
           <iframe
