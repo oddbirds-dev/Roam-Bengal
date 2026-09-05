@@ -694,12 +694,10 @@ function TourEditor() {
                   open={openSections.highlights}
                   onToggle={() => toggleSection("highlights")}
                 >
-                  <TextArea
+                  <StringListField
                     label="Highlights"
-                    hint="One per line."
-                    rows={5}
-                    value={form.highlights.join("\n")}
-                    onChange={(v) => set("highlights", v.split("\n"))}
+                    values={form.highlights}
+                    onChange={(v) => set("highlights", v)}
                   />
                 </FormSection>
               ) : null}
@@ -762,19 +760,15 @@ function TourEditor() {
                   onToggle={() => toggleSection("included")}
                 >
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <TextArea
+                    <StringListField
                       label="Inclusions"
-                      hint="One per line."
-                      rows={5}
-                      value={form.inclusions.join("\n")}
-                      onChange={(v) => set("inclusions", v.split("\n"))}
+                      values={form.inclusions}
+                      onChange={(v) => set("inclusions", v)}
                     />
-                    <TextArea
+                    <StringListField
                       label="Exclusions"
-                      hint="One per line."
-                      rows={5}
-                      value={form.exclusions.join("\n")}
-                      onChange={(v) => set("exclusions", v.split("\n"))}
+                      values={form.exclusions}
+                      onChange={(v) => set("exclusions", v)}
                     />
                   </div>
                 </FormSection>
@@ -790,6 +784,7 @@ function TourEditor() {
                     label="Advice blocks"
                     hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
                     rows={8}
+                    plain
                     value={serializeAdvice(form.advice)}
                     onChange={(v) => set("advice", parseAdvice(v))}
                   />
@@ -822,12 +817,10 @@ function TourEditor() {
                   open={openSections.why_us}
                   onToggle={() => toggleSection("why_us")}
                 >
-                  <TextArea
+                  <StringListField
                     label="Why choose us for this tour"
-                    hint="One per line."
-                    rows={5}
-                    value={form.why_items.join("\n")}
-                    onChange={(v) => set("why_items", v.split("\n"))}
+                    values={form.why_items}
+                    onChange={(v) => set("why_items", v)}
                   />
                 </FormSection>
               ) : null}
