@@ -424,30 +424,6 @@ function TourEditor() {
                 </button>
               </div>
 
-              {shows("seo") ? (
-                <FormSection
-                  title="Meta SEO"
-                  description="The search-result title and description for this tour's page."
-                  open={openSections.seo}
-                  onToggle={() => toggleSection("seo")}
-                >
-                  <TextField
-                    label="SEO title"
-                    hint="Falls back to the tour title when blank."
-                    value={form.meta_title}
-                    onChange={(v) => set("meta_title", v)}
-                  />
-                  <TextArea
-                    label="Meta description"
-                    hint="Shown under the title in search results. For the focus keyphrase, Open Graph, Twitter card, and other advanced SEO controls, see Admin → SEO."
-                    rows={3}
-                    plain
-                    value={form.meta_description}
-                    onChange={(v) => set("meta_description", v)}
-                  />
-                </FormSection>
-              ) : null}
-
               {shows("pricing") ? (
                 <FormSection
                   title="Pricing"
@@ -890,6 +866,30 @@ function TourEditor() {
                     kind="post"
                     values={form.related_post_slugs}
                     onChange={(v) => set("related_post_slugs", v)}
+                  />
+                </FormSection>
+              ) : null}
+
+              {shows("seo") ? (
+                <FormSection
+                  title="Meta SEO"
+                  description="The search-result title and description for this tour's page."
+                  open={openSections.seo}
+                  onToggle={() => toggleSection("seo")}
+                >
+                  <TextField
+                    label="SEO title"
+                    hint="Falls back to the tour title when blank."
+                    value={form.meta_title}
+                    onChange={(v) => set("meta_title", v)}
+                  />
+                  <TextArea
+                    label="Meta description"
+                    hint="Shown under the title in search results. For the focus keyphrase, Open Graph, Twitter card, and other advanced SEO controls, see Admin → SEO."
+                    rows={3}
+                    plain
+                    value={form.meta_description}
+                    onChange={(v) => set("meta_description", v)}
                   />
                 </FormSection>
               ) : null}
