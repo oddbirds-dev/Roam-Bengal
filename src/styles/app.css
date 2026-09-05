@@ -224,6 +224,17 @@
     margin-block-start: 1.15em;
   }
 
+  /* TipTap represents a deliberately blank line as `<p></p>`. The reset stylesheet
+     gives that element no height, so retain one line box wherever rich documents render. */
+  .blog-body > p:empty {
+    min-height: 1lh;
+  }
+
+  /* Tour overviews used a one-rem flex gap before they became full rich documents. */
+  .tour-overview > * + * {
+    margin-block-start: 1rem;
+  }
+
   .blog-body h2,
   .blog-body h3,
   .blog-body h4 {

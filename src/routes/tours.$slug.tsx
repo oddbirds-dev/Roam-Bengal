@@ -213,13 +213,9 @@ function TourDetail() {
               {tour.overview || tour.overviewTip ? (
                 <Section id="overview" title="📜 Trip Overview">
                   {tour.overview ? (
-                      <div className="flex flex-col gap-4">
-                        {overviewParagraphs(tour.overview).map((p, i) => (
-                          <p key={i} className="text-[0.92rem] leading-7 text-ink/85">
-                            <FormatText>{p}</FormatText>
-                          </p>
-                        ))}
-                      </div>
+                    <div className="blog-body tour-overview text-[0.92rem] leading-7 text-ink/85">
+                      <FormatDocument>{tour.overview}</FormatDocument>
+                    </div>
                   ) : null}
                   {tour.overviewTip ? (
                     <div className="rounded-xl border-l-4 border-gold bg-mint p-4 text-[0.88rem] leading-6">

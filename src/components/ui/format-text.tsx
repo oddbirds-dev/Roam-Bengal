@@ -30,6 +30,10 @@ export const INLINE_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
 
 /** Full documents: blog bodies. Headings, lists, tables, images. */
 export const BLOCK_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
+  // Keep the authored blocks as direct children of their typography container. Besides
+  // making `.blog-body > *` rules work, this lets an intentional empty paragraph occupy
+  // space instead of being hidden inside markdown-to-jsx's default wrapper div.
+  wrapper: null,
   overrides,
 };
 

@@ -26,6 +26,15 @@ const blockHtml = renderToStaticMarkup(
 );
 assert.match(blockHtml, /^<p>/);
 
+const documentHtml = renderToStaticMarkup(
+  React.createElement(
+    Markdown,
+    { options: { wrapper: null } },
+    "<p><strong>Heading</strong></p><p></p><p>Body</p>",
+  ),
+);
+assert.equal(documentHtml, "<p><strong>Heading</strong></p><p></p><p>Body</p>");
+
 console.log(
-  "FormatText forceInline preserves bare TipTap spans, but not TipTap paragraph wrappers; inline list/repeater controls must stay plain.",
+  "Rich text preserves inline markup and direct document blocks, including intentional blank paragraphs.",
 );
