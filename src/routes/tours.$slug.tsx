@@ -274,6 +274,7 @@ function TourDetail() {
                 <Section
                   id="itinerary"
                   title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
+                  headingClassName="font-body text-base"
                 >
                   <ol className="flex flex-col gap-6">
                       {tour.itinerary.map((day, i) => (
@@ -289,7 +290,7 @@ function TourDetail() {
                           </span>
                           <details className="group min-w-0 flex-1">
                             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-green/40 [&::-webkit-details-marker]:hidden">
-                              <h3 className="font-display text-[1.05rem] font-bold text-green-dark">
+                              <h3 className="font-body text-base font-bold text-green-dark">
                                 {day.title}
                               </h3>
                               <span
@@ -365,7 +366,7 @@ function TourDetail() {
               ) : null}
 
               {tour.advice.length ? (
-                <Section id="advice" title="🎯 Trip Advice & Responsibilities">
+                <Section id="advice" title="🎯 Trip Advice & Responsibilities" headingClassName="font-body text-base">
                   <div className="flex flex-col gap-5">
                     {tour.advice.map((block) => (
                       <div key={block.title} className="rounded-xl border border-rule p-5">
@@ -613,15 +614,17 @@ function blankTour(slug: string): TourDTO {
 function Section({
   id,
   title,
+  headingClassName,
   children,
 }: {
   id: string;
   title: string;
+  headingClassName?: string;
   children: React.ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-24">
-      <h2 className="mb-4 font-display text-[1.35rem] text-green">{title}</h2>
+      <h2 className={`mb-4 ${headingClassName ?? "font-display text-[1.35rem]"} text-green`}>{title}</h2>
       <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
