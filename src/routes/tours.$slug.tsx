@@ -622,7 +622,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-24">
       {collapsible ? (
-        <details open className="group">
+        <details className="group">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none [&::-webkit-details-marker]:hidden">
             {heading}
             <ChevronDown
