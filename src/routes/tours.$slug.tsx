@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
@@ -276,6 +277,7 @@ function TourDetail() {
                   id="itinerary"
                   title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
                   headingClassName="font-body text-base"
+                  collapsible
                 >
                   <ol className="flex flex-col gap-6">
                       {tour.itinerary.map((day, i) => (
@@ -401,7 +403,7 @@ function TourDetail() {
               ) : null}
 
               {tour.faqs.length ? (
-                <Section id="faq" title="❓ Frequently Asked Questions">
+                <Section id="faq" title="❓ Frequently Asked Questions" collapsible>
                   <FaqAccordion items={tour.faqs} />
                 </Section>
               ) : null}
@@ -602,17 +604,40 @@ function Section({
   id,
   title,
   headingClassName,
+  collapsible = false,
   children,
 }: {
   id: string;
   title: string;
   headingClassName?: string;
+  collapsible?: boolean;
   children: React.ReactNode;
 }) {
+  const heading = (
+    <h2 className={`mb-4 ${headingClassName ?? "font-display text-[1.35rem]"} text-green`}>
+      {title}
+    </h2>
+  );
+
   return (
     <section id={id} className="scroll-mt-24">
-      <h2 className={`mb-4 ${headingClassName ?? "font-display text-[1.35rem]"} text-green`}>{title}</h2>
-      <div className="flex flex-col gap-4">{children}</div>
+      {collapsible ? (
+        <details open className="group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none [&::-webkit-details-marker]:hidden">
+            {heading}
+            <ChevronDown
+              aria-hidden="true"
+              className="mb-4 h-5 w-5 shrink-0 text-green transition-transform duration-200 group-open:rotate-180"
+            />
+          </summary>
+          <div className="flex flex-col gap-4">{children}</div>
+        </details>
+      ) : (
+        <>
+          {heading}
+          <div className="flex flex-col gap-4">{children}</div>
+        </>
+      )}
     </section>
   );
 }

@@ -22,6 +22,16 @@ const overrides: MarkdownToJSX.Overrides = {
   },
 };
 
+const INLINE_TAGS = "a|b|code|em|i|s|span|strong|u";
+
+/** Rich-text editors can leave a word boundary outside an inline mark without a
+ * whitespace text node. Restore that visual boundary before Markdown parses the HTML. */
+function restoreInlineSpaces(value: string): string {
+  return value
+    .replace(new RegExp(`([^\\s>])(<(?:${INLINE_TAGS})\\b)`, "gi"), "$1 $2")
+    .replace(new RegExp(`(</(?:${INLINE_TAGS})>)(?=[^\\s<])`, "gi"), "$1 ");
+}
+
 /** One-line strings: paragraphs, list items, headings, table cells. No block parsing. */
 export const INLINE_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
   forceInline: true,
@@ -44,7 +54,7 @@ export const BLOCK_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
 export function FormatText({ children }: { children: string }) {
   if (!children || typeof children !== "string") return <>{children}</>;
 
-  return <Markdown options={INLINE_MARKDOWN_OPTIONS}>{children}</Markdown>;
+  return <Markdown options={INLINE_MARKDOWN_OPTIONS}>{restoreInlineSpaces(children)}</Markdown>;
 }
 
 /**
@@ -54,5 +64,5 @@ export function FormatText({ children }: { children: string }) {
 export function FormatDocument({ children }: { children: string }) {
   if (!children || typeof children !== "string") return <>{children}</>;
 
-  return <Markdown options={BLOCK_MARKDOWN_OPTIONS}>{children}</Markdown>;
+  return <Markdown options={BLOCK_MARKDOWN_OPTIONS}>{restoreInlineSpaces(children)}</Markdown>;
 }

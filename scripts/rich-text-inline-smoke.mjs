@@ -15,6 +15,17 @@ const markedBoundaryHtml = renderToStaticMarkup(
 );
 assert.match(markedBoundaryHtml, /at <strong>Swari Ghat<\/strong> is/);
 
+const repairedBoundarySource = 'The ferry terminal at<strong>Swari Ghat</strong>is dense';
+const repairedBoundaryHtml = renderToStaticMarkup(
+  React.createElement(
+    Markdown,
+    { options: { forceInline: true } },
+    repairedBoundarySource.replace(/([^\s>])(<(?:a|b|code|em|i|s|span|strong|u)\b)/gi, "$1 $2")
+      .replace(/(<\/(?:a|b|code|em|i|s|span|strong|u)>)(?=[^\s<])/gi, "$1 "),
+  ),
+);
+assert.match(repairedBoundaryHtml, /at <strong>Swari Ghat<\/strong> is/);
+
 for (const source of cases) {
   const html = renderToStaticMarkup(
     React.createElement(Markdown, { options: { forceInline: true } }, source),
