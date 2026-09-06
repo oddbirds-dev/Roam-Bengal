@@ -1,6 +1,7 @@
 import Markdown from "markdown-to-jsx";
 import type { MarkdownToJSX } from "markdown-to-jsx";
 import { SmartLink } from "@/components/ui/smart-link";
+import { restoreInlineSpaces } from "@/lib/inline-markup";
 
 /**
  * The single markdown renderer for the whole site.
@@ -21,16 +22,6 @@ const overrides: MarkdownToJSX.Overrides = {
     props: { className: "text-orange font-medium underline-offset-2 hover:underline" },
   },
 };
-
-const INLINE_TAGS = "a|b|code|em|i|s|span|strong|u";
-
-/** Rich-text editors can leave a word boundary outside an inline mark without a
- * whitespace text node. Restore that visual boundary before Markdown parses the HTML. */
-function restoreInlineSpaces(value: string): string {
-  return value
-    .replace(new RegExp(`([^\\s>])(<(?:${INLINE_TAGS})\\b)`, "gi"), "$1 $2")
-    .replace(new RegExp(`(</(?:${INLINE_TAGS})>)(?=[^\\s<])`, "gi"), "$1 ");
-}
 
 /** One-line strings: paragraphs, list items, headings, table cells. No block parsing. */
 export const INLINE_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {

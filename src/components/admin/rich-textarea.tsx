@@ -10,6 +10,7 @@ import { AdminIcon } from "@/components/admin/icons";
 import { LinkPicker, type LinkPickResult } from "@/components/admin/link-picker";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { resolveCustomFonts } from "@/lib/custom-fonts";
+import { restoreInlineSpaces } from "@/lib/inline-markup";
 import {
   BASE_FONT_PX,
   COLOR_OPTIONS,
@@ -127,9 +128,9 @@ export function RichTextarea({
           : []),
         Placeholder.configure({ placeholder: placeholder ?? "" }),
       ],
-      content: marked.parse(value || "") as string,
+      content: marked.parse(restoreInlineSpaces(value || "")) as string,
       onUpdate: ({ editor: current }) => {
-        const html = current.isEmpty ? "" : current.getHTML();
+        const html = current.isEmpty ? "" : restoreInlineSpaces(current.getHTML());
         lastEmitted.current = html;
         onChange(html);
       },
@@ -151,7 +152,9 @@ export function RichTextarea({
   useEffect(() => {
     if (!editor || value === lastEmitted.current) return;
     lastEmitted.current = value;
-    editor.commands.setContent(marked.parse(value || "") as string, { emitUpdate: false });
+    editor.commands.setContent(marked.parse(restoreInlineSpaces(value || "")) as string, {
+      emitUpdate: false,
+    });
   }, [editor, value]);
 
   const state = useEditorState({
