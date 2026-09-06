@@ -1343,15 +1343,11 @@ function parseGlance(documentHtml: string): { when: string; detail: string }[] {
 function sliceInlineHtml(element: Element, rawStart: number, rawEnd: number): string {
   const text = element.textContent ?? "";
   const selected = text.slice(rawStart, rawEnd);
-  const leading = selected.match(/^\s*/)?.[0].length ?? 0;
-  const trailing = selected.match(/\s*$/)?.[0].length ?? 0;
-  const start = rawStart + leading;
-  const end = Math.max(start, rawEnd - trailing);
-  if (start === end) return "";
+  if (!selected.trim()) return "";
 
   const range = document.createRange();
-  const startBoundary = textBoundary(element, start);
-  const endBoundary = textBoundary(element, end);
+  const startBoundary = textBoundary(element, rawStart);
+  const endBoundary = textBoundary(element, rawEnd);
   range.setStart(startBoundary.node, startBoundary.offset);
   range.setEnd(endBoundary.node, endBoundary.offset);
   const wrapper = document.createElement("div");

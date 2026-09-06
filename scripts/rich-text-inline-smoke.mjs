@@ -9,6 +9,12 @@ const cases = [
   '<span class="font-display">Table cell</span>',
 ];
 
+const markedBoundarySource = 'The ferry terminal at <strong>Swari Ghat</strong> is dense';
+const markedBoundaryHtml = renderToStaticMarkup(
+  React.createElement(Markdown, { options: { forceInline: true } }, markedBoundarySource),
+);
+assert.match(markedBoundaryHtml, /at <strong>Swari Ghat<\/strong> is/);
+
 for (const source of cases) {
   const html = renderToStaticMarkup(
     React.createElement(Markdown, { options: { forceInline: true } }, source),
