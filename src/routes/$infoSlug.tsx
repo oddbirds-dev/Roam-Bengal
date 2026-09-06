@@ -59,5 +59,5 @@ function InfoRoute() {
         }
       : page;
 
-  return <PolicyLayout page={withFaqs} />;
+  return <PolicyLayout page={withFaqs} faqPage={slug === "travel-faqs"} />;
 }

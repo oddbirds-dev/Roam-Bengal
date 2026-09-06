@@ -3,11 +3,12 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
+import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
 import type { PolicyPage } from "@/content/policy-defaults";
 
 /** Shared by /policies/:slug and the standalone info pages. */
-export function PolicyLayout({ page }: { page: PolicyPage }) {
+export function PolicyLayout({ page, faqPage = false }: { page: PolicyPage; faqPage?: boolean }) {
   return (
     <>
       <div className="bg-green-dark">
@@ -45,29 +46,38 @@ export function PolicyLayout({ page }: { page: PolicyPage }) {
           </div>
         ) : (
         <div className="mt-10 flex flex-col gap-10">
-          {page.blocks.map((block) => (
-            <section key={block.heading}>
-              <h2 className="font-display text-[1.25rem] text-green">{block.heading}</h2>
-              {block.paragraphs?.map((p) => (
-                <p key={p} className="mt-3 text-[0.94rem] leading-8 text-ink/85">
-                  <FormatText>{p}</FormatText>
-                </p>
-              ))}
-              {block.items?.length ? (
-                <ul className="mt-3 flex flex-col gap-2.5">
-                  {block.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex gap-3 text-[0.92rem] leading-7 text-ink/85"
-                    >
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                      <FormatText>{item}</FormatText>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </section>
-          ))}
+          {faqPage ? (
+            <FaqAccordion
+              items={page.blocks.map((block) => ({
+                question: block.heading,
+                answer: block.paragraphs?.join("\n\n") ?? block.items?.join("\n\n") ?? "",
+              }))}
+            />
+          ) : (
+            page.blocks.map((block) => (
+              <section key={block.heading}>
+                <h2 className="font-display text-[1.25rem] text-green">{block.heading}</h2>
+                {block.paragraphs?.map((p) => (
+                  <p key={p} className="mt-3 text-[0.94rem] leading-8 text-ink/85">
+                    <FormatText>{p}</FormatText>
+                  </p>
+                ))}
+                {block.items?.length ? (
+                  <ul className="mt-3 flex flex-col gap-2.5">
+                    {block.items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex gap-3 text-[0.92rem] leading-7 text-ink/85"
+                      >
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+                        <FormatText>{item}</FormatText>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
+            ))
+          )}
 
           {page.blocks.length === 0 ? (
             <p className="rounded-xl border border-dashed border-rule p-8 text-center text-[0.92rem] text-muted">

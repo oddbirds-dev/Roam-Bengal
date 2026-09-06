@@ -8,6 +8,7 @@ import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
 import { TourPricing } from "@/components/tour/tour-pricing";
 import { BestValueTours } from "@/components/tour/best-value-tours";
+import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { getTourBySlug, listPublishedPosts, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
 import { buildSeoMeta } from "@/lib/seo-head";
@@ -401,21 +402,7 @@ function TourDetail() {
 
               {tour.faqs.length ? (
                 <Section id="faq" title="❓ Frequently Asked Questions">
-                  <div className="flex flex-col gap-3">
-                    {tour.faqs.map((faq) => (
-                      <details
-                        key={faq.question}
-                        className="group rounded-xl border border-rule p-5"
-                      >
-                        <summary className="cursor-pointer list-none font-display text-[0.98rem] font-bold text-green-dark">
-                          {faq.question}
-                        </summary>
-                        <p className="mt-3 text-[0.88rem] leading-7 text-ink/85">
-                          <FormatText>{faq.answer}</FormatText>
-                        </p>
-                      </details>
-                    ))}
-                  </div>
+                  <FaqAccordion items={tour.faqs} />
                 </Section>
               ) : null}
 
