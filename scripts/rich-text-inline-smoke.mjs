@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import Markdown from "markdown-to-jsx";
+import { restoreInlineSpaces } from "../src/lib/inline-markup.ts";
 
 const cases = [
   '<span class="text-green">Hello <strong>world</strong></span>',
@@ -15,16 +16,20 @@ const markedBoundaryHtml = renderToStaticMarkup(
 );
 assert.match(markedBoundaryHtml, /at <strong>Swari Ghat<\/strong> is/);
 
-const repairedBoundarySource = 'The ferry terminal at<strong>Swari Ghat</strong>is dense';
-const repairedBoundaryHtml = renderToStaticMarkup(
-  React.createElement(
-    Markdown,
-    { options: { forceInline: true } },
-    repairedBoundarySource.replace(/([^\s>])(<(?:a|b|code|em|i|s|span|strong|u)\b)/gi, "$1 $2")
-      .replace(/(<\/(?:a|b|code|em|i|s|span|strong|u)>)(?=[^\s<])/gi, "$1 "),
-  ),
+// Formatting may begin or end part-way through a word. The renderer must preserve the
+// exact text-node boundaries TipTap emits, rather than inserting a guessed space.
+const partialWordSource = 'The ferry terminal at Swari Ghat is dense <strong>w</strong>ith movement';
+const partialWordHtml = renderToStaticMarkup(
+  React.createElement(Markdown, { options: { forceInline: true } }, restoreInlineSpaces(partialWordSource)),
 );
-assert.match(repairedBoundaryHtml, /at <strong>Swari Ghat<\/strong> is/);
+assert.match(partialWordHtml, /Ghat is dense <strong>w<\/strong>ith movement/);
+assert.doesNotMatch(partialWordHtml, /<strong>w<\/strong> ith/);
+
+const formattedPhraseSource = 'The ferry terminal at Swari Ghat <strong>is dense</strong> with movement';
+const formattedPhraseHtml = renderToStaticMarkup(
+  React.createElement(Markdown, { options: { forceInline: true } }, restoreInlineSpaces(formattedPhraseSource)),
+);
+assert.match(formattedPhraseHtml, /Ghat <strong>is dense<\/strong> with movement/);
 
 for (const source of cases) {
   const html = renderToStaticMarkup(

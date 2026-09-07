@@ -1,8 +1,11 @@
-const INLINE_TAGS = "a|b|code|em|i|s|span|strong|u";
-
-/** Keep word boundaries visible when an inline mark is adjacent to plain text. */
+/**
+ * Preserve inline HTML exactly as it was authored.
+ *
+ * TipTap serializes whitespace as text nodes on either side of a mark. Rewriting the
+ * HTML with a tag-boundary regex makes that serialization lossy: a legitimate partial
+ * selection such as `with` with only `w` bolded becomes `w ith`. Let the editor and
+ * renderer retain the original nodes instead of trying to infer word boundaries.
+ */
 export function restoreInlineSpaces(value: string): string {
-  return value
-    .replace(new RegExp(`([^\\s>])(<(?:${INLINE_TAGS})\\b)`, "gi"), "$1 $2")
-    .replace(new RegExp(`(</(?:${INLINE_TAGS})>)(?=[^\\s<])`, "gi"), "$1 ");
+  return value;
 }
