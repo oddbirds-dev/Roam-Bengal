@@ -5,12 +5,11 @@ import { Plugin } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import Placeholder from "@tiptap/extension-placeholder";
-import { marked } from "marked";
 import { AdminIcon } from "@/components/admin/icons";
 import { LinkPicker, type LinkPickResult } from "@/components/admin/link-picker";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { resolveCustomFonts } from "@/lib/custom-fonts";
-import { restoreInlineSpaces } from "@/lib/inline-markup";
+import { markdown } from "@/lib/markdown";
 import {
   BASE_FONT_PX,
   COLOR_OPTIONS,
@@ -22,8 +21,6 @@ import {
   MIN_FONT_PX,
   createFontClassMark,
 } from "@/lib/tiptap-rich-marks";
-
-marked.setOptions({ gfm: true, breaks: false });
 
 const HEADING_LEVELS = [2, 3, 4] as const;
 const DEFAULT_CUSTOM_COLOR = "#1E5F3B";
@@ -128,9 +125,9 @@ export function RichTextarea({
           : []),
         Placeholder.configure({ placeholder: placeholder ?? "" }),
       ],
-      content: marked.parse(restoreInlineSpaces(value || "")) as string,
+      content: markdown.parse(value || "") as string,
       onUpdate: ({ editor: current }) => {
-        const html = current.isEmpty ? "" : restoreInlineSpaces(current.getHTML());
+        const html = current.isEmpty ? "" : current.getHTML();
         lastEmitted.current = html;
         onChange(html);
       },
@@ -152,7 +149,7 @@ export function RichTextarea({
   useEffect(() => {
     if (!editor || value === lastEmitted.current) return;
     lastEmitted.current = value;
-    editor.commands.setContent(marked.parse(restoreInlineSpaces(value || "")) as string, {
+    editor.commands.setContent(markdown.parse(value || "") as string, {
       emitUpdate: false,
     });
   }, [editor, value]);

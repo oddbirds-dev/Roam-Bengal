@@ -1,6 +1,4 @@
-import { marked } from "marked";
-
-marked.setOptions({ gfm: true, breaks: false });
+import { markdown } from "@/lib/markdown";
 
 /**
  * The old structured shape of an info or policy page: a list of blocks, each with its own
@@ -39,12 +37,12 @@ function escapeHtml(value: unknown): string {
 
 /** Values that used to go through `FormatDocument` — block-level Markdown plus inline HTML. */
 function block(value: string): string {
-  return (marked.parse(value) as string).trim();
+  return (markdown.parse(value) as string).trim();
 }
 
 /** Values that used to go through `FormatText` — one line, no block parsing. */
 function inline(value: string): string {
-  return (marked.parseInline(value) as string).trim();
+  return (markdown.parseInline(value) as string).trim();
 }
 
 const ONLY_A_TABLE = /^<table[\s\S]*<\/table>$/;

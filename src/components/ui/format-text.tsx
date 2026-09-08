@@ -1,41 +1,64 @@
-import Markdown from "markdown-to-jsx";
-import type { MarkdownToJSX } from "markdown-to-jsx";
+import { Fragment } from "react";
+import parse, { domToReact, Element } from "html-react-parser";
+import type { DOMNode, HTMLReactParserOptions } from "html-react-parser";
 import { SmartLink } from "@/components/ui/smart-link";
-import { restoreInlineSpaces } from "@/lib/inline-markup";
+import { markdown } from "@/lib/markdown";
 
 /**
  * The single markdown renderer for the whole site.
  *
- * Two option sets share one override map so a link, a bold run, or a `<span class>` from
- * the admin toolbar looks identical in a tour highlight and in a blog body. Raw HTML is
- * rendered on purpose — that is how the toolbar's Color/Size/Font buttons work — which is
- * why `stripUnsafeHtml` runs on write and `SmartLink` re-checks hrefs on render.
+ * Copy is authored as HTML by the admin toolbar, with Markdown surviving only in legacy
+ * rows and `policy-defaults.ts`. So the pipeline is Markdown -> HTML (`marked`, which
+ * passes existing HTML through untouched) -> React (`html-react-parser`).
+ *
+ * It used to be `markdown-to-jsx` in one step, but that renderer drops a whitespace-only
+ * text node sitting between two tags and trims whitespace at an inline tag's inner edges.
+ * With the toolbar wrapping runs in `<span style="font-size">`, both positions occur
+ * around a bolded phrase, so `a <strong>rural char</strong> village` rendered as
+ * `arural charvillage` and there was nowhere left to put the space. `html-react-parser`
+ * keeps text nodes exactly as authored.
+ *
+ * Raw HTML is rendered on purpose — that is how the toolbar's Color/Size/Font buttons
+ * work — which is why `stripUnsafeHtml` runs on write, `DROPPED_TAGS` below re-filters on
+ * render, and `SmartLink` re-checks hrefs.
  */
 
-const overrides: MarkdownToJSX.Overrides = {
-  strong: {
-    component: "strong",
-    props: { className: "font-semibold text-ink" },
-  },
-  a: {
-    component: SmartLink,
-    props: { className: "text-orange font-medium underline-offset-2 hover:underline" },
-  },
-};
+/**
+ * Tags that execute or reach outside the document. `markdown-to-jsx` filtered these
+ * itself; `html-react-parser` renders whatever it is given, so the choke point
+ * `sanitize.ts` describes has to be restored here.
+ */
+const DROPPED_TAGS = new Set(["script", "style", "iframe", "object", "embed", "link", "meta"]);
 
-/** One-line strings: paragraphs, list items, headings, table cells. No block parsing. */
-export const INLINE_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
-  forceInline: true,
-  overrides,
-};
+const LINK_CLASS = "text-orange font-medium underline-offset-2 hover:underline";
+const STRONG_CLASS = "font-semibold text-ink";
 
-/** Full documents: blog bodies. Headings, lists, tables, images. */
-export const BLOCK_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
-  // Keep the authored blocks as direct children of their typography container. Besides
-  // making `.blog-body > *` rules work, this lets an intentional empty paragraph occupy
-  // space instead of being hidden inside markdown-to-jsx's default wrapper div.
-  wrapper: null,
-  overrides,
+const options: HTMLReactParserOptions = {
+  replace(node) {
+    if (!(node instanceof Element)) return;
+
+    if (DROPPED_TAGS.has(node.name)) return <Fragment />;
+
+    // Inline handlers survive `stripUnsafeHtml` only if a row predates it; strip them for
+    // every tag rather than trusting the write path alone.
+    for (const attribute of Object.keys(node.attribs)) {
+      if (/^on/i.test(attribute)) delete node.attribs[attribute];
+    }
+
+    const children = () => domToReact(node.children as DOMNode[], options);
+
+    if (node.name === "a") {
+      return (
+        <SmartLink href={node.attribs.href ?? ""} className={LINK_CLASS}>
+          {children()}
+        </SmartLink>
+      );
+    }
+
+    if (node.name === "strong" || node.name === "b") {
+      return <strong className={STRONG_CLASS}>{children()}</strong>;
+    }
+  },
 };
 
 /**
@@ -43,17 +66,18 @@ export const BLOCK_MARKDOWN_OPTIONS: MarkdownToJSX.Options = {
  * Extremely lightweight and safe for inline content like paragraphs, list items, and headings.
  */
 export function FormatText({ children }: { children: string }) {
-  if (!children || typeof children !== "string") return <>{children}</>;
+  if (!children || typeof children !== "string") return <Fragment>{children}</Fragment>;
 
-  return <Markdown options={INLINE_MARKDOWN_OPTIONS}>{restoreInlineSpaces(children)}</Markdown>;
+  return <Fragment>{parse(markdown.parseInline(children) as string, options)}</Fragment>;
 }
 
 /**
  * Block-level sibling of `FormatText`, for content authored as a whole document rather
- * than a single line. `forceInline` must stay off here or headings and lists collapse.
+ * than a single line. Blocks land as direct children of their typography container, so
+ * `.blog-body > *` rules work and an intentional `<p></p>` still occupies space.
  */
 export function FormatDocument({ children }: { children: string }) {
-  if (!children || typeof children !== "string") return <>{children}</>;
+  if (!children || typeof children !== "string") return <Fragment>{children}</Fragment>;
 
-  return <Markdown options={BLOCK_MARKDOWN_OPTIONS}>{restoreInlineSpaces(children)}</Markdown>;
+  return <Fragment>{parse(markdown.parse(children) as string, options)}</Fragment>;
 }

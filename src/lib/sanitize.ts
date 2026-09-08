@@ -3,7 +3,7 @@
  *
  * This is deliberately NOT a general sanitizer. Content here is authored only by admins
  * behind `assertAdmin` + RLS, and the formatting toolbar's whole job is to emit raw
- * `<span class="...">` that `markdown-to-jsx` renders — so a strict allowlist would break
+ * `<span class="...">` that `FormatText`/`FormatDocument` render — so a strict allowlist would break
  * the feature it is protecting. What these two functions buy is a choke point: the
  * scripting vectors are blocked in one place, on every write and on every rendered link.
  *

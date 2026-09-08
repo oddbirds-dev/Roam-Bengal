@@ -40,7 +40,7 @@ const slug = z
 /**
  * Every free-text field on every table flows through these two helpers, which makes them
  * the one place to strip script/style/iframe/on*= before it reaches the database. Body
- * copy is rendered as raw HTML by markdown-to-jsx (that is how the toolbar's
+ * copy is rendered as raw HTML by `FormatText`/`FormatDocument` (that is how the toolbar's
  * `<span class>` works), so the scrub happens on write rather than on every render.
  */
 const optionalText = (max: number) =>
