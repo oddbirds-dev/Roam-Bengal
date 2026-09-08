@@ -5,10 +5,20 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
+import { PolicyGallery, PolicyReviews } from "@/components/policy-extras";
 import type { PolicyPage } from "@/content/policy-defaults";
+import type { TestimonialDTO } from "@/lib/content-types";
 
 /** Shared by /policies/:slug and the standalone info pages. */
-export function PolicyLayout({ page, faqPage = false }: { page: PolicyPage; faqPage?: boolean }) {
+export function PolicyLayout({
+  page,
+  faqPage = false,
+  testimonials = [],
+}: {
+  page: PolicyPage;
+  faqPage?: boolean;
+  testimonials?: TestimonialDTO[];
+}) {
   return (
     <>
       <div className="bg-green-dark">
@@ -100,6 +110,9 @@ export function PolicyLayout({ page, faqPage = false }: { page: PolicyPage; faqP
           </div>
         </div>
       </main>
+
+      <PolicyGallery />
+      <PolicyReviews testimonials={testimonials} />
 
       <SiteFooter />
       <WhatsAppFloat />

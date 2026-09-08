@@ -31,6 +31,57 @@ const formattedPhraseHtml = renderToStaticMarkup(
 );
 assert.match(formattedPhraseHtml, /Ghat <strong>is dense<\/strong> with movement/);
 
+// TipTap includes boundary spaces inside the mark when the admin selects them. Raw HTML
+// parsing trims those spaces unless they are moved outside the mark before rendering.
+const selectedSpacesSource = 'The ferry terminal at<strong> Swari Ghat </strong>is dense';
+const selectedSpacesHtml = renderToStaticMarkup(
+  React.createElement(Markdown, { options: { forceInline: true } }, restoreInlineSpaces(selectedSpacesSource)),
+);
+assert.match(selectedSpacesHtml, /at <strong>Swari Ghat<\/strong> is/);
+
+// The admin bolds a phrase whose selection also grabbed the spaces on both sides. TipTap
+// emits `Long<strong> before Dhaka rose </strong>on`; without hoisting, markdown-to-jsx
+// trims the mark's edge whitespace and the words collide as `Longbefore Dhaka roseon`.
+const boldedPhraseWithSpacesSource =
+  '<p>Long<strong> before Dhaka rose </strong>on the map, Sonargaon thrived</p>';
+const boldedPhraseWithSpacesHtml = renderToStaticMarkup(
+  React.createElement(
+    Markdown,
+    { options: { wrapper: null } },
+    restoreInlineSpaces(boldedPhraseWithSpacesSource),
+  ),
+);
+assert.match(
+  boldedPhraseWithSpacesHtml,
+  /Long <strong>before Dhaka rose<\/strong> on the map/,
+);
+
+// Same, with the font-size span TipTap nests inside the bold mark.
+const boldedSizedPhraseSource =
+  '<p>Long<strong><span style="font-size: 16px"> before Dhaka rose </span></strong>on the map</p>';
+const boldedSizedPhraseHtml = renderToStaticMarkup(
+  React.createElement(
+    Markdown,
+    { options: { wrapper: null } },
+    restoreInlineSpaces(boldedSizedPhraseSource),
+  ),
+);
+assert.match(boldedSizedPhraseHtml, /Long <strong><span[^>]*>before Dhaka rose<\/span><\/strong> on the map/);
+
+const nestedSelectedSpacesSource =
+  'The ferry terminal at<strong><span class="text-green"> Swari Ghat </span></strong>is dense';
+const nestedSelectedSpacesHtml = renderToStaticMarkup(
+  React.createElement(
+    Markdown,
+    { options: { forceInline: true } },
+    restoreInlineSpaces(nestedSelectedSpacesSource),
+  ),
+);
+assert.match(
+  nestedSelectedSpacesHtml,
+  /at <strong><span class="text-green">Swari Ghat<\/span><\/strong> is/,
+);
+
 for (const source of cases) {
   const html = renderToStaticMarkup(
     React.createElement(Markdown, { options: { forceInline: true } }, source),

@@ -6,6 +6,22 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
 export function SiteFooter() {
   const { footer, header } = useSiteSettings();
 
+  const policyLinks = [
+    { label: "Privacy Policy", to: "/privacy-policy" },
+    { label: "Terms & Conditions", to: "/terms-conditions" },
+  ];
+
+  const guestSupportLinks = [
+    { label: "24/7 Customer Support", to: "/customer-support" },
+    { label: "Licensed Tour Operator", to: "/licensed-tour-operator" },
+    { label: "Secure Payment Gateway", to: "/secure-payment-gateway" },
+  ];
+
+  const travelEssentialLinks = [
+    { label: "Rentals & Tickets", to: "/rentals-tickets" },
+    { label: "Responsible Travel", to: "/responsible-travel" },
+  ];
+
   return (
     <footer
       className="shell pt-14 pb-[26px] text-white"
@@ -34,7 +50,12 @@ export function SiteFooter() {
             <h4 className="mb-3.5 text-[0.8rem] font-bold tracking-[0.06em] text-gold uppercase">
               {col.title}
             </h4>
-            {col.links.map((link) =>
+            {[...col.links, ...(col.title.trim().toLowerCase() === "know more" ? policyLinks : col.title.trim().toLowerCase() === "guest support" ? guestSupportLinks : col.title.trim().toLowerCase() === "travel essential" ? travelEssentialLinks : [])]
+              // A link saved without a destination renders as `<Link to="">`, which just
+              // reloads the current page. Drop those (and fully blank rows) rather than
+              // show a dead link.
+              .filter((link) => link.label.trim() && link.to.trim())
+              .map((link) =>
               isExternal(link.to) ? (
                 <a
                   key={link.label}

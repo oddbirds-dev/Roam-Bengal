@@ -19,6 +19,7 @@ import type { TourCategory } from "@/lib/content-types";
 
 const searchSchema = z.object({
   theme: z.string().optional(),
+  category: z.enum(["day-tour", "multi-day", "holiday"]).optional(),
 });
 
 export const Route = createFileRoute("/tours/")({
@@ -76,21 +77,30 @@ function ToursIndex() {
   const activities = activityDraft
     ? [activityDraft, ...savedActivities.filter((activity) => activity.id !== activityDraft.id)]
     : savedActivities;
-  const { theme } = Route.useSearch();
+  const { theme, category } = Route.useSearch();
   const navigate = useNavigate({ from: "/tours/" });
   const { tours_page, homepage } = useSiteSettings();
 
   const active = theme ?? "all";
-  const visible =
+  const themeFiltered =
     active === "all"
       ? tours
       : tours.filter((t) => (themes[t.slug] ?? []).includes(active));
+  const visible = category
+    ? themeFiltered.filter((tour) => tour.category === category)
+    : themeFiltered;
 
   const activeName = activities.find((a) => a.slug === active)?.name ?? active;
 
   function setTheme(slug: string) {
     navigate({
-      search: () => (slug === "all" ? {} : { theme: slug }),
+      search: () =>
+        slug === "all"
+          ? {}
+          : {
+              theme: slug,
+              ...(category ? { category } : {}),
+            },
       replace: true,
       resetScroll: false,
     });
@@ -161,8 +171,10 @@ function ToursIndex() {
             ))}
           </div>
           <p className="mb-[30px] text-center text-[0.85rem] text-muted" aria-live="polite">
-            {active === "all"
+            {active === "all" && !category
               ? `Showing all ${visible.length} tours`
+              : active === "all" && category
+                ? `Showing ${visible.length} ${CATEGORY_LABELS[category]}`
               : `Showing ${visible.length} ${activeName} tour${visible.length === 1 ? "" : "s"}`}
           </p>
         </section>

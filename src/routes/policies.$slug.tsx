@@ -6,11 +6,15 @@ import {
   type PolicySlug,
 } from "@/content/policy-defaults";
 import { useSettingGroup, useSiteSettings } from "@/hooks/use-site-settings";
+import { listPublishedTestimonials } from "@/lib/site-content.functions";
 
 export const Route = createFileRoute("/policies/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     if (!POLICY_SLUGS.includes(params.slug as PolicySlug)) throw notFound();
-    return { slug: params.slug as PolicySlug };
+    return {
+      slug: params.slug as PolicySlug,
+      testimonials: await listPublishedTestimonials(),
+    };
   },
   head: ({ loaderData }) => {
     const page = loaderData ? policyDefaults[loaderData.slug] : undefined;
@@ -26,7 +30,7 @@ export const Route = createFileRoute("/policies/$slug")({
 });
 
 function PolicyRoute() {
-  const { slug } = Route.useLoaderData();
+  const { slug, testimonials } = Route.useLoaderData();
   // Touch the settings hook so the header/footer share one source of truth.
   useSiteSettings();
 
@@ -36,5 +40,5 @@ function PolicyRoute() {
   // the live preview update as you type.
   const page = useSettingGroup(`policy_${slug}`, policyDefaults[slug]);
 
-  return <PolicyLayout page={page} />;
+  return <PolicyLayout page={page} testimonials={testimonials} />;
 }

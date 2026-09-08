@@ -3,6 +3,12 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ButtonLink, normalizePath } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
+const TOUR_MENU_ITEMS = [
+  { label: "Day Tour", category: "day-tour" },
+  { label: "Multi-Day Tour", category: "multi-day" },
+  { label: "Holiday Tour", category: "holiday" },
+] as const;
+
 /**
  * Site header.
  *
@@ -28,6 +34,7 @@ export function SiteHeader({
       ? header.logo_url_light || "/logo-white.png"
       : header.logo_url || "/logo.png";
   const [open, setOpen] = useState(false);
+  const [mobileToursOpen, setMobileToursOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Close the drawer on navigation, and lock body scroll while it is open.
@@ -66,25 +73,72 @@ export function SiteHeader({
         </Link>
 
         <div className="hidden items-center gap-[30px] text-[0.9rem] font-medium nav:flex">
-          {header.nav.map((item) => (
-            <Link
-              key={item.to}
-              to={normalizePath(item.to)}
-              className={`relative pb-1.5 transition-colors ${
-                onDark ? "text-white/90 hover:text-white" : "text-ink hover:text-green"
-              }`}
-              activeProps={{
-                // Overlay pages mark the active link with an orange rule; the solid
-                // header on /blog and the package pages colours the label instead.
-                className: onDark
-                  ? "text-white after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-orange"
-                  : "text-orange font-semibold",
-              }}
-              activeOptions={{ exact: item.to === "/" }}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {header.nav.map((item) => {
+            const isTours = normalizePath(item.to) === "/tours";
+            if (isTours) {
+              return (
+                <div key={item.to} className="group relative pb-1.5">
+                  <button
+                    type="button"
+                    className={`flex items-center gap-1 transition-colors ${
+                      pathname.startsWith("/tours")
+                        ? onDark
+                          ? "text-white"
+                          : "font-semibold text-orange"
+                        : onDark
+                          ? "text-white/90 hover:text-white"
+                          : "text-ink hover:text-green"
+                    }`}
+                    aria-haspopup="menu"
+                  >
+                    {item.label}
+                    <svg className="transition-transform group-hover:rotate-180 group-focus-within:rotate-180" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                  {pathname.startsWith("/tours") && onDark ? (
+                    <span className="absolute inset-x-0 -bottom-0.5 h-[2px] bg-orange" />
+                  ) : null}
+                  <div className="invisible absolute left-1/2 top-full z-50 w-52 -translate-x-1/2 translate-y-2 pt-4 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                    <div className="overflow-hidden rounded-xl border border-black/10 bg-white p-2 shadow-[0_16px_40px_rgba(0,0,0,0.2)]" role="menu">
+                      {TOUR_MENU_ITEMS.map((tourItem) => (
+                        <Link
+                          key={tourItem.category}
+                          to="/tours"
+                          search={{ category: tourItem.category }}
+                          className="block rounded-lg px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-orange hover:text-white focus:bg-orange focus:text-white focus:outline-none"
+                          role="menuitem"
+                          onClick={(event) => event.currentTarget.blur()}
+                        >
+                          {tourItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                key={item.to}
+                to={normalizePath(item.to)}
+                className={`relative pb-1.5 transition-colors ${
+                  onDark ? "text-white/90 hover:text-white" : "text-ink hover:text-green"
+                }`}
+                activeProps={{
+                  // Overlay pages mark the active link with an orange rule; the solid
+                  // header on /blog and the package pages colours the label instead.
+                  className: onDark
+                    ? "text-white after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-orange"
+                    : "text-orange font-semibold",
+                }}
+                activeOptions={{ exact: item.to === "/" }}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="hidden nav:block">
@@ -138,17 +192,53 @@ export function SiteHeader({
               </button>
             </div>
 
-            {header.nav.map((item) => (
-              <Link
-                key={item.to}
-                to={normalizePath(item.to)}
-                className="border-b border-rule py-3 text-[1.05rem] font-medium"
-                activeProps={{ className: "text-green font-semibold" }}
-                activeOptions={{ exact: item.to === "/" }}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {header.nav.map((item) => {
+              const isTours = normalizePath(item.to) === "/tours";
+              if (isTours) {
+                return (
+                  <div key={item.to} className="border-b border-rule">
+                    <button
+                      type="button"
+                      onClick={() => setMobileToursOpen((value) => !value)}
+                      className={`flex w-full items-center justify-between py-3 text-left text-[1.05rem] font-medium ${pathname.startsWith("/tours") ? "font-semibold text-green" : ""}`}
+                      aria-expanded={mobileToursOpen}
+                    >
+                      {item.label}
+                      <svg className={`transition-transform ${mobileToursOpen ? "rotate-180" : ""}`} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </button>
+                    {mobileToursOpen ? (
+                      <div className="mb-3 grid gap-1 pl-3">
+                        {TOUR_MENU_ITEMS.map((tourItem) => (
+                          <Link
+                            key={tourItem.category}
+                            to="/tours"
+                            search={{ category: tourItem.category }}
+                            className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-orange/10 hover:text-orange"
+                            onClick={() => setOpen(false)}
+                          >
+                            {tourItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.to}
+                  to={normalizePath(item.to)}
+                  className="border-b border-rule py-3 text-[1.05rem] font-medium"
+                  activeProps={{ className: "text-green font-semibold" }}
+                  activeOptions={{ exact: item.to === "/" }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             <ButtonLink to={header.cta_link} variant="green-dark" className="mt-4 w-full">
               {header.cta_label}

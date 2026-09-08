@@ -1049,6 +1049,15 @@ const INFO_META: Record<(typeof INFO_SLUGS)[number], string> = {
   "responsible-travel": "Your promises on local pay, wildlife, and the environment.",
   guides: "Who your guides are and how they are chosen.",
   careers: "Roles you are hiring for and how to apply.",
+  "rentals-tickets": "Vehicle, boat, and ticket/permit booking, with or without a tour.",
+  "customer-support": "How guests reach you before and during a trip.",
+  "licensed-tour-operator": "Your registration status and what it means for guests.",
+  "secure-payment-gateway": "How card and transfer payments are processed safely.",
+  destinations: "The regions of Bangladesh your tours cover.",
+  "b2b-partners": "Ground handling and trade rates for agencies and operators.",
+  "photo-gallery": "Photos from your tours (placeholder until a full gallery exists).",
+  "privacy-policy": "Standalone footer copy of the privacy policy.",
+  "terms-conditions": "Standalone footer copy of the terms and conditions.",
 };
 
 for (const slug of POLICY_SLUGS) {
