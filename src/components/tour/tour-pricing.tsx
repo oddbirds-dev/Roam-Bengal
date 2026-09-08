@@ -86,7 +86,7 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
             {copy.heading}
           </h2>
           {copy.subhead ? (
-            <p className="mt-2 text-center text-[0.92rem] text-muted">{copy.subhead}</p>
+            <p className="mt-2 text-center text-[0.92rem] text-muted"><FormatText>{copy.subhead}</FormatText></p>
           ) : null}
           {/* Reference ornament: rule, dot, rule. */}
           <span aria-hidden="true" className="mt-5 flex items-center justify-center gap-2">

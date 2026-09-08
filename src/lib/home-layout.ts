@@ -13,8 +13,9 @@ export const HOME_LAYOUT_KEY = "homepage_layout";
  *
  *  - anything that isn't a known section id is dropped;
  *  - duplicates collapse to their first appearance;
- *  - sections the saved layout has never seen are appended in code order, so adding a
- *    section to the registry ships it without a data migration;
+ *  - sections the saved layout has never seen are slotted in beside their code-order
+ *    neighbours, so adding a section to the registry ships it in the place the code puts
+ *    it — not at the bottom of the page — without a data migration;
  *  - a missing, malformed or empty value falls back to the default order.
  *
  * The result therefore always lists every section exactly once.
@@ -30,9 +31,24 @@ export function resolveHomeLayout(raw: unknown): HomeLayout {
     layout.push(entry);
   }
 
-  for (const id of DEFAULT_HOME_ORDER) {
-    if (!seen.has(id)) layout.push({ id, visible: true });
-  }
+  // An unseen section goes directly after the nearest section that precedes it in code
+  // order and is already in the layout — appending would bury every newly shipped band at
+  // the foot of the page regardless of where the registry puts it. Nothing preceding it is
+  // present (or the layout was empty), so it goes to the front.
+  DEFAULT_HOME_ORDER.forEach((id, i) => {
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    let at = 0;
+    for (const preceding of DEFAULT_HOME_ORDER.slice(0, i).reverse()) {
+      const before = layout.findIndex((entry) => entry.id === preceding);
+      if (before !== -1) {
+        at = before + 1;
+        break;
+      }
+    }
+    layout.splice(at, 0, { id, visible: true });
+  });
 
   return layout;
 }

@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PolicyLayout } from "@/components/policy-layout";
 import { INFO_SLUGS, infoDefaults, type InfoSlug } from "@/content/policy-defaults";
 import { useSettingGroup } from "@/hooks/use-site-settings";
+import { toPlainText } from "@/lib/markdown";
 import { listPublishedFaqs, listPublishedTestimonials } from "@/lib/site-content.functions";
 import { faqPreviewChannel } from "@/lib/faq-preview";
 
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/$infoSlug")({
     return {
       meta: [
         { title: `${page.title} — Roam Bengal` },
-        { name: "description", content: page.subhead },
+        { name: "description", content: toPlainText(page.subhead) },
       ],
     };
   },

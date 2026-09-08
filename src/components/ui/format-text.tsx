@@ -62,13 +62,37 @@ const options: HTMLReactParserOptions = {
 };
 
 /**
+ * Drops the paragraph wrapper the editor always emits.
+ *
+ * TipTap serialises even a one-line field as `<p>...</p>`, but every `FormatText` call site
+ * already sits inside a styled `<p>`, an `<li>` or a `<strong>`. Left in place the wrapper
+ * nests a block inside an inline slot, which the browser resolves by splitting the parent —
+ * so the field loses its styling, and where the markup reaches the page as text the tags
+ * show up literally. Only the wrapper goes; everything inside it is kept, and a value that
+ * is not paragraph-wrapped is returned untouched.
+ */
+const PARAGRAPH_WRAPPED = /^\s*<p(?:\s[^>]*)?>[\s\S]*<\/p>\s*$/i;
+
+function unwrapParagraphs(html: string): string {
+  if (!PARAGRAPH_WRAPPED.test(html)) return html;
+  return html
+    .trim()
+    .replace(/^<p(?:\s[^>]*)?>/i, "")
+    .replace(/<\/p>$/i, "")
+    // A second paragraph in an inline slot still has to break the line.
+    .replace(/<\/p>\s*<p(?:\s[^>]*)?>/gi, "<br />");
+}
+
+/**
  * Parses inline Markdown-style **bold** tags and basic HTML tags like <span class="...">.
  * Extremely lightweight and safe for inline content like paragraphs, list items, and headings.
  */
 export function FormatText({ children }: { children: string }) {
   if (!children || typeof children !== "string") return <Fragment>{children}</Fragment>;
 
-  return <Fragment>{parse(markdown.parseInline(children) as string, options)}</Fragment>;
+  const html = unwrapParagraphs(markdown.parseInline(children) as string);
+
+  return <Fragment>{parse(html, options)}</Fragment>;
 }
 
 /**

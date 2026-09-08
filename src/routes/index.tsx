@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings, useHomeLayout } from "@/hooks/use-site-settings";
 import {
   listPublishedPosts,
@@ -60,7 +61,7 @@ function Home() {
           <h1 className="mt-0.5 mb-[18px] font-marker text-[clamp(2.4rem,5.6vw,4.1rem)] leading-[1.08] font-normal tracking-[0.01em] [text-shadow:0_4px_24px_rgba(0,0,0,0.3)]">
             {hero.headline}
           </h1>
-          <p className="mb-[30px] max-w-[480px] text-[1.02rem] opacity-[0.92]">{hero.subtext}</p>
+          <p className="mb-[30px] max-w-[480px] text-[1.02rem] opacity-[0.92]"><FormatText>{hero.subtext}</FormatText></p>
           <div className="mb-14 flex flex-wrap gap-3.5">
             <ButtonLink to={hero.primary_link} variant="green">
               {hero.primary_label}

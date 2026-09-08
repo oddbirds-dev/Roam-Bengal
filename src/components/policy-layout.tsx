@@ -42,7 +42,7 @@ export function PolicyLayout({
 
       <main id="main" className="wrap max-w-3xl py-14">
         <p className="font-display text-[1.2rem] leading-8 text-green-dark">
-          {page.subhead}
+          <FormatText>{page.subhead}</FormatText>
         </p>
 
         {/* `body` is what the admin editor writes now; `blocks` is the shape these pages shipped
@@ -101,7 +101,7 @@ export function PolicyLayout({
         <div className="mt-12 rounded-2xl bg-mint p-7 text-center">
           <h3 className="font-display text-[1.2rem] text-green">{page.contact_heading}</h3>
           <p className="mx-auto mt-2 max-w-md text-center text-[0.9rem] leading-7 text-muted">
-            {page.contact_body}
+            <FormatText>{page.contact_body}</FormatText>
           </p>
           <div className="mt-5">
             <ButtonLink to="/contact" variant="green-dark">

@@ -1,3 +1,29 @@
+.home-section-seam {
+  background-size: 220% 100% !important;
+  animation: home-seam-flow 7s linear infinite, home-seam-blink 1.1s ease-in-out infinite;
+}
+
+@keyframes home-seam-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@keyframes home-seam-blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-section-seam { animation: home-seam-blink 1.1s ease-in-out infinite; }
+}
+.tour-sections {
+    color: #000000;
+}
+
+.tour-sections :where(.text-muted, .text-ink\/85, .text-green, .text-green-dark) {
+    color: #000000;
+}
+
 @import "tailwindcss";
 
 /* Self-hosted fonts. Five families over the Google CDN was the single biggest LCP
@@ -129,7 +155,12 @@
     border-radius: 4px;
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  @keyframes home-seam-blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
     }
@@ -240,7 +271,7 @@
   .blog-body h4 {
     font-family: var(--font-display);
     font-weight: 700;
-    color: var(--color-green-dark);
+    color: #000000;
     line-height: 1.25;
     margin-block-start: 1.9em;
   }
@@ -280,7 +311,7 @@
     padding: 0.2em 0 0.2em 1.1em;
     font-family: var(--font-display);
     font-style: italic;
-    color: var(--color-green-dark);
+    color: #000000;
   }
 
   .blog-body img {

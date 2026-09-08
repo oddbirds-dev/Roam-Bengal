@@ -74,51 +74,6 @@ export function SiteHeader({
 
         <div className="hidden items-center gap-[30px] text-[0.9rem] font-medium nav:flex">
           {header.nav.map((item) => {
-            const isTours = normalizePath(item.to) === "/tours";
-            if (isTours) {
-              return (
-                <div key={item.to} className="group relative pb-1.5">
-                  <button
-                    type="button"
-                    className={`flex items-center gap-1 transition-colors ${
-                      pathname.startsWith("/tours")
-                        ? onDark
-                          ? "text-white"
-                          : "font-semibold text-orange"
-                        : onDark
-                          ? "text-white/90 hover:text-white"
-                          : "text-ink hover:text-green"
-                    }`}
-                    aria-haspopup="menu"
-                  >
-                    {item.label}
-                    <svg className="transition-transform group-hover:rotate-180 group-focus-within:rotate-180" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </button>
-                  {pathname.startsWith("/tours") && onDark ? (
-                    <span className="absolute inset-x-0 -bottom-0.5 h-[2px] bg-orange" />
-                  ) : null}
-                  <div className="invisible absolute left-1/2 top-full z-50 w-52 -translate-x-1/2 translate-y-2 pt-4 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                    <div className="overflow-hidden rounded-xl border border-black/10 bg-white p-2 shadow-[0_16px_40px_rgba(0,0,0,0.2)]" role="menu">
-                      {TOUR_MENU_ITEMS.map((tourItem) => (
-                        <Link
-                          key={tourItem.category}
-                          to="/tours"
-                          search={{ category: tourItem.category }}
-                          className="block rounded-lg px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-orange hover:text-white focus:bg-orange focus:text-white focus:outline-none"
-                          role="menuitem"
-                          onClick={(event) => event.currentTarget.blur()}
-                        >
-                          {tourItem.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
             return (
               <Link
                 key={item.to}

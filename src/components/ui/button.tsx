@@ -24,7 +24,7 @@ const BASE =
    inherited from the source CSS — it paints orange (`--orange`), not green. */
 const VARIANTS: Record<ButtonVariant, string> = {
   green: "bg-orange text-white hover:bg-[#D9600F]",
-  "green-dark": "bg-green-dark text-white hover:bg-[#0B2818]",
+  "green-dark": "bg-orange text-white hover:bg-[#D9600F]",
   // Booking CTA. Hover darkens by the same ratio `.btn-green` uses for `--orange`.
   ember: "bg-ember text-white hover:bg-[#D55E18]",
   "outline-light": "border-white/60 text-white hover:bg-white/15",

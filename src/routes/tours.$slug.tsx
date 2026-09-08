@@ -211,7 +211,7 @@ function TourDetail() {
               </div>
             </div>
 
-            <div className="mt-10 flex flex-col gap-12">
+            <div className="tour-sections mt-10 flex flex-col gap-12">
               {tour.overview || tour.overviewTip ? (
                 <Section id="overview" title="📜 Trip Overview">
                   {tour.overview ? (
@@ -277,7 +277,6 @@ function TourDetail() {
                   id="itinerary"
                   title={tour.category === "day-tour" ? "🗺️ Full-Day Itinerary" : "🗺️ Day-by-Day Itinerary"}
                   headingClassName="font-body text-base"
-                  collapsible
                 >
                   <ol className="flex flex-col gap-6">
                       {tour.itinerary.map((day, i) => (
@@ -288,27 +287,19 @@ function TourDetail() {
                               className="absolute top-10 -bottom-6 left-5 w-0 border-l-2 border-dashed border-green/35"
                             />
                           ) : null}
-                          <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-[0.95rem] font-bold text-white">
+                          <span className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange text-[0.95rem] font-bold text-white">
                             {day.day}
                           </span>
-                          <details className="group min-w-0 flex-1">
-                            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-green/40 [&::-webkit-details-marker]:hidden">
-                              <h3 className="font-body text-base font-bold text-green-dark">
-                                {day.title}
-                              </h3>
-                              <span
-                                aria-hidden="true"
-                                className="shrink-0 text-green transition-transform group-open:rotate-90"
-                              >
-                                ›
-                              </span>
-                            </summary>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="py-1 font-body text-base font-bold text-green-dark">
+                              {day.title}
+                            </h3>
                             {day.detail ? (
                               <div className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
                                 <FormatDocument>{day.detail}</FormatDocument>
                               </div>
                             ) : null}
-                          </details>
+                          </div>
                         </li>
                       ))}
                   </ol>
@@ -503,18 +494,18 @@ function TourDetail() {
             {tour.inclusions.length || tour.exclusions.length ? (
               <div
                 id="inclusions"
-                className="mt-6 scroll-mt-24 rounded-2xl border border-rule bg-paper p-6 shadow-sm"
+                className="mt-6 scroll-mt-24 rounded-2xl border border-rule bg-paper p-6 font-body text-[16px] shadow-sm"
               >
-                <h2 className="mb-4 font-display text-[1.05rem] font-bold text-green-dark">
+                <h2 className="mb-4 font-body text-[16px] font-bold text-green-dark">
                   🛑 What's Included
                 </h2>
                 <div className="flex flex-col gap-5">
                   {tour.inclusions.length ? (
                     <div>
-                      <h3 className="font-display text-[0.9rem] font-bold text-green-dark">
+                      <h3 className="font-body text-[16px] font-bold text-green-dark">
                         ✅ Included
                       </h3>
-                      <ul className="mt-2 flex flex-col gap-1.5 text-[0.82rem] leading-6">
+                      <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
                         {tour.inclusions.map((i) => (
                           <li key={i}>• <FormatText>{i}</FormatText></li>
                         ))}
@@ -523,10 +514,10 @@ function TourDetail() {
                   ) : null}
                   {tour.exclusions.length ? (
                     <div>
-                      <h3 className="font-display text-[0.9rem] font-bold text-rust">
+                      <h3 className="font-body text-[16px] font-bold text-rust">
                         ❌ Not Included
                       </h3>
-                      <ul className="mt-2 flex flex-col gap-1.5 text-[0.82rem] leading-6">
+                      <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
                         {tour.exclusions.map((i) => (
                           <li key={i}>• <FormatText>{i}</FormatText></li>
                         ))}

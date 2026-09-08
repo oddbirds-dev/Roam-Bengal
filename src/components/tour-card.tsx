@@ -136,7 +136,7 @@ export function TourCard({
           <Link
             to="/tours/$slug"
             params={{ slug: tour.slug }}
-            className="inline-flex items-center justify-center gap-2 rounded-[30px] bg-green-dark px-5 py-2.75 text-[0.8rem] font-semibold whitespace-nowrap text-white transition-colors hover:bg-green"
+            className="inline-flex items-center justify-center gap-2 rounded-[30px] bg-orange px-5 py-2.75 text-[0.8rem] font-semibold whitespace-nowrap text-white transition-colors hover:bg-[#D9600F]"
           >
             Book Now →
           </Link>

@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 import type { TourDTO, BlogPostDTO, TestimonialDTO } from "@/lib/content-types";
 import { FeaturesSection } from "./features-section";
 import { PopularToursSection } from "./popular-tours-section";
+import { MultiDayToursSection } from "./multi-day-tours-section";
+import { HolidayToursSection } from "./holiday-tours-section";
 import { GallerySection } from "./gallery-section";
 import { FaithSection } from "./faith-section";
 import { JournalSection } from "./journal-section";
@@ -27,7 +29,9 @@ export const HOME_SECTION_IDS = [
   "popularTours",
   "gallery",
   "faith",
+  "multiDayTours",
   "journal",
+  "holidayTours",
   "reviews",
   "whyChooseUs",
   "dreamCta",
@@ -61,6 +65,16 @@ export const HOME_SECTIONS: Record<HomeSectionId, HomeSectionMeta> = {
     label: "Why travellers trust us",
     blurb: "Guide and traveller photos alongside the numbered trust list and callouts.",
     Component: FaithSection,
+  },
+  multiDayTours: {
+    label: "Multi-day tours",
+    blurb: "Up to three multi-day tours, with a link to the filtered tours page.",
+    Component: MultiDayToursSection,
+  },
+  holidayTours: {
+    label: "Holiday tours",
+    blurb: "Up to three holiday tours, with a link to the filtered tours page.",
+    Component: HolidayToursSection,
   },
   journal: {
     label: "Journal",
@@ -96,6 +110,8 @@ export const HOME_SECTION_SETTINGS_KEY: Record<HomeSectionId, string> = {
   popularTours: "homepage",
   gallery: "gallery",
   faith: "homepage",
+  multiDayTours: "homepage",
+  holidayTours: "homepage",
   journal: "homepage",
   reviews: "reviews",
   whyChooseUs: "homepage",

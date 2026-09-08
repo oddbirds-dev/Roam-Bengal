@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
 import { testimonialPreviewChannel } from "@/lib/testimonial-preview";
@@ -110,7 +111,7 @@ function Reviews() {
                 {reviews.heading_2}
               </h1>
               <p className="mx-auto mb-10 max-w-[520px] text-[1rem] text-[#DDEBE1]">
-                {reviews.subtext}
+                <FormatText>{reviews.subtext}</FormatText>
               </p>
 
               <div className="mb-10 flex flex-col flex-wrap items-center justify-center gap-5 min-[640px]:flex-row min-[640px]:gap-9">
@@ -217,7 +218,7 @@ function Reviews() {
                 <h3 className="mb-2 font-display text-[1.4rem] font-bold">
                   {reviews.cta_heading}
                 </h3>
-                <p className="max-w-[400px] text-[0.88rem] text-muted">{reviews.cta_body}</p>
+                <p className="max-w-[400px] text-[0.88rem] text-muted"><FormatText>{reviews.cta_body}</FormatText></p>
               </div>
               <ButtonLink to={reviews.cta_link} variant="green-dark">
                 {reviews.cta_label}

@@ -5,6 +5,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { SectionHead, Eyebrow, Stars, InitialAvatar } from "@/components/sections";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
 
@@ -88,7 +89,7 @@ function About() {
           <div className="wrap">
             <SectionHead kicker={about.mvv_kicker}>{about.mvv_heading}</SectionHead>
             <p className="mx-auto mt-4 max-w-2xl text-center text-[0.92rem] leading-7 text-muted">
-              {about.mvv_intro}
+              <FormatText>{about.mvv_intro}</FormatText>
             </p>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {about.pillars.map((p) => (

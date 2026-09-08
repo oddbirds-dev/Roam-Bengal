@@ -25,12 +25,12 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
           gallery below — where the torn paper edges used to be. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-[6px]"
+        className="home-section-seam pointer-events-none absolute inset-x-0 top-0 z-[5] h-[6px]"
         style={{ background: SECTION_SEAM }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[6px]"
+        className="home-section-seam pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[6px]"
         style={{ background: SECTION_SEAM }}
       />
 

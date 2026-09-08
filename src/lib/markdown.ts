@@ -12,3 +12,28 @@ import { Marked } from "marked";
  * around a bolded phrase intact on the way to the renderer.
  */
 export const markdown = new Marked({ gfm: true, breaks: false });
+
+const ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&nbsp;": " ",
+};
+
+/**
+ * Flattens authored rich text to a single line of plain text.
+ *
+ * For the places a value has to leave the DOM — `<meta name="description">`, a `title`
+ * attribute, a share card — where the editor's `<p>`/`<strong>`/`<span>` markup would
+ * otherwise be shown to the reader verbatim.
+ */
+export function toPlainText(value: string | undefined | null): string {
+  if (!value) return "";
+  return (value as string)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;|&lt;|&gt;|&quot;|&#39;|&nbsp;/g, (entity) => ENTITIES[entity] ?? entity)
+    .replace(/\s+/g, " ")
+    .trim();
+}

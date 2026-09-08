@@ -6,6 +6,7 @@ import {
   type PolicySlug,
 } from "@/content/policy-defaults";
 import { useSettingGroup, useSiteSettings } from "@/hooks/use-site-settings";
+import { toPlainText } from "@/lib/markdown";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
 
 export const Route = createFileRoute("/policies/$slug")({
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/policies/$slug")({
     return {
       meta: [
         { title: `${page.title} — Roam Bengal` },
-        { name: "description", content: page.subhead },
+        { name: "description", content: toPlainText(page.subhead) },
       ],
     };
   },

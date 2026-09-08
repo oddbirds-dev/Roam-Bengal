@@ -943,6 +943,14 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
       blank: { lead: "", text: "" },
     },
   ],
+  multiDayTours: [
+    { kind: "text", key: "multiday_kicker", label: "Small label above the heading" },
+    { kind: "text", key: "multiday_heading", label: "Heading" },
+  ],
+  holidayTours: [
+    { kind: "text", key: "holiday_kicker", label: "Small label above the heading" },
+    { kind: "text", key: "holiday_heading", label: "Heading" },
+  ],
   journal: [
     { kind: "text", key: "journal_kicker", label: "Small label above the heading" },
     { kind: "text", key: "journal_heading", label: "Heading" },

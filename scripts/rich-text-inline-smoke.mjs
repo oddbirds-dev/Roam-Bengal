@@ -69,7 +69,7 @@ assert.match(
 assert.match(line("**25% deposit** — confirms your private tour."), /<strong[^>]*>25% deposit<\/strong> — confirms/);
 assert.match(doc("## Head\n\n- one\n- two"), /<h2>Head<\/h2>\s*<ul>\s*<li>one<\/li>/);
 
-// Inline values carry no block wrapper, and a value that is already a block keeps it.
+// Inline values carry no block wrapper.
 for (const value of [
   '<span class="text-green">Hello <strong>world</strong></span>',
   '<span style="color: #1E5F3B">Short heading</span>',
@@ -79,7 +79,14 @@ for (const value of [
   assert.match(html, /^<span/);
   assert.doesNotMatch(html, /<p(?:\s|>)/);
 }
-assert.match(line('<p><span class="font-display">TipTap paragraph</span></p>'), /^<p>/);
+// The editor wraps every value, one-liners included, in `<p>`. Inline slots are already
+// inside a styled `<p>`, so the wrapper is dropped there — keeping it split the parent and
+// left the tags visible on the page. A second paragraph still breaks the line.
+assert.equal(
+  line('<p><span class="font-display">TipTap paragraph</span></p>'),
+  '<span class="font-display">TipTap paragraph</span>',
+);
+assert.equal(line("<p>one</p><p>two</p>"), "one<br/>two");
 
 // Blocks stay direct siblings so `.blog-body > *` rules apply, and an intentional blank
 // paragraph still occupies space rather than being collapsed away.

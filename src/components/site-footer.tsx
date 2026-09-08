@@ -6,13 +6,15 @@ import { useSiteSettings } from "@/hooks/use-site-settings";
 export function SiteFooter() {
   const { footer, header } = useSiteSettings();
 
-  const policyLinks = [
+  // Rendered under the logo/intro rather than inside a column, so the gap above
+  // the copyright row carries them.
+  const brandLinks = [
     { label: "Privacy Policy", to: "/privacy-policy" },
     { label: "Terms & Conditions", to: "/terms-conditions" },
+    { label: "24/7 Customer Support", to: "/customer-support" },
   ];
 
   const guestSupportLinks = [
-    { label: "24/7 Customer Support", to: "/customer-support" },
     { label: "Licensed Tour Operator", to: "/licensed-tour-operator" },
     { label: "Secure Payment Gateway", to: "/secure-payment-gateway" },
   ];
@@ -43,6 +45,17 @@ export function SiteFooter() {
           <p className="mt-3.5 max-w-[260px] text-left text-[0.85rem] opacity-70">
             {footer.intro}
           </p>
+          <div className="mt-4 flex max-w-[260px] flex-col gap-2.5">
+            {brandLinks.map((link) => (
+              <Link
+                key={link.label}
+                to={normalizePath(link.to)}
+                className="block text-[0.87rem] opacity-85 transition-opacity hover:opacity-100"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {footer.columns.map((col) => (
@@ -50,7 +63,7 @@ export function SiteFooter() {
             <h4 className="mb-3.5 text-[0.8rem] font-bold tracking-[0.06em] text-gold uppercase">
               {col.title}
             </h4>
-            {[...col.links, ...(col.title.trim().toLowerCase() === "know more" ? policyLinks : col.title.trim().toLowerCase() === "guest support" ? guestSupportLinks : col.title.trim().toLowerCase() === "travel essential" ? travelEssentialLinks : [])]
+            {[...col.links, ...(col.title.trim().toLowerCase() === "guest support" ? guestSupportLinks : col.title.trim().toLowerCase() === "travel essential" ? travelEssentialLinks : [])]
               // A link saved without a destination renders as `<Link to="">`, which just
               // reloads the current page. Drop those (and fully blank rows) rather than
               // show a dead link.

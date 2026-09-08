@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedPosts } from "@/lib/site-content.functions";
 
@@ -65,7 +66,7 @@ function BlogIndex() {
             <Emphasised text={blog_page.heading} />
           </h1>
           <p className="mx-auto max-w-[520px] text-center text-[1rem] text-muted">
-            {blog_page.subtext}
+            <FormatText>{blog_page.subtext}</FormatText>
           </p>
         </section>
 
@@ -230,7 +231,7 @@ function BlogIndex() {
                 {blog_page.newsletter_heading}
               </h3>
               <p className="max-w-[400px] text-[0.88rem] text-muted">
-                {blog_page.newsletter_body}
+                <FormatText>{blog_page.newsletter_body}</FormatText>
               </p>
             </div>
             <NewsletterForm cta={blog_page.newsletter_cta} source="blog" />
