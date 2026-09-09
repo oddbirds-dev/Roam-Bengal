@@ -67,6 +67,40 @@ const ACCENTS = [
   },
 ] as const;
 
+/**
+ * Just the per-group-size price cards. Rendered inside {@link TourPricing} on the
+ * main column and also in the booking sidebar (above the "Book Now" button), so it
+ * lives in its own component. Returns nothing when the tour has no tiers.
+ */
+export function PriceTierCards({
+  tour,
+  className = "grid gap-4 sm:grid-cols-2 xl:grid-cols-4",
+  compact = false,
+}: {
+  tour: TourDTO;
+  className?: string;
+  compact?: boolean;
+}) {
+  const { tour_pricing: copy } = useSiteSettings();
+  const tiers = tour.priceTiers.filter((t) => t.label || t.price !== null);
+
+  if (!tiers.length) return null;
+
+  return (
+    <ul className={className}>
+      {tiers.map((tier, i) => (
+        <TierCard
+          key={`${tier.label}-${i}`}
+          tier={tier}
+          index={i}
+          perPersonLabel={copy.per_person_label}
+          compact={compact}
+        />
+      ))}
+    </ul>
+  );
+}
+
 export function TourPricing({ tour }: { tour: TourDTO }) {
   const { tour_pricing: copy } = useSiteSettings();
   const tiers = tour.priceTiers.filter((t) => t.label || t.price !== null);
@@ -95,17 +129,6 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
             <span className="h-px w-16 bg-gradient-to-l from-transparent to-green/40" />
           </span>
         </header>
-
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {tiers.map((tier, i) => (
-            <TierCard
-              key={`${tier.label}-${i}`}
-              tier={tier}
-              index={i}
-              perPersonLabel={copy.per_person_label}
-            />
-          ))}
-        </ul>
 
         {copy.promises.length ? (
           <div className="mt-8 rounded-2xl border border-rule bg-paper p-5 md:p-6">
@@ -197,58 +220,94 @@ function TierCard({
   tier,
   index,
   perPersonLabel,
+  compact = false,
 }: {
   tier: PriceTier;
   index: number;
   perPersonLabel: string;
+  compact?: boolean;
 }) {
   const accent = ACCENTS[index % ACCENTS.length]!;
   const people = tier.persons;
 
   return (
     <li
-      className={`relative flex flex-col items-center overflow-hidden rounded-2xl border p-5 text-center ${accent.ring} ${accent.surface}`}
+      className={`relative flex flex-col items-center overflow-hidden border text-center ${
+        compact ? "rounded-xl p-2.5" : "rounded-2xl p-5"
+      } ${accent.ring} ${accent.surface}`}
     >
       {tier.badge ? (
         // Diagonal corner ribbon, as in the reference.
         <span
-          className={`absolute -top-px -right-px w-[132px] translate-x-[34px] translate-y-[26px] rotate-45 py-1 text-[0.6rem] font-bold tracking-[0.1em] text-white uppercase ${accent.ribbon}`}
+          className={`absolute -top-px -right-px rotate-45 font-bold tracking-[0.1em] text-white uppercase ${
+            compact
+              ? "w-[100px] translate-x-[26px] translate-y-[20px] py-0.5 text-[0.5rem]"
+              : "w-[132px] translate-x-[34px] translate-y-[26px] py-1 text-[0.6rem]"
+          } ${accent.ribbon}`}
         >
           {tier.badge}
         </span>
       ) : null}
 
       <span
-        className={`flex h-14 w-14 items-center justify-center rounded-full ${accent.iconBg} ${accent.iconText}`}
+        className={`flex items-center justify-center rounded-full ${
+          compact ? "h-8 w-8" : "h-14 w-14"
+        } ${accent.iconBg} ${accent.iconText}`}
       >
-        <GroupGlyph solo={people === 1} />
+        <GroupGlyph solo={people === 1} compact={compact} />
       </span>
 
       <span
-        className={`-mt-3 flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[0.72rem] font-bold text-white ${accent.numberBg}`}
+        className={`flex items-center justify-center rounded-full font-bold text-white ${
+          compact
+            ? "-mt-2 h-5 min-w-5 px-1.5 text-[0.62rem]"
+            : "-mt-3 h-6 min-w-6 px-2 text-[0.72rem]"
+        } ${accent.numberBg}`}
       >
         {index + 1}
       </span>
 
-      <h3 className="mt-2.5 font-display text-[1rem] font-bold text-ink">{tier.label}</h3>
+      <h3
+        className={`font-display font-bold text-ink ${
+          compact ? "mt-1 text-[0.8rem] leading-tight" : "mt-2.5 text-[1rem]"
+        }`}
+      >
+        {tier.label}
+      </h3>
       {people !== null ? (
-        <p className="mt-1 text-center text-[0.82rem] text-muted">
+        <p
+          className={`text-center text-muted ${
+            compact ? "mt-0.5 text-[0.7rem]" : "mt-1 text-[0.82rem]"
+          }`}
+        >
           {people} {people === 1 ? "person" : "persons"}
         </p>
       ) : null}
 
       <p
-        className={`mt-3 text-center font-display text-[2rem] leading-none font-bold ${accent.price}`}
+        className={`text-center font-display leading-none font-bold ${
+          compact ? "mt-1.5 text-[1.05rem]" : "mt-3 text-[2rem]"
+        } ${accent.price}`}
       >
         {formatPrice(tier.price)}
       </p>
       {perPersonLabel ? (
-        <p className="mt-1.5 text-center text-[0.76rem] text-muted">{perPersonLabel}</p>
+        <p
+          className={`text-center text-muted ${
+            compact ? "mt-0.5 text-[0.62rem]" : "mt-1.5 text-[0.76rem]"
+          }`}
+        >
+          {perPersonLabel}
+        </p>
       ) : null}
 
       {tier.note ? (
         <p
-          className={`mt-4 w-full rounded-lg px-3 py-1.5 text-center text-[0.74rem] font-medium ${accent.noteBg} ${accent.noteText}`}
+          className={`w-full text-center font-medium ${
+            compact
+              ? "mt-1.5 rounded-md px-1.5 py-1 text-[0.62rem] leading-tight"
+              : "mt-4 rounded-lg px-3 py-1.5 text-[0.74rem]"
+          } ${accent.noteBg} ${accent.noteText}`}
         >
           {tier.note}
         </p>
@@ -258,11 +317,11 @@ function TierCard({
 }
 
 /** One silhouette for a solo traveller, two for a group. */
-function GroupGlyph({ solo }: { solo: boolean }) {
+function GroupGlyph({ solo, compact = false }: { solo: boolean; compact?: boolean }) {
   return (
     <svg
-      width="26"
-      height="26"
+      width={compact ? "16" : "26"}
+      height={compact ? "16" : "26"}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
