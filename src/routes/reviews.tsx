@@ -92,7 +92,7 @@ function Reviews() {
         <main id="main">
           {/* Hero */}
           <section
-            className="shell relative isolate overflow-hidden pt-[70px] pb-[60px] text-center text-white"
+            className="full-bleed shell relative isolate overflow-hidden pt-[70px] pb-[60px] text-center text-white"
             style={banner ? undefined : { background: HERO_BG }}
           >
             <BannerPhoto src={reviews.banner_image} alt={reviews.heading_1} />

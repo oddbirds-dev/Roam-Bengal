@@ -99,7 +99,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
   return (
     <>
-      <div className="bg-green-dark">
+      <div className="full-bleed bg-green-dark">
         <SiteHeader />
         {/* The extra bottom padding is the runway the article card is pulled up into —
             it has to exceed the negative margin below or the card would clear the banner

@@ -22,7 +22,7 @@ export function PolicyLayout({
 }) {
   return (
     <>
-      <div className="relative isolate bg-green-dark">
+      <div className="full-bleed relative isolate bg-green-dark">
         <BannerPhoto src={page.banner_image} alt={page.title} />
         <SiteHeader />
         <div className="relative z-[1] wrap py-14 text-center">
@@ -42,7 +42,7 @@ export function PolicyLayout({
         </div>
       </div>
 
-      <main id="main" className="wrap max-w-3xl py-14">
+      <main id="main" className="wrap py-14">
         <p className="font-display text-[1.2rem] leading-8 text-green-dark">
           <FormatText>{page.subhead}</FormatText>
         </p>

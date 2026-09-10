@@ -60,7 +60,7 @@ function BlogIndex() {
       <main id="main">
         {/* Masthead */}
         <section
-          className={`shell relative isolate border-b border-rule pt-16 pb-[46px] text-center ${
+          className={`full-bleed shell relative isolate border-b border-rule pt-16 pb-[46px] text-center ${
             banner ? "overflow-hidden" : "bg-cream"
           }`}
         >

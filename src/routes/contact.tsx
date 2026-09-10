@@ -72,7 +72,7 @@ function Contact() {
 
       <main id="main">
         {/* Hero — flat cream by default, a full-bleed photo band once one is set in the admin */}
-        <section className={`relative isolate ${banner ? "overflow-hidden py-16" : ""}`}>
+        <section className={`full-bleed relative isolate ${banner ? "overflow-hidden py-16" : ""}`}>
           <BannerPhoto src={contact.banner_image} alt={contact.banner_title} />
           <div
             className={`relative z-[1] shell mx-auto max-w-[760px] text-center ${

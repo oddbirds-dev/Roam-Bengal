@@ -39,7 +39,7 @@ function Home() {
   return (
     <>
       {/* Hero — always first, not reorderable. */}
-      <div id="section-hero" className="relative min-h-[640px] overflow-hidden text-white" style={{ background: HERO_BG }}>
+      <div id="section-hero" className="full-bleed relative min-h-[640px] overflow-hidden text-white" style={{ background: HERO_BG }}>
         <PhotoFrame
           src={hero.background_url}
           alt={hero.background_alt}

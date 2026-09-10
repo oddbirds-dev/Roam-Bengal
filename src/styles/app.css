@@ -118,13 +118,24 @@
     overflow-x: hidden;
   }
 
+  html {
+    background: var(--color-cream);
+  }
+
   body {
     font-family: var(--font-body);
     color: var(--color-ink);
     background: var(--color-paper);
     line-height: 1.5;
+    /* Pages extend to the viewport edges; interior section utilities provide their
+       own responsive content padding. */
+    --page-gutter: 0px;
   }
 
+  /* Keeps existing hero/banner wrappers edge-to-edge. */
+  .full-bleed {
+    margin-inline: calc(var(--page-gutter) * -1);
+  }
   h1,
   h2,
   h3 {
