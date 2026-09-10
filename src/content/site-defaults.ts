@@ -348,6 +348,7 @@ export const siteDefaults = {
     email: "hello@roambengal.com",
     phone: "+880 1XXX-XXXXXX",
     address: "Gulshan, Dhaka, Bangladesh",
+    registered_address: "Gulshan, Dhaka, Bangladesh",
     art_note: "Every message gets a real reply — usually the same day.",
     map_label: "Roam Bengal Office, Gulshan, Dhaka",
     map_embed: "",

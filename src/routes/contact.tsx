@@ -81,10 +81,11 @@ function Contact() {
         </div>
 
         {/* Info cards */}
-        <div className="mx-auto grid max-w-[1160px] grid-cols-1 gap-5 px-5 pt-[46px] pb-2.5 min-[640px]:grid-cols-2 min-[640px]:px-10 min-[980px]:grid-cols-4">
+        <div className="mx-auto grid max-w-[1160px] grid-cols-1 gap-5 px-5 pt-[46px] pb-2.5 min-[640px]:grid-cols-2 min-[640px]:px-10 min-[980px]:grid-cols-3 min-[1200px]:grid-cols-5">
           <InfoCard icon="📧" title="Email Us" link={contact.email} href={`mailto:${contact.email}`} />
           <InfoCard icon="💬" title="WhatsApp" link={contact.phone} href={whatsapp.link} />
-          <InfoCard icon="📍" title="Our Office" body={contact.address} />
+          <InfoCard icon="📍" title="Head Office" body={contact.address} />
+          <InfoCard icon="🏢" title="Registered Office" body={contact.registered_address} />
           <InfoCard icon="🕒" title={contact.office_hours_label} body={contact.office_hours} />
         </div>
 

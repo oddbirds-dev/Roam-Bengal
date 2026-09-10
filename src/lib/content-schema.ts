@@ -738,7 +738,8 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
         fields: [
           { kind: "text", key: "email", label: "Email address" },
           { kind: "text", key: "phone", label: "Phone number" },
-          { kind: "text", key: "address", label: "Address" },
+          { kind: "text", key: "address", label: "Head office address" },
+          { kind: "text", key: "registered_address", label: "Registered office address" },
           { kind: "text", key: "office_hours_label", label: "Opening hours label" },
           {
             kind: "text",
