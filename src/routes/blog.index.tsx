@@ -5,8 +5,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { BannerPhoto, hasBannerPhoto } from "@/components/ui/banner-photo";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { toPlainText } from "@/lib/markdown";
 import { listPublishedPosts } from "@/lib/site-content.functions";
 
 export const Route = createFileRoute("/blog/")({
@@ -42,6 +44,7 @@ function BlogIndex() {
   const { category } = Route.useSearch();
   const navigate = useNavigate({ from: "/blog/" });
   const { blog_page } = useSiteSettings();
+  const banner = hasBannerPhoto(blog_page.banner_image);
 
   const categories = [...new Set(posts.map((p) => p.category).filter(Boolean))] as string[];
   const active = category ?? "all";
@@ -56,18 +59,43 @@ function BlogIndex() {
 
       <main id="main">
         {/* Masthead */}
-        <section className="shell border-b border-rule bg-cream pt-16 pb-[46px] text-center">
-          <span className="mb-[22px] inline-flex items-center gap-2.5 text-[0.72rem] font-bold tracking-[0.18em] text-muted uppercase">
-            <span className="h-px w-[34px] bg-rule" aria-hidden="true" />
-            {blog_page.volume_label}
-            <span className="h-px w-[34px] bg-rule" aria-hidden="true" />
-          </span>
-          <h1 className="mx-auto mb-[18px] max-w-[820px] font-display text-[clamp(2.4rem,5vw,3.6rem)] leading-[1.08] font-bold">
-            <Emphasised text={blog_page.heading} />
-          </h1>
-          <p className="mx-auto max-w-[520px] text-center text-[1rem] text-muted">
-            <FormatText>{blog_page.subtext}</FormatText>
-          </p>
+        <section
+          className={`shell relative isolate border-b border-rule pt-16 pb-[46px] text-center ${
+            banner ? "overflow-hidden" : "bg-cream"
+          }`}
+        >
+          <BannerPhoto src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} />
+          <div className="relative z-[1]">
+            <span
+              className={`mb-[22px] inline-flex items-center gap-2.5 text-[0.72rem] font-bold tracking-[0.18em] uppercase ${
+                banner ? "text-white/80" : "text-muted"
+              }`}
+            >
+              <span
+                className={`h-px w-[34px] ${banner ? "bg-white/40" : "bg-rule"}`}
+                aria-hidden="true"
+              />
+              {blog_page.volume_label}
+              <span
+                className={`h-px w-[34px] ${banner ? "bg-white/40" : "bg-rule"}`}
+                aria-hidden="true"
+              />
+            </span>
+            <h1
+              className={`mx-auto mb-[18px] max-w-[820px] font-display text-[clamp(2.4rem,5vw,3.6rem)] leading-[1.08] font-bold ${
+                banner ? "text-white [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]" : ""
+              }`}
+            >
+              <Emphasised text={blog_page.heading} />
+            </h1>
+            <p
+              className={`mx-auto max-w-[520px] text-center text-[1rem] ${
+                banner ? "text-white/85" : "text-muted"
+              }`}
+            >
+              <FormatText>{blog_page.subtext}</FormatText>
+            </p>
+          </div>
         </section>
 
         {/* Category rail */}

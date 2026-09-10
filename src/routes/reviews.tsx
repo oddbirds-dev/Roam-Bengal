@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { BannerPhoto, hasBannerPhoto } from "@/components/ui/banner-photo";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
@@ -43,6 +44,7 @@ function Reviews() {
   const { tour } = Route.useSearch();
   const navigate = useNavigate({ from: "/reviews" });
   const { reviews } = useSiteSettings();
+  const banner = hasBannerPhoto(reviews.banner_image);
 
   // No `?preview=1` needed here, unlike tours/posts: reviews has no per-item detail
   // route to 404 on, so being embedded in an iframe at all (the draft channel's own
@@ -90,9 +92,10 @@ function Reviews() {
         <main id="main">
           {/* Hero */}
           <section
-            className="shell relative overflow-hidden pt-[70px] pb-[60px] text-center text-white"
-            style={{ background: HERO_BG }}
+            className="shell relative isolate overflow-hidden pt-[70px] pb-[60px] text-center text-white"
+            style={banner ? undefined : { background: HERO_BG }}
           >
+            <BannerPhoto src={reviews.banner_image} alt={reviews.heading_1} />
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.08]"
               style={{

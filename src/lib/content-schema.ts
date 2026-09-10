@@ -155,6 +155,18 @@ const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode =>
     onChange,
   });
 
+/**
+ * The optional hero photo every page banner accepts. Left empty, the banner keeps the
+ * flat colour it ships with; set, the photo fills the banner and the copy on it turns
+ * white. Same key everywhere so `BannerPhoto` reads it the same way on every page.
+ */
+const bannerPhotoField = {
+  kind: "image",
+  key: "banner_image",
+  label: "Banner photo",
+  hint: "Optional. Fills the top banner behind the title. Leave empty for the plain coloured banner.",
+} as const satisfies SettingsField;
+
 // ---------------------------------------------------------------------------
 // The schema, one entry per site_settings key
 // ---------------------------------------------------------------------------
@@ -542,6 +554,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
           { kind: "text", key: "heading_1", label: "Heading — first line" },
           { kind: "text", key: "heading_2", label: "Heading — second line" },
           { kind: "textarea", key: "subtext", label: "Paragraph under the heading", rows: 2 },
+          bannerPhotoField,
         ],
       },
       {
@@ -685,6 +698,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             hint: "Wrap a phrase in *asterisks* to show it in italic orange.",
           },
           { kind: "textarea", key: "subtext", label: "Paragraph under the heading", rows: 2 },
+          bannerPhotoField,
         ],
       },
       {
@@ -722,6 +736,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             label: "Paragraph under the title",
             rows: 3,
           },
+          bannerPhotoField,
           { kind: "text", key: "form_heading", label: "Heading above the form" },
           { kind: "textarea", key: "form_intro", label: "Paragraph above the form", rows: 3 },
           { kind: "text", key: "form_cta", label: "Send button text" },
@@ -1023,6 +1038,7 @@ function pageSchema(title: string, path: string, description: string): SettingsS
           { kind: "text", key: "eyebrow", label: "Small label above the title" },
           { kind: "text", key: "title", label: "Page title" },
           { kind: "textarea", key: "subhead", label: "Sentence under the title", rows: 2 },
+          bannerPhotoField,
         ],
       },
       {

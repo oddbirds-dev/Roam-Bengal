@@ -47,6 +47,7 @@ const SKIP_KEYS = new Set([
   "updated_at",
   "cover_image",
   "hero_image",
+  "banner_image",
   "author_avatar",
   "avatar_url",
   "images",

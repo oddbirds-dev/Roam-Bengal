@@ -255,6 +255,7 @@ export const siteDefaults = {
       "We'd love to hear how it went — your review helps the next traveller plan with confidence.",
     cta_label: "Leave A Review →",
     cta_link: "/contact",
+    banner_image: "",
   },
 
   tours_page: {
@@ -332,6 +333,7 @@ export const siteDefaults = {
     newsletter_body:
       "No spam — just field notes and travel advice from Bangladesh, a few times a month.",
     newsletter_cta: "Subscribe",
+    banner_image: "",
   },
 
   contact: {
@@ -352,6 +354,7 @@ export const siteDefaults = {
     art_note: "Every message gets a real reply — usually the same day.",
     map_label: "Roam Bengal Office, Gulshan, Dhaka",
     map_embed: "",
+    banner_image: "",
   },
 
   about: {

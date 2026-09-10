@@ -20,6 +20,11 @@ export interface PolicyPage {
   title: string;
   subhead: string;
   /**
+   * Optional banner photo, set per page from the admin panel. Empty (or absent, as it is
+   * in every default below) keeps the flat green banner these pages shipped with.
+   */
+  banner_image?: string;
+  /**
    * The page body as rich-text HTML — what the admin editor now writes.
    *
    * Optional because the defaults below are still authored as `blocks`, which is the shape these

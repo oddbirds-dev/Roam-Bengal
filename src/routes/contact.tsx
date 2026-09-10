@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
+import { BannerPhoto, hasBannerPhoto } from "@/components/ui/banner-photo";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -37,6 +38,7 @@ function Contact() {
   const { tour: preselected } = Route.useSearch();
   const { contact, whatsapp } = useSiteSettings();
   const send = useServerFn(submitInquiry);
+  const banner = hasBannerPhoto(contact.banner_image);
 
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState("");
@@ -69,16 +71,37 @@ function Contact() {
       <SiteHeader variant="solid" />
 
       <main id="main">
-        {/* Hero */}
-        <div className="shell mx-auto max-w-[760px] pt-16 pb-5 text-center">
-          <span className="mb-4 inline-block text-[0.78rem] font-bold tracking-[0.1em] text-orange uppercase">
-            {contact.hero_eyebrow}
-          </span>
-          <h1 className="mb-4 font-display text-[clamp(2rem,4.2vw,2.8rem)] leading-[1.2] font-bold">
-            {contact.banner_title}
-          </h1>
-          <p className="text-center text-[1rem] leading-[1.7] text-muted"><FormatText>{contact.hero_intro}</FormatText></p>
-        </div>
+        {/* Hero — flat cream by default, a full-bleed photo band once one is set in the admin */}
+        <section className={`relative isolate ${banner ? "overflow-hidden py-16" : ""}`}>
+          <BannerPhoto src={contact.banner_image} alt={contact.banner_title} />
+          <div
+            className={`relative z-[1] shell mx-auto max-w-[760px] text-center ${
+              banner ? "" : "pt-16 pb-5"
+            }`}
+          >
+            <span
+              className={`mb-4 inline-block text-[0.78rem] font-bold tracking-[0.1em] uppercase ${
+                banner ? "text-gold" : "text-orange"
+              }`}
+            >
+              {contact.hero_eyebrow}
+            </span>
+            <h1
+              className={`mb-4 font-display text-[clamp(2rem,4.2vw,2.8rem)] leading-[1.2] font-bold ${
+                banner ? "text-white [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]" : ""
+              }`}
+            >
+              {contact.banner_title}
+            </h1>
+            <p
+              className={`text-center text-[1rem] leading-[1.7] ${
+                banner ? "text-white/85" : "text-muted"
+              }`}
+            >
+              <FormatText>{contact.hero_intro}</FormatText>
+            </p>
+          </div>
+        </section>
 
         {/* Info cards */}
         <div className="mx-auto grid max-w-[1160px] grid-cols-1 gap-5 px-5 pt-[46px] pb-2.5 min-[640px]:grid-cols-2 min-[640px]:px-10 min-[980px]:grid-cols-3 min-[1200px]:grid-cols-5">
@@ -272,12 +295,16 @@ function InfoCard({
       <div className="mb-3.5 text-[1.6rem]" aria-hidden="true">
         {icon}
       </div>
-      <h4 className="mb-1.5 text-[0.98rem] font-bold">{title}</h4>
-      {body ? <p className="text-[0.84rem] leading-[1.5] text-muted">{body}</p> : null}
+      <h4 className="mb-1.5 font-body text-[0.98rem] font-bold">{title}</h4>
+      {body ? (
+        <p className="font-body text-[0.84rem] leading-[1.5] font-bold text-balance text-muted [text-align:center] [text-justify:auto]">
+          {body}
+        </p>
+      ) : null}
       {link && href ? (
         <a
           href={href}
-          className="mt-1 block text-[0.84rem] font-semibold text-green-dark hover:text-orange"
+          className="mt-1 block font-body text-[0.84rem] font-bold text-green-dark hover:text-orange"
           {...(href.startsWith("http")
             ? { target: "_blank", rel: "noreferrer noopener" }
             : {})}
