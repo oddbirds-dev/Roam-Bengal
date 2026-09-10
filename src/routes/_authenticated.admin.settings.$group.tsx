@@ -95,9 +95,15 @@ function SchemaEditor({
   const dirty = serialize(draft) !== serialize(baseline);
 
   async function save() {
+    // Optional fields the page has never had set (e.g. `banner_image` on a page whose
+    // shipped default omits it) hydrate to `undefined`. The patch validator only accepts
+    // JSON values, and a shallow merge treats a missing key and an undefined one the same,
+    // so drop them rather than send `undefined` over the wire.
     const patch = Object.fromEntries(
       schema.sections.flatMap((section) =>
-        section.fields.map((field) => [field.key, draft[field.key]] as const),
+        section.fields
+          .map((field) => [field.key, draft[field.key]] as const)
+          .filter(([, value]) => value !== undefined),
       ),
     );
     const ok = await run(() =>
