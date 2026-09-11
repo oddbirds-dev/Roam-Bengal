@@ -110,7 +110,7 @@ function ToursIndex() {
     <>
       {/* Page banner */}
       <div
-        className="full-bleed relative flex min-h-[640px] flex-col overflow-hidden text-white"
+        className="full-bleed relative flex min-h-[480px] flex-col overflow-hidden text-white"
         style={{ background: BANNER_BG }}
       >
         <PhotoFrame

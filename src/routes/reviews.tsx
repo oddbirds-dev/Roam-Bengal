@@ -84,12 +84,11 @@ function Reviews() {
       />
 
       <div className="relative z-[1]">
-        <SiteHeader variant="solid" />
 
         <main id="main">
           {/* Hero */}
-          <section className="full-bleed relative flex min-h-[640px] flex-col overflow-hidden pt-[70px] pb-[60px] text-center text-white">
-            <PhotoFrame src={reviews.banner_image} alt={reviews.heading_1} gradientCss={HERO_BG} priority placeholderLabel="images/reviews-banner.jpg" className="absolute inset-0 z-0 h-full w-full" />
+          <section className="full-bleed relative flex min-h-[500px] flex-col overflow-hidden pb-[30px] text-center text-white">
+            <PhotoFrame src={reviews.banner_image} alt={reviews.heading_1} gradientCss={HERO_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
             <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden="true" />
             <SiteHeader logo="light" />
             <div
@@ -304,3 +303,4 @@ function LeafArt({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+

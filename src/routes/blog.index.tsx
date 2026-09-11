@@ -52,12 +52,11 @@ function BlogIndex() {
 
   return (
     <>
-      <SiteHeader variant="solid" />
 
       <main id="main">
         {/* Masthead */}
-        <section className="full-bleed relative flex min-h-[640px] flex-col overflow-hidden text-center text-white">
-          <PhotoFrame src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} gradientCss={FEATURED_BG} priority placeholderLabel="images/blog-banner.jpg" className="absolute inset-0 z-0 h-full w-full" />
+        <section className="full-bleed relative flex min-h-[480px] flex-col overflow-hidden text-center text-white">
+          <PhotoFrame src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} gradientCss={FEATURED_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
           <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden="true" />
           <SiteHeader logo="light" />
           <div className="relative z-[1]">
@@ -83,13 +82,6 @@ function BlogIndex() {
             >
               <Emphasised text={blog_page.heading} />
             </h1>
-            <p
-              className={`mx-auto max-w-[520px] text-center text-[1rem] ${
-                "text-white/85"
-              }`}
-            >
-              <FormatText>{blog_page.subtext}</FormatText>
-            </p>
           </div>
         </section>
 

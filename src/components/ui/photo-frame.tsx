@@ -43,6 +43,8 @@ interface PhotoFrameProps {
   priority?: boolean;
   /** Shown in dev when `src` is empty, mirroring the reference placeholder label. */
   placeholderLabel?: string;
+  /** Disable the development placeholder for decorative/background frames. */
+  showPlaceholder?: boolean;
   children?: React.ReactNode;
 }
 
@@ -55,6 +57,7 @@ export function PhotoFrame({
   style,
   priority = false,
   placeholderLabel,
+  showPlaceholder = true,
   children,
 }: PhotoFrameProps) {
   const [failed, setFailed] = useState(false);
@@ -73,7 +76,7 @@ export function PhotoFrame({
       className={`${positioned ? "" : "relative"} overflow-hidden ${className}`}
       style={{ background: gradientCss ?? FRAME_GRADIENTS[gradient], ...style }}
     >
-      {import.meta.env.DEV && !showImage ? (
+      {import.meta.env.DEV && !showImage && showPlaceholder ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-3 text-center text-white/80">
           <ImageOff className="h-5 w-5 opacity-70" strokeWidth={1.5} />
           <span className="text-[0.7rem] font-medium tracking-wide">No image yet</span>
@@ -101,3 +104,6 @@ export function PhotoFrame({
     </div>
   );
 }
+
+
+
