@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { buttonClass } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { FormatText } from "@/components/ui/format-text";
 import birdsImg from "@/assets/bird.webp";
 import routeImg from "@/assets/map.webp";
 import pinTrailImg from "@/assets/loc.png";
@@ -80,7 +81,7 @@ export function ReviewsSection({ testimonials }: HomeSectionProps) {
             <span className="text-accent">{homepage.reviews_heading_2}</span>
           </h2>
           <p className="mx-auto mt-4 max-w-[560px] text-center text-[0.95rem] text-muted">
-            {homepage.reviews_subtext}
+            <FormatText>{homepage.reviews_subtext}</FormatText>
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">

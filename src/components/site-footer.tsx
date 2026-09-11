@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { isExternal, normalizePath } from "@/components/ui/button";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function SiteFooter() {
@@ -43,7 +44,7 @@ export function SiteFooter() {
               260px wide, and justifying prose that narrow stretches single spaces into
               rivers of whitespace across every line. */}
           <p className="mt-3.5 max-w-[260px] text-left text-[0.85rem] opacity-70">
-            {footer.intro}
+            <FormatText>{footer.intro}</FormatText>
           </p>
           <div className="mt-4 flex max-w-[260px] flex-col gap-2.5">
             {brandLinks.map((link) => (

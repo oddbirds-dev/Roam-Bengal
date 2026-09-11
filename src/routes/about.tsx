@@ -65,7 +65,7 @@ function About() {
 
         <section className="bg-mint py-12">
           <div className="wrap max-w-4xl text-center text-[0.98rem] leading-8 text-ink/85">
-            {about.intro_strip}
+            <FormatText>{about.intro_strip}</FormatText>
           </div>
         </section>
 
