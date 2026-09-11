@@ -6,7 +6,7 @@ import {
   createRootRoute,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import appCss from "@/styles/app.css?url";
+import appCssText from "@/styles/app.css?inline";
 import { NotFound } from "@/components/not-found";
 import { ErrorPage } from "@/components/error-page";
 import { getAllSettings } from "@/lib/site-content.functions";
@@ -43,7 +43,6 @@ export const Route = createRootRoute({
 
     return {
       meta,
-      links: [{ rel: "stylesheet", href: appCss }],
     };
   },
   component: RootComponent,
@@ -70,6 +69,9 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Keep the shell styled even if a stale CDN/HTML response references an old
+            content-hashed stylesheet that is no longer present after a deploy. */}
+        <style dangerouslySetInnerHTML={{ __html: appCssText }} />
         {/* Admin → Site content → Custom Fonts. One `<style>` for the whole list: it is
             unlayered, so it beats Tailwind's layered utilities whatever order they load in. */}
         {customFontUrls(fonts).map((href) => (
