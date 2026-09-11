@@ -1,3 +1,18 @@
+
+@import "tailwindcss";
+
+@import "@fontsource/playfair-display/latin-600.css";
+@import "@fontsource/playfair-display/latin-700.css";
+@import "@fontsource/playfair-display/latin-900.css";
+@import "@fontsource/playfair-display/latin-600-italic.css";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/caveat/latin-600.css";
+@import "@fontsource/caveat/latin-700.css";
+@import "@fontsource/permanent-marker/latin-400.css";
+@import "@fontsource/kalam/latin-700.css";
 .home-section-seam {
   background-size: 220% 100% !important;
   animation: home-seam-flow 7s linear infinite, home-seam-blink 1.1s ease-in-out infinite;
@@ -23,25 +38,6 @@
 .tour-sections :where(.text-muted, .text-ink\/85, .text-green, .text-green-dark) {
     color: #000000;
 }
-
-@import "tailwindcss";
-
-/* Self-hosted fonts. Five families over the Google CDN was the single biggest LCP
-   risk in the reference designs (PRD §5). */
-/* latin subsets only — the full packages also ship devanagari and cyrillic, which
-   roughly triples the font payload for an English-only site. */
-@import "@fontsource/playfair-display/latin-600.css";
-@import "@fontsource/playfair-display/latin-700.css";
-@import "@fontsource/playfair-display/latin-900.css";
-@import "@fontsource/playfair-display/latin-600-italic.css";
-@import "@fontsource/poppins/latin-400.css";
-@import "@fontsource/poppins/latin-500.css";
-@import "@fontsource/poppins/latin-600.css";
-@import "@fontsource/poppins/latin-700.css";
-@import "@fontsource/caveat/latin-600.css";
-@import "@fontsource/caveat/latin-700.css";
-@import "@fontsource/permanent-marker/latin-400.css";
-@import "@fontsource/kalam/latin-700.css";
 
 /* Design tokens, lifted verbatim from reference design/*.html :root blocks.
    `--blue` is a misnomer inherited from the source CSS: it is a burnt red. */
