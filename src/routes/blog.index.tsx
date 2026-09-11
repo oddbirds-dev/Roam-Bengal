@@ -5,7 +5,6 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PhotoFrame } from "@/components/ui/photo-frame";
-import { BannerPhoto, hasBannerPhoto } from "@/components/ui/banner-photo";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { toPlainText } from "@/lib/markdown";
@@ -44,8 +43,6 @@ function BlogIndex() {
   const { category } = Route.useSearch();
   const navigate = useNavigate({ from: "/blog/" });
   const { blog_page } = useSiteSettings();
-  const banner = hasBannerPhoto(blog_page.banner_image);
-
   const categories = [...new Set(posts.map((p) => p.category).filter(Boolean))] as string[];
   const active = category ?? "all";
   const filtered = active === "all" ? posts : posts.filter((p) => p.category === active);
@@ -59,38 +56,36 @@ function BlogIndex() {
 
       <main id="main">
         {/* Masthead */}
-        <section
-          className={`full-bleed shell relative isolate border-b border-rule pt-16 pb-[46px] text-center ${
-            banner ? "overflow-hidden" : "bg-cream"
-          }`}
-        >
-          <BannerPhoto src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} />
+        <section className="full-bleed relative flex min-h-[640px] flex-col overflow-hidden text-center text-white">
+          <PhotoFrame src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} gradientCss={FEATURED_BG} priority placeholderLabel="images/blog-banner.jpg" className="absolute inset-0 z-0 h-full w-full" />
+          <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden="true" />
+          <SiteHeader logo="light" />
           <div className="relative z-[1]">
             <span
               className={`mb-[22px] inline-flex items-center gap-2.5 text-[0.72rem] font-bold tracking-[0.18em] uppercase ${
-                banner ? "text-white/80" : "text-muted"
+                "text-white/80"
               }`}
             >
               <span
-                className={`h-px w-[34px] ${banner ? "bg-white/40" : "bg-rule"}`}
+                className={`h-px w-[34px] ${"bg-white/40"}`}
                 aria-hidden="true"
               />
               {blog_page.volume_label}
               <span
-                className={`h-px w-[34px] ${banner ? "bg-white/40" : "bg-rule"}`}
+                className={`h-px w-[34px] ${"bg-white/40"}`}
                 aria-hidden="true"
               />
             </span>
             <h1
               className={`mx-auto mb-[18px] max-w-[820px] font-display text-[clamp(2.4rem,5vw,3.6rem)] leading-[1.08] font-bold ${
-                banner ? "text-white [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]" : ""
+                "text-white [text-shadow:0_4px_20px_rgba(0,0,0,0.4)]"
               }`}
             >
               <Emphasised text={blog_page.heading} />
             </h1>
             <p
               className={`mx-auto max-w-[520px] text-center text-[1rem] ${
-                banner ? "text-white/85" : "text-muted"
+                "text-white/85"
               }`}
             >
               <FormatText>{blog_page.subtext}</FormatText>
