@@ -231,7 +231,7 @@ function TourDetail() {
                 <Section id="highlights" title="⭐ Trip Highlights">
                   <ul className="flex flex-col gap-2.5">
                     {tour.highlights.map((h) => (
-                      <li key={h} className="flex gap-3 text-[0.9rem] leading-6">
+                      <li key={h} className="flex gap-3 text-left text-[0.9rem] leading-6">
                         <span className="mt-0.5 text-green-bright">✓</span>
                         <FormatText>{h}</FormatText>
                       </li>
@@ -244,7 +244,7 @@ function TourDetail() {
                 <Section id="glance" title="📍 Journey at a Glance">
                   <ul className="flex flex-col gap-2.5">
                     {tour.glance.map((g, index) => (
-                      <li key={`${g.when}-${g.detail}-${index}`} className="text-[0.9rem] leading-6">
+                      <li key={`${g.when}-${g.detail}-${index}`} className="text-left text-[0.9rem] leading-6">
                         {g.when ? (
                           <strong className="text-green-dark"><FormatText>{g.when}</FormatText></strong>
                         ) : null}
