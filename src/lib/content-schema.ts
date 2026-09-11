@@ -786,6 +786,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
     description: "Your story, the numbers you show off, and why people travel with you.",
     where: "/about",
     previewPath: "/about",
+    previewAnchor: "founder-story",
     sections: [
       {
         title: "Opening",
@@ -809,6 +810,25 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             label: "Wide paragraph across the page",
             rows: 5,
           },
+        ],
+      },
+      {
+        title: "Founder story",
+        description: "The personal introduction shown after the opening section.",
+        fields: [
+          { kind: "text", key: "founder_eyebrow", label: "Small label above the heading" },
+          { kind: "text", key: "founder_heading", label: "Heading" },
+          { kind: "text", key: "founder_heading_accent", label: "Highlighted heading word or phrase" },
+          {
+            kind: "list",
+            key: "founder_paragraphs",
+            label: "Founder story paragraphs",
+            multiline: true,
+            hint: "Each box is one paragraph.",
+          },
+          { kind: "image", key: "founder_image", label: "Founder portrait" },
+          { kind: "text", key: "founder_name", label: "Founder name" },
+          { kind: "text", key: "founder_role", label: "Founder role" },
         ],
       },
       {

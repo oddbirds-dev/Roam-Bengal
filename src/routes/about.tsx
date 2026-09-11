@@ -69,6 +69,37 @@ function About() {
           </div>
         </section>
 
+        <section id="founder-story" className="bg-cream py-16 sm:py-20">
+          <div className="wrap grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:gap-16">
+            <div>
+              <Eyebrow>{about.founder_eyebrow}</Eyebrow>
+              <h2 className="max-w-2xl font-display text-[clamp(1.8rem,3.6vw,2.65rem)] leading-tight text-green">
+                {about.founder_heading} <span className="text-accent">{about.founder_heading_accent}</span>
+              </h2>
+              <div className="mt-6 max-w-3xl space-y-4 text-[0.94rem] leading-7 text-muted">
+                {about.founder_paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mx-auto w-full max-w-sm text-center lg:mx-0 lg:justify-self-end">
+              <PhotoFrame
+                src={about.founder_image || about.hero_image}
+                alt="Roam Bengal founder in Bangladesh"
+                gradient="green"
+                placeholderLabel="images/founder.jpg"
+                className="aspect-[4/5] rounded-2xl"
+              />
+              <div className="mt-5">
+                <h3 className="font-display text-[1.2rem] font-bold text-green-dark">
+                  {about.founder_name}
+                </h3>
+                <p className="mt-1 text-[0.82rem] text-muted">{about.founder_role}</p>
+              </div>
+            </div>
+          </div>
+        </section>
         <section className="py-14">
           <div className="wrap grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {about.stats.map((stat) => (

@@ -370,6 +370,17 @@ export const siteDefaults = {
     hero_image: "",
     intro_strip:
       "A new journey begins with finding a destination that truly suits you. As international travel to Bangladesh grows each year, so does the need for operators who put safety, honesty, and local knowledge first. Roam Bengal was founded to close that gap — built by the boatmen, tea-garden guides, and hill-trekkers who call these routes home.",
+    founder_eyebrow: "Meet the founder",
+    founder_heading: "Travel is better when it feels",
+    founder_heading_accent: "personal.",
+    founder_paragraphs: [
+      "Bangladesh is more than a destination to me. It is a collection of familiar roads, river crossings, tea gardens, and welcoming people that I want every curious traveller to experience with care.",
+      "I started Roam Bengal to make that experience feel straightforward and human. Every journey is shaped around the people travelling, with enough room for unplanned conversations, local food, and the moments that never appear in a guidebook.",
+      "Whether you are visiting for the first time or returning to see a different side of the country, my promise is simple: thoughtful planning, honest advice, and a warm welcome from start to finish.",
+    ],
+    founder_image: "",
+    founder_name: "Arafat Rasul",
+    founder_role: "Founder & local travel guide",
     stats: [
       { value: "40+", label: "Tours & Itineraries" },
       { value: "25+", label: "Outdoor Activities" },
