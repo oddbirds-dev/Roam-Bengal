@@ -469,6 +469,12 @@ function TourDetail() {
                   ৳{tour.priceBdt.toLocaleString("en-BD")} for Bangladeshi nationals
                 </div>
               ) : null}
+              <PriceTierCards
+                tour={tour}
+                className="mt-6 grid grid-cols-2 gap-2.5"
+                compact
+              />
+
 
               {sidebarPromises.length ? (
                 <ul className="mt-5 flex flex-col gap-2.5 text-[0.82rem] leading-5">
@@ -480,12 +486,6 @@ function TourDetail() {
                   ))}
                 </ul>
               ) : null}
-
-              <PriceTierCards
-                tour={tour}
-                className="mt-6 grid grid-cols-2 gap-2.5"
-                compact
-              />
 
               <ButtonLink
                 to="/contact"

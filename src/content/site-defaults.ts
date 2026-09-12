@@ -311,7 +311,14 @@ export const siteDefaults = {
     cta_label: "Book This Tour Now",
     cta_footnote: "Free cancellation · No payment required today",
     /** The ticked reassurances in the sticky "Tour Cost" box in the tour page sidebar. */
-    sidebar_promises: [],
+    sidebar_promises: [
+      "100% Exclusive Private Tours",
+      "Fully Flexible & Customisable",
+      "Transparent Pricing Promise",
+      "Expert, Knowledgeable Guides",
+      "No Shopping Detours, Ever",
+      "Direct Booking Savings",
+    ],
   },
 
   blog_page: {
