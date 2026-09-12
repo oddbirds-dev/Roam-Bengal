@@ -82,7 +82,9 @@ export function PolicyLayout({
                         className="flex gap-3 text-[0.92rem] leading-7 text-ink/85"
                       >
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                        <FormatText>{item}</FormatText>
+                        <span>
+                          <FormatText>{item}</FormatText>
+                        </span>
                       </li>
                     ))}
                   </ul>
