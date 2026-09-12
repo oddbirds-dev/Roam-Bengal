@@ -212,9 +212,13 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
     og_title: seo?.og_title ?? "",
     og_description: seo?.og_description ?? "",
     og_image: seo?.og_image ?? "",
+    og_image_alt: seo?.og_image_alt ?? "",
+    og_image_width: seo?.og_image_width ? String(seo.og_image_width) : "",
+    og_image_height: seo?.og_image_height ? String(seo.og_image_height) : "",
     twitter_title: seo?.twitter_title ?? "",
     twitter_description: seo?.twitter_description ?? "",
     twitter_image: seo?.twitter_image ?? "",
+    twitter_image_alt: seo?.twitter_image_alt ?? "",
     robots_noindex: seo?.robots_noindex ?? false,
     cornerstone: seo?.cornerstone ?? false,
     schema_type: seo?.schema_type ?? "",
@@ -264,9 +268,13 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
           og_title: form.og_title || null,
           og_description: form.og_description || null,
           og_image: form.og_image || null,
+          og_image_alt: form.og_image_alt || null,
+          og_image_width: form.og_image_width ? Number(form.og_image_width) : null,
+          og_image_height: form.og_image_height ? Number(form.og_image_height) : null,
           twitter_title: form.twitter_title || null,
           twitter_description: form.twitter_description || null,
           twitter_image: form.twitter_image || null,
+          twitter_image_alt: form.twitter_image_alt || null,
           robots_noindex: form.robots_noindex,
           cornerstone: form.cornerstone,
           schema_type: form.schema_type || null,
@@ -352,7 +360,40 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
 
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="OG title" value={form.og_title} onChange={(v) => set("og_title", v)} />
-          <TextField label="OG image" value={form.og_image} onChange={(v) => set("og_image", v)} />
+          <TextField
+            label="OG image"
+            value={form.og_image}
+            onChange={(v) => {
+              set("og_image", v);
+              void detectImageDimensions(v, (w, h) => {
+                setForm((f) =>
+                  f.og_image === v
+                    ? { ...f, og_image_width: String(w), og_image_height: String(h) }
+                    : f,
+                );
+              });
+            }}
+          />
+        </div>
+        <div className="grid gap-5 sm:grid-cols-3">
+          <TextField
+            label="OG image alt text"
+            hint="Describes the image for screen readers and social platforms"
+            value={form.og_image_alt}
+            onChange={(v) => set("og_image_alt", v)}
+          />
+          <TextField
+            label="OG image width"
+            hint="Auto-detected"
+            value={form.og_image_width}
+            onChange={(v) => set("og_image_width", v.replace(/\D/g, ""))}
+          />
+          <TextField
+            label="OG image height"
+            hint="Auto-detected"
+            value={form.og_image_height}
+            onChange={(v) => set("og_image_height", v.replace(/\D/g, ""))}
+          />
         </div>
         <TextArea
           label="Twitter description"
@@ -387,6 +428,12 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
             onChange={(v) => set("twitter_image", v)}
           />
         </div>
+        <TextField
+          label="Twitter image alt text"
+          hint="Falls back to the OG image alt text if left blank"
+          value={form.twitter_image_alt}
+          onChange={(v) => set("twitter_image_alt", v)}
+        />
 
         <Toggle
           label="Noindex"
@@ -419,6 +466,23 @@ function SeoEditModal({ target, onClose }: { target: SeoTarget; onClose: () => v
       </div>
     </AdminModal>
   );
+}
+
+/** Loads `url` off-DOM to read its natural dimensions; silently no-ops on invalid/unreachable images. */
+function detectImageDimensions(url: string, onLoaded: (width: number, height: number) => void): Promise<void> {
+  return new Promise((resolve) => {
+    if (!url.trim()) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      onLoaded(img.naturalWidth, img.naturalHeight);
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = url;
+  });
 }
 
 function splitCsv(s: string): string[] {

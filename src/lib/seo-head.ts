@@ -47,10 +47,14 @@ export function buildSeoMeta(seo: SeoMetaRow | null, fallbacks: SeoFallbacks) {
   const ogTitle = seo?.og_title || title;
   const ogDescription = seo?.og_description || description;
   const ogImage = seo?.og_image || fallbacks.image;
+  const ogImageAlt = seo?.og_image_alt || ogTitle;
+  const ogImageWidth = seo?.og_image_width;
+  const ogImageHeight = seo?.og_image_height;
 
   const twitterTitle = seo?.twitter_title || ogTitle;
   const twitterDescription = seo?.twitter_description || ogDescription;
   const twitterImage = seo?.twitter_image || ogImage;
+  const twitterImageAlt = seo?.twitter_image_alt || ogImageAlt;
 
   const metaTags: Array<Record<string, string>> = [
     { title },
@@ -66,10 +70,14 @@ export function buildSeoMeta(seo: SeoMetaRow | null, fallbacks: SeoFallbacks) {
 
   if (ogImage) {
     metaTags.push({ property: "og:image", content: ogImage });
+    metaTags.push({ property: "og:image:alt", content: ogImageAlt });
+    if (ogImageWidth) metaTags.push({ property: "og:image:width", content: String(ogImageWidth) });
+    if (ogImageHeight) metaTags.push({ property: "og:image:height", content: String(ogImageHeight) });
   }
-  
+
   if (twitterImage) {
     metaTags.push({ name: "twitter:image", content: twitterImage });
+    metaTags.push({ name: "twitter:image:alt", content: twitterImageAlt });
   }
 
   if (seo?.robots_noindex) {
