@@ -469,15 +469,25 @@ function TourDetail() {
 
               {tour.whyItems.length ? (
                 <Section id="why-tour" title="🌟 Why Choose Roam Bengal for This Tour">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {tour.whyItems.map((w) => (
-                      <div
-                        key={w}
-                        className="rounded-xl border border-rule p-4 text-[0.86rem] leading-6"
-                      >
-                        <FormatText>{w}</FormatText>
-                      </div>
-                    ))}
+                  <div className="flex flex-col gap-1 text-[0.92rem] leading-6">
+                    {Array.from({ length: Math.ceil(tour.whyItems.length / 2) }, (_, index) => {
+                      const title = tour.whyItems[index * 2] ?? "";
+                      const description = tour.whyItems[index * 2 + 1];
+
+                      return (
+                        <p key={`${title}-${index}`}>
+                          <strong className="font-semibold text-ink">
+                            <FormatText>{title}</FormatText>
+                          </strong>
+                          {description ? (
+                            <span className="text-muted">
+                              {" – "}
+                              <FormatText>{description}</FormatText>
+                            </span>
+                          ) : null}
+                        </p>
+                      );
+                    })}
                   </div>
                 </Section>
               ) : null}
