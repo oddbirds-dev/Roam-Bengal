@@ -7,7 +7,7 @@ import { TourCard, formatPrice } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
-import { TourPricing, PriceTierCards } from "@/components/tour/tour-pricing";
+import { TourBookingCta, TourPricing, PriceTierCards } from "@/components/tour/tour-pricing";
 import { BestValueTours } from "@/components/tour/best-value-tours";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { getTourBySlug, listPublishedPosts, listPublishedTours } from "@/lib/site-content.functions";
@@ -490,6 +490,10 @@ function TourDetail() {
                     })}
                   </div>
                 </Section>
+              ) : null}
+
+              {tour.priceTiers.some((tier) => tier.label || tier.price !== null) ? (
+                <TourBookingCta tour={tour} />
               ) : null}
             </div>
           </main>

@@ -173,46 +173,54 @@ export function TourPricing({ tour }: { tour: TourDTO }) {
           </div>
         ) : null}
 
-        <div className="relative mt-8 overflow-hidden rounded-2xl bg-green-dark px-6 py-8 text-center">
-          <FlightPathDoodle />
-          <div className="relative">
-            <h3 className="font-display text-[clamp(1.15rem,2.4vw,1.5rem)] font-bold text-white">
-              {copy.cta_heading}
-            </h3>
-            <ButtonLink
-              to="/contact"
-              variant="ember"
-              search={{ tour: tour.slug }}
-              className="mt-5 w-full sm:w-auto sm:min-w-[320px]"
-            >
-              {copy.cta_label} →
-            </ButtonLink>
-            {copy.cta_footnote ? (
-              <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[0.8rem] text-white/75">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  className="shrink-0"
-                >
-                  <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3Z" />
-                </svg>
-                {copy.cta_footnote}
-              </p>
-            ) : null}
-          </div>
-        </div>
       </div>
     </section>
   );
 }
 
+export function TourBookingCta({ tour }: { tour: TourDTO }) {
+  const { tour_pricing: copy } = useSiteSettings();
+
+  return (
+    <div className="rounded-2xl border border-rule bg-sand/60 p-2 md:p-3">
+      <div className="relative overflow-hidden rounded-2xl bg-green-dark px-6 py-8 text-center">
+        <FlightPathDoodle />
+        <div className="relative">
+          <h3 className="font-display text-[clamp(1.15rem,2.4vw,1.5rem)] font-bold text-white">
+            {copy.cta_heading}
+          </h3>
+          <ButtonLink
+            to="/contact"
+            variant="ember"
+            search={{ tour: tour.slug }}
+            className="mt-5 w-full sm:w-auto sm:min-w-[320px]"
+          >
+            {copy.cta_label} →
+          </ButtonLink>
+          {copy.cta_footnote ? (
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[0.8rem] text-white/75">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="shrink-0"
+              >
+                <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3Z" />
+              </svg>
+              {copy.cta_footnote}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 /** Circle colours for the promise icons, matching the card accents. */
 const PROMISE_TONES = ["bg-green", "bg-teal", "bg-orange"] as const;
 
