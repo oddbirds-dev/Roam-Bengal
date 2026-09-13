@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { TourDTO, BlogPostDTO, TestimonialDTO } from "@/lib/content-types";
 import { FeaturesSection } from "./features-section";
+import { TripBuilderSection } from "./trip-builder-section";
 import { PopularToursSection } from "./popular-tours-section";
 import { MultiDayToursSection } from "./multi-day-tours-section";
 import { HolidayToursSection } from "./holiday-tours-section";
@@ -26,6 +27,7 @@ export interface HomeSectionProps {
  */
 export const HOME_SECTION_IDS = [
   "features",
+  "tripBuilder",
   "popularTours",
   "gallery",
   "faith",
@@ -50,6 +52,11 @@ export const HOME_SECTIONS: Record<HomeSectionId, HomeSectionMeta> = {
     label: "Feature strip",
     blurb: "The row of small icons + labels just under the hero.",
     Component: FeaturesSection,
+  },
+  tripBuilder: {
+    label: "Trip builder",
+    blurb: "Interactive area picker with ready-made presets and a lead-capture form.",
+    Component: TripBuilderSection,
   },
   popularTours: {
     label: "Popular tours",
@@ -107,6 +114,7 @@ export const DEFAULT_HOME_ORDER: HomeSectionId[] = [...HOME_SECTION_IDS];
  */
 export const HOME_SECTION_SETTINGS_KEY: Record<HomeSectionId, string> = {
   features: "homepage",
+  tripBuilder: "homepage",
   popularTours: "homepage",
   gallery: "gallery",
   faith: "homepage",
