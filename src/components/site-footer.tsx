@@ -46,17 +46,6 @@ export function SiteFooter() {
           <p className="mt-3.5 max-w-[260px] text-left text-[0.85rem] opacity-70">
             <FormatText>{footer.intro}</FormatText>
           </p>
-          <div className="mt-4 flex max-w-[260px] flex-col gap-2.5">
-            {brandLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={normalizePath(link.to)}
-                className="block text-[0.87rem] opacity-85 transition-opacity hover:opacity-100"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
         </div>
 
         {footer.columns.map((col) => (
@@ -95,8 +84,19 @@ export function SiteFooter() {
         ))}
       </div>
 
-      <div className="wide flex flex-wrap justify-between gap-2.5 border-t border-white/15 pt-[22px] text-[0.78rem] opacity-60">
+      <div className="wide flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/15 pt-[22px] text-[0.78rem] opacity-60">
         <span>{footer.copyright}</span>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+          {brandLinks.map((link) => (
+            <Link
+              key={link.label}
+              to={normalizePath(link.to)}
+              className="transition-opacity hover:opacity-100"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
         <span>{footer.site_label}</span>
       </div>
     </footer>

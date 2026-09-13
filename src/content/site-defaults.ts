@@ -141,6 +141,8 @@ export const siteDefaults = {
         title: "Airport Pickup",
         text: "Meet-and-greet from Dhaka or Cox's Bazar airport",
       },
+      { icon: "calendar", title: "Festival Tours", text: "Experience Bangladesh's vibrant celebrations" },
+      { icon: "route", title: "Schedule Tours", text: "Flexible itineraries built around your dates" },
     ],
     popular_kicker: "Popular Tours",
     popular_heading: "Handpicked Experiences for You",

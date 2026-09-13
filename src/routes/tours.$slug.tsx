@@ -308,6 +308,43 @@ function TourDetail() {
                 </Section>
               ) : null}
 
+              {tour.inclusions.length || tour.exclusions.length ? (
+                <div
+                  id="inclusions"
+                  className="scroll-mt-24 rounded-2xl border border-rule bg-paper p-6 font-body text-[16px] shadow-sm"
+                >
+                  <h2 className="mb-4 font-body text-[16px] font-bold text-green-dark">
+                    🛑 What's Included
+                  </h2>
+                  <div className="flex flex-col gap-5">
+                    {tour.inclusions.length ? (
+                      <div>
+                        <h3 className="font-body text-[16px] font-bold text-green-dark">
+                          ✅ Included
+                        </h3>
+                        <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
+                          {tour.inclusions.map((i) => (
+                            <li key={i}>• <FormatText>{i}</FormatText></li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {tour.exclusions.length ? (
+                      <div>
+                        <h3 className="font-body text-[16px] font-bold text-rust">
+                          ❌ Not Included
+                        </h3>
+                        <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
+                          {tour.exclusions.map((i) => (
+                            <li key={i}>• <FormatText>{i}</FormatText></li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+
               {tour.offers.length || (tour.priceUsd !== null && !tour.priceTiers.length) ? (
                 <Section
                   id={tour.priceTiers.length ? "offers" : "cost"}
@@ -498,43 +535,6 @@ function TourDetail() {
                 Book Now
               </ButtonLink>
             </div>
-
-            {tour.inclusions.length || tour.exclusions.length ? (
-              <div
-                id="inclusions"
-                className="mt-6 scroll-mt-24 rounded-2xl border border-rule bg-paper p-6 font-body text-[16px] shadow-sm"
-              >
-                <h2 className="mb-4 font-body text-[16px] font-bold text-green-dark">
-                  🛑 What's Included
-                </h2>
-                <div className="flex flex-col gap-5">
-                  {tour.inclusions.length ? (
-                    <div>
-                      <h3 className="font-body text-[16px] font-bold text-green-dark">
-                        ✅ Included
-                      </h3>
-                      <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
-                        {tour.inclusions.map((i) => (
-                          <li key={i}>• <FormatText>{i}</FormatText></li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  {tour.exclusions.length ? (
-                    <div>
-                      <h3 className="font-body text-[16px] font-bold text-rust">
-                        ❌ Not Included
-                      </h3>
-                      <ul className="mt-2 flex flex-col gap-1.5 text-[16px] leading-6">
-                        {tour.exclusions.map((i) => (
-                          <li key={i}>• <FormatText>{i}</FormatText></li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
 
             {bestValuePicks.length ? (
               <div className="mt-6">
