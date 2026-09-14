@@ -401,18 +401,29 @@ function TourDetail() {
               {tour.advice.length ? (
                 <Section id="advice" title="🎯 Trip Advice & Responsibilities" headingClassName="font-body text-base">
                   <div className="flex flex-col gap-5">
-                    {tour.advice.map((block) => (
-                      <div key={block.title} className="rounded-xl border border-rule p-5">
-                        <h3 className="font-display text-[0.98rem] font-bold text-green-dark">
-                          <FormatText>{block.title}</FormatText>
-                        </h3>
-                        <ul className="mt-3 flex flex-col gap-2 text-[0.86rem] leading-6">
-                          {block.items.map((i) => (
-                            <li key={i}>• <FormatText>{i}</FormatText></li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    {tour.advice.flatMap((block) => {
+                      if (block.items.length <= 1) {
+                        return [
+                          <AdviceCard key={block.title} title={block.title}>
+                            {block.items[0] ?? ""}
+                          </AdviceCard>,
+                        ];
+                      }
+
+                      return [
+                        <AdviceCard key={block.title} title={block.title}>
+                          {block.items[0] ?? ""}
+                        </AdviceCard>,
+                        ...block.items.slice(1).map((item, index) => {
+                          const { title, detail } = splitAdviceItem(item, index);
+                          return (
+                            <AdviceCard key={`${block.title}-${item}`} title={title}>
+                              {detail}
+                            </AdviceCard>
+                          );
+                        }),
+                      ];
+                    })}
                   </div>
                 </Section>
               ) : null}
@@ -653,6 +664,28 @@ function Section({
       )}
     </section>
   );
+}
+
+function AdviceCard({ title, children }: { title: string; children: string }) {
+  return (
+    <div className="rounded-xl border border-rule p-5">
+      <h3 className="font-display text-[0.98rem] font-black text-green-dark">
+        <FormatText>{title}</FormatText>
+      </h3>
+      {children ? (
+        <p className="mt-3 text-[0.86rem] leading-6">
+          <FormatText>{children}</FormatText>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function splitAdviceItem(item: string, index: number): { title: string; detail: string } {
+  const match = item.match(/^\s*([^*<]*?)\s*(?:<strong>([\s\S]*?)<\/strong>|\*\*([\s\S]*?)\*\*)\s*(?:—|-|:\s*)\s*([\s\S]*)$/i);
+  if (!match) return { title: `Trip Advice ${index + 1}`, detail: item };
+
+  return { title: `${match[1] ?? ""}${match[2] ?? match[3] ?? `Trip Advice ${index + 1}`}`.trim(), detail: match[4] ?? "" };
 }
 
 function hasSection(tour: TourDTO, id: string): boolean {
