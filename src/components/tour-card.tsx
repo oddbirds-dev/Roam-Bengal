@@ -35,8 +35,8 @@ export function TourCard({
   return (
     <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_10px_28px_rgba(0,0,0,0.08)] transition-transform duration-250 hover:-translate-y-1.5">
       <PhotoFrame
-        src={tour.heroImage ?? tour.images[0]}
-        alt={tour.title}
+        src={tour.heroImage ?? tour.images[0]?.url}
+        alt={tour.heroImage ? tour.heroImageAlt || tour.title : tour.images[0]?.alt || tour.title}
         gradientCss={gradientCss ?? FRAME_GRADIENTS[gradientFor(tour.slug)]}
         placeholderLabel={`images/tour-${tour.slug}.jpg`}
         className="aspect-4/3 w-full"

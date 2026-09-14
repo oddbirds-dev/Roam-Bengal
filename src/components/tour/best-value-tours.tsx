@@ -23,8 +23,8 @@ export function BestValueTours({ tours, limit = 4 }: { tours: TourDTO[]; limit?:
             className="flex flex-col overflow-hidden rounded-xl border border-rule transition-shadow hover:shadow-md"
           >
             <PhotoFrame
-              src={tour.heroImage ?? tour.images[0]}
-              alt={tour.title}
+              src={tour.heroImage ?? tour.images[0]?.url}
+              alt={tour.heroImage ? tour.heroImageAlt || tour.title : tour.images[0]?.alt || tour.title}
               gradient={gradientFor(tour.slug)}
               className="aspect-[4/3] w-full"
             />

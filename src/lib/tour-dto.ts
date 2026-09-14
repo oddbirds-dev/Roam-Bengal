@@ -1,4 +1,4 @@
-import type { TourCategory, TourDTO, TourFacts } from "@/lib/content-types";
+import type { TourCategory, TourDTO, TourFacts, TourImage } from "@/lib/content-types";
 
 /**
  * Row → DTO for a `tours` record.
@@ -28,7 +28,8 @@ export function toTourDTO(row: TourRowLike): TourDTO {
       ? (row.category as TourCategory)
       : "multi-day",
     heroImage: text(row.hero_image),
-    images: strArr(row.images),
+    heroImageAlt: text(row.hero_image_alt),
+    images: imageArr(row.images),
     durationLabel: text(row.duration_label),
     durationDays: intOr(row.duration_days, 1),
     priceUsd: num(row.price_usd),
@@ -95,6 +96,16 @@ function arr<T>(value: unknown): T[] {
 
 function strArr(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : [];
+}
+
+/** `images` is jsonb `{url, alt}[]`; older rows (pre-migration) still carry plain URL strings. */
+function imageArr(value: unknown): TourImage[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry) =>
+    typeof entry === "string"
+      ? { url: entry, alt: "" }
+      : { url: str((entry as Record<string, unknown>)?.url), alt: str((entry as Record<string, unknown>)?.alt) },
+  );
 }
 
 function jsonObject(value: unknown): Record<string, string> {

@@ -122,6 +122,11 @@ const TourFaq = z.object({
   answer: z.string().max(3000),
 });
 
+const TourImage = z.object({
+  url: z.string().max(1000),
+  alt: z.string().max(300).default(""),
+});
+
 /**
  * The effective write contract for `tours`, deliberately stricter than the database:
  * `category` is an exact enum, `duration_days` is bounded, and `slug` is shape-checked.
@@ -131,7 +136,8 @@ const TourInput = z.object({
   title: z.string().min(1).max(240),
   category: z.enum(["day-tour", "multi-day", "holiday"]),
   hero_image: optionalText(1000),
-  images: textArray(1000),
+  hero_image_alt: optionalText(300),
+  images: z.array(TourImage).default([]),
   duration_label: optionalText(120),
   duration_days: z.coerce.number().int().min(1).max(365),
   price_usd: z.coerce.number().min(0).max(1_000_000).nullish(),

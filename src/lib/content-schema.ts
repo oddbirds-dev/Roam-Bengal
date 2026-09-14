@@ -952,6 +952,37 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
     { kind: "text", key: "popular_heading", label: "Heading" },
     { kind: "image", key: "popular_bg_image", label: "Background photo" },
   ],
+  tripBuilder: [
+    { kind: "text", key: "trip_builder_heading", label: "Heading" },
+    { kind: "textarea", key: "trip_builder_intro", label: "Intro text", rows: 2 },
+    {
+      kind: "rows",
+      key: "trip_builder_areas",
+      label: "Areas",
+      hint: "Each area needs a unique ID (lowercase, hyphenated, no spaces) — presets below reference areas by this ID.",
+      columns: [
+        { key: "id", label: "ID", placeholder: "dhaka", span: 3 },
+        { key: "label", label: "Label", span: 4 },
+        { key: "region", label: "Region", span: 5 },
+        { key: "days", label: "Days", type: "number", span: 3 },
+        { key: "blurb", label: "Description", type: "textarea", span: 9 },
+      ],
+      blank: { id: "", label: "", region: "", days: 1, blurb: "" },
+    },
+    {
+      kind: "rows",
+      key: "trip_builder_presets",
+      label: "Ready-made trip presets",
+      hint: "Area IDs must match the IDs in the Areas list above, separated by commas.",
+      columns: [
+        { key: "id", label: "ID", span: 3 },
+        { key: "label", label: "Label", span: 4 },
+        { key: "sublabel", label: "Sublabel", span: 5 },
+        { key: "areaIds", label: "Area IDs (comma-separated)", type: "textarea", span: 12 },
+      ],
+      blank: { id: "", label: "", sublabel: "", areaIds: "" },
+    },
+  ],
   faith: [
     { kind: "text", key: "faith_heading_1", label: "Heading — first line" },
     { kind: "text", key: "faith_heading_2", label: "Heading — second line" },

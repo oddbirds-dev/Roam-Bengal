@@ -3,26 +3,50 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { submitInquiry } from "@/lib/capture.functions";
-import {
-  TRIP_BUILDER_AREAS,
-  TRIP_BUILDER_PRESETS,
-  TRIP_BUILDER_REGIONS,
-  type TripBuilderArea,
-} from "@/content/trip-builder-data";
 import type { HomeSectionProps } from "./registry";
 
-const AREAS_BY_REGION = TRIP_BUILDER_REGIONS.map((region) => ({
-  region,
-  areas: TRIP_BUILDER_AREAS.filter((a) => a.region === region),
-}));
+interface TripBuilderArea {
+  id: string;
+  label: string;
+  region: string;
+  /** Typical length this area adds to an itinerary, used for the running total estimate. */
+  days: number;
+  blurb: string;
+}
+
+interface TripBuilderPreset {
+  id: string;
+  label: string;
+  sublabel: string;
+  /** Comma-separated `TripBuilderArea.id`s, as entered in the admin editor. */
+  areaIds: string;
+}
+
+function splitAreaIds(areaIds: string): string[] {
+  return areaIds
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
 
 const FIELD =
   "w-full rounded-[10px] border-[1.5px] border-rule bg-paper px-3.5 py-2.5 " +
   "font-body text-[0.86rem] text-ink outline-none focus:border-green";
 
 export function TripBuilderSection(_props: HomeSectionProps) {
-  const { whatsapp } = useSiteSettings();
+  const { whatsapp, homepage } = useSiteSettings();
   const send = useServerFn(submitInquiry);
+
+  const areas = homepage.trip_builder_areas as unknown as TripBuilderArea[];
+  const presets = homepage.trip_builder_presets as unknown as TripBuilderPreset[];
+
+  const areasByRegion = useMemo(() => {
+    const regions: string[] = [];
+    for (const area of areas) {
+      if (!regions.includes(area.region)) regions.push(area.region);
+    }
+    return regions.map((region) => ({ region, areas: areas.filter((a) => a.region === region) }));
+  }, [areas]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activePreset, setActivePreset] = useState<string | null>(null);
@@ -30,8 +54,8 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   const [error, setError] = useState("");
 
   const selectedAreas = useMemo(
-    () => TRIP_BUILDER_AREAS.filter((a) => selected.has(a.id)),
-    [selected],
+    () => areas.filter((a) => selected.has(a.id)),
+    [areas, selected],
   );
   const totalDays = selectedAreas.reduce((sum, a) => sum + a.days, 0);
 
@@ -46,10 +70,10 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   }
 
   function applyPreset(presetId: string) {
-    const preset = TRIP_BUILDER_PRESETS.find((p) => p.id === presetId);
+    const preset = presets.find((p) => p.id === presetId);
     if (!preset) return;
     setActivePreset(presetId);
-    setSelected(new Set(preset.areaIds));
+    setSelected(new Set(splitAreaIds(preset.areaIds)));
   }
 
   function clearAll() {
@@ -75,7 +99,7 @@ export function TripBuilderSection(_props: HomeSectionProps) {
     setError("");
     const notes = String(form.get("notes") ?? "").trim();
     const startDate = String(form.get("start_date") ?? "").trim();
-    const preset = activePreset ? TRIP_BUILDER_PRESETS.find((p) => p.id === activePreset) : null;
+    const preset = activePreset ? presets.find((p) => p.id === activePreset) : null;
     const message = [
       `Areas selected (${selectedAreas.length}): ${areaNames}`,
       `Estimated trip length: about ${dayWord(totalDays)}`,
@@ -102,15 +126,17 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   }
 
   return (
-    <section className="shell pt-[70px] pb-[60px]">
-      <div className="wide">
+    <section className="shell relative isolate overflow-hidden pt-[70px] pb-[60px]">
+      <div className="tripBackground" />
+      <TripBuilderDecor />
+      <div className="wide relative">
         <div className="mx-auto mb-8 max-w-[1000px] text-center">
-          <h2 className="mb-2 font-display text-[1.9rem] font-bold">Build Your Own Trip</h2>
-          <p className="text-[0.92rem] text-muted">
-            Not sure where to start? Tap a ready-made trip, then add or remove areas.
-          </p>
+          <h2 className="mb-2 font-display text-[1.9rem] font-bold">
+            {homepage.trip_builder_heading}
+          </h2>
+          <p className="text-[0.92rem] text-muted">{homepage.trip_builder_intro}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2.5 min-[980px]:flex-nowrap">
-            {TRIP_BUILDER_PRESETS.map((preset) => (
+            {presets.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
@@ -151,10 +177,10 @@ export function TripBuilderSection(_props: HomeSectionProps) {
             </div>
 
             <div className="flex flex-col gap-7">
-              {AREAS_BY_REGION.map(({ region, areas }) => (
+              {areasByRegion.map(({ region, areas: regionAreas }) => (
                 <div key={region}>
                   <div className="grid grid-cols-1 gap-3 min-[640px]:grid-cols-2">
-                    {areas.map((area) => (
+                    {regionAreas.map((area) => (
                       <AreaCard
                         key={area.id}
                         area={area}
@@ -251,6 +277,225 @@ export function TripBuilderSection(_props: HomeSectionProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Corner watermark art for the trip builder — leaf sprigs, a pair of birds, a river
+ * silhouette (boatman + palms) and a domed-building silhouette, plus the handwritten
+ * "More Than a Trip / A Deeper Connection" note. Purely decorative, so every piece is
+ * `aria-hidden` and sits behind the card content via `-z-10`.
+ */
+function TripBuilderDecor() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden">
+      <LeafSprig className="absolute -top-8 -left-8 h-44 w-44 text-green/30 sm:h-56 sm:w-56" />
+      <LeafSprig className="absolute -top-8 -right-8 h-44 w-44 scale-x-[-1] text-green/30 sm:h-56 sm:w-56" />
+
+      <Bird className="absolute top-[14%] right-[16%] h-4 w-7 text-ink/25" />
+      <Bird className="absolute top-[20%] right-[9%] h-3 w-5 text-ink/20" />
+      <Bird className="absolute top-[11%] right-[6%] h-2.5 w-4 text-ink/15" />
+
+      {/* Full-width horizon band: dunes, the river/boatman/palms on the left, the domed
+          building on the right — one continuous scene rather than two separate corner
+          motifs, matching the reference banner. */}
+      <svg
+        className="absolute inset-x-0 bottom-0 h-40 w-full text-green-dark/15 sm:h-56"
+        viewBox="0 0 1536 320"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path
+          d="M0 230C160 200 260 260 420 235S620 190 760 220 980 260 1140 225 1400 190 1536 215V320H0V230Z"
+          fill="currentColor"
+          opacity="0.55"
+        />
+        <path
+          d="M0 265C200 245 340 285 480 268S740 235 900 260 1120 290 1280 262 1450 235 1536 250V320H0V265Z"
+          fill="currentColor"
+          opacity="0.35"
+        />
+      </svg>
+
+      <RiverScene className="absolute -bottom-2 -left-2 h-40 w-56 text-green-dark/25 sm:h-52 sm:w-72" />
+      <DomeBuilding className="absolute -right-4 -bottom-2 h-36 w-48 text-brown/25 sm:h-48 sm:w-64" />
+
+      <p className="font-script absolute right-6 bottom-6 hidden -rotate-3 text-right text-[1.15rem] leading-tight text-green-dark/70 sm:block">
+        More Than a Trip
+        <br />A Deeper Connection
+      </p>
+    </div>
+  );
+}
+
+/** One outlined petal, drawn along the local +x axis so it can be placed with a plain
+ *  `translate + rotate` transform — simpler and tidier than rotating an off-center ellipse. */
+function Petal({ x, y, angle, length = 15 }: { x: number; y: number; angle: number; length?: number }) {
+  const w = length * 0.34;
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${angle})`}>
+      <path
+        d={`M0 0C${length * 0.3} ${-w} ${length * 0.7} ${-w} ${length} 0C${length * 0.7} ${w} ${length * 0.3} ${w} 0 0Z`}
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+    </g>
+  );
+}
+
+/** A cascading leaf sprig, angled in from the corner it's anchored to: a curved stem
+ *  with alternating petal-shaped leaves along its length. */
+function LeafSprig({ className }: { className?: string }) {
+  const stemPoints: [number, number][] = [
+    [16, 14],
+    [26, 30],
+    [38, 48],
+    [48, 66],
+    [58, 84],
+    [70, 100],
+  ];
+  const leaves = [
+    { x: 22, y: 20, angle: -55 },
+    { x: 26, y: 30, angle: 35 },
+    { x: 34, y: 42, angle: -50 },
+    { x: 40, y: 52, angle: 40 },
+    { x: 46, y: 64, angle: -42 },
+    { x: 50, y: 70, angle: 45 },
+    { x: 56, y: 82, angle: -35 },
+    { x: 60, y: 88, angle: 48 },
+    { x: 66, y: 98, angle: -28 },
+  ];
+
+  const stem = stemPoints.reduce(
+    (d, [x, y], i) => (i === 0 ? `M${x} ${y}` : `${d}L${x} ${y}`),
+    "",
+  );
+
+  return (
+    <svg viewBox="0 0 120 120" fill="none" className={className}>
+      <path d={stem} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {leaves.map((leaf, i) => (
+        <Petal key={i} x={leaf.x} y={leaf.y} angle={leaf.angle} length={13} />
+      ))}
+    </svg>
+  );
+}
+
+function Bird({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 12" fill="none" className={className}>
+      <path
+        d="M1 8C4 2 8 2 12 6C16 2 20 2 23 8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** One arched, drooping palm frond fanning out from an apex point. */
+function Frond({
+  apex,
+  dir,
+  length = 32,
+}: {
+  apex: [number, number];
+  dir: [number, number];
+  length?: number;
+}) {
+  const [ax, ay] = apex;
+  const [ux, uy] = dir;
+  const midX = ax + ux * length * 0.35;
+  const midY = ay + uy * length * 0.65 - 7;
+  const endMidX = ax + ux * length * 0.75;
+  const endMidY = ay + uy * length * 0.95;
+  const tipX = ax + ux * length;
+  const tipY = ay + uy * length + 11;
+  return (
+    <path
+      d={`M${ax} ${ay}C${midX} ${midY} ${endMidX} ${endMidY} ${tipX} ${tipY}`}
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
+  );
+}
+
+/** A palm: a slightly curved trunk topped with a fan of five drooping fronds. */
+function PalmTree({ base, height = 60 }: { base: [number, number]; height?: number }) {
+  const [bx, by] = base;
+  const apex: [number, number] = [bx - height * 0.15, by - height];
+  const dirs: [number, number][] = [
+    [-1, -0.15],
+    [-0.55, -0.85],
+    [0, -1],
+    [0.55, -0.85],
+    [1, -0.15],
+  ];
+  return (
+    <g>
+      <path
+        d={`M${bx} ${by}Q${bx - height * 0.25} ${by - height * 0.55} ${apex[0]} ${apex[1]}`}
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      {dirs.map((dir, i) => (
+        <Frond key={i} apex={apex} dir={dir} length={height * 0.55} />
+      ))}
+    </g>
+  );
+}
+
+/** Boatman on the river flanked by two palms, as the left end of the horizon band. */
+function RiverScene({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 260 200" fill="none" className={className}>
+      <PalmTree base={[36, 150]} height={62} />
+      <PalmTree base={[86, 168]} height={72} />
+
+      <path
+        d="M120 190C150 176 190 176 215 190"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path d="M140 188L154 150L168 188Z" fill="currentColor" />
+      <circle cx="154" cy="136" r="8" fill="currentColor" />
+      <path d="M120 178L215 178" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** A Taj-style domed pavilion with corner minarets, the right end of the horizon band. */
+function DomeBuilding({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 260 200" fill="none" className={className}>
+      <rect x="80" y="110" width="100" height="80" fill="currentColor" />
+      <path d="M80 110L130 88L180 110Z" fill="currentColor" />
+      <path
+        d="M130 30C152 30 168 52 168 78C168 96 152 108 130 108C108 108 92 96 92 78C92 52 108 30 130 30Z"
+        fill="currentColor"
+      />
+      <rect x="124" y="8" width="12" height="26" fill="currentColor" />
+      <circle cx="130" cy="6" r="5" fill="currentColor" />
+      <path d="M112 190V150C112 138 120 130 130 130C140 130 148 138 148 150V190Z" fill="currentColor" opacity="0.6" />
+
+      {[36, 224].map((cx, i) => (
+        <g key={i}>
+          <rect x={cx - 8} y="118" width="16" height="72" fill="currentColor" />
+          <path
+            d={`M${cx - 10} 118C${cx - 10} 104 ${cx + 10} 104 ${cx + 10} 118Z`}
+            fill="currentColor"
+          />
+          <rect x={cx - 3} y="96" width="6" height="14" fill="currentColor" />
+          <circle cx={cx} cy="94" r="3.5" fill="currentColor" />
+        </g>
+      ))}
+
+      <rect x="0" y="188" width="260" height="12" fill="currentColor" />
+    </svg>
   );
 }
 

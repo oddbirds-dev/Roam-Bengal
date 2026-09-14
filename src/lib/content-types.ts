@@ -172,13 +172,20 @@ export interface TourFaq {
   answer: string;
 }
 
+export interface TourImage {
+  url: string;
+  /** Blank falls back to a generic "{title} — photograph" alt at render time. */
+  alt: string;
+}
+
 export interface TourDTO {
   id: string;
   slug: string;
   title: string;
   category: TourCategory;
   heroImage: string | null;
-  images: string[];
+  heroImageAlt: string | null;
+  images: TourImage[];
   durationLabel: string | null;
   durationDays: number;
   priceUsd: number | null;

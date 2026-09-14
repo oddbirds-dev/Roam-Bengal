@@ -67,7 +67,7 @@ export const Route = createFileRoute("/tours/$slug")({
     return buildSeoMeta(loaderData.seoMeta, {
       title: `${tour.title} — Roam Bengal`,
       description: overviewParagraphs(tour.overview).map(plainText).find(Boolean) ?? "",
-      image: tour.heroImage ?? tour.images[0] ?? undefined,
+      image: tour.heroImage ?? tour.images[0]?.url ?? undefined,
       urlPath: `/tours/${tour.slug}`
     });
   },
@@ -113,7 +113,10 @@ function TourDetail() {
   // mean setting a hero had no effect on the page the hero was picked for. A hero that is
   // also in the gallery must not take two tiles.
   const gallery = tour.heroImage
-    ? [tour.heroImage, ...tour.images.filter((src) => src !== tour.heroImage)]
+    ? [
+        { url: tour.heroImage, alt: tour.heroImageAlt },
+        ...tour.images.filter((img) => img.url !== tour.heroImage),
+      ]
     : tour.images;
 
   return (
@@ -132,8 +135,8 @@ function TourDetail() {
             as the column beside it. Ratios still drive the stacked mobile layout. */}
         <div className="wrap grid gap-3 py-6 md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[440px]">
           <PhotoFrame
-            src={gallery[0]}
-            alt={`${tour.title} — main photograph`}
+            src={gallery[0]?.url}
+            alt={gallery[0]?.alt || `${tour.title} — main photograph`}
             gradient={gradientFor(tour.slug)}
             priority
             placeholderLabel={`images/pkg-${tour.slug}-1.jpg`}
@@ -142,8 +145,8 @@ function TourDetail() {
           {[1, 2, 3].map((i) => (
             <PhotoFrame
               key={i}
-              src={gallery[i]}
-              alt={`${tour.title} — photograph ${i + 1}`}
+              src={gallery[i]?.url}
+              alt={gallery[i]?.alt || `${tour.title} — photograph ${i + 1}`}
               gradient={gradientFor(`${tour.slug}-${i}`)}
               placeholderLabel={`images/pkg-${tour.slug}-${i + 1}.jpg`}
               className={`aspect-[4/3] rounded-2xl md:aspect-auto ${i === 1 ? "md:col-span-2" : ""}`}

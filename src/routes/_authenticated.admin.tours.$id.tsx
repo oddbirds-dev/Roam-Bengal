@@ -27,7 +27,7 @@ import {
   Toggle,
 } from "@/components/admin/fields";
 import { RichTextarea } from "@/components/admin/rich-textarea";
-import { GalleryField, ImageField } from "@/components/admin/image-upload";
+import { GalleryFieldWithAlt, ImageField } from "@/components/admin/image-upload";
 import { invalidateLinkTargets } from "@/components/admin/link-picker";
 import {
   adminGetTour,
@@ -97,7 +97,8 @@ function emptyTour() {
     // category <select> unassignable.
     category: "multi-day" as TourCategory,
     hero_image: "",
-    images: [] as string[],
+    hero_image_alt: "",
+    images: [] as { url: string; alt: string }[],
     duration_label: "",
     duration_days: 1,
     price_usd: null as number | null,
@@ -578,10 +579,12 @@ function TourEditor() {
                     hint="Leads the tour page gallery and every card. Falls back to the first gallery image."
                     value={form.hero_image}
                     onChange={(v) => set("hero_image", v)}
+                    alt={form.hero_image_alt}
+                    onAltChange={(v) => set("hero_image_alt", v)}
                   />
-                  <GalleryField
+                  <GalleryFieldWithAlt
                     label="Gallery"
-                    hint="The tour page shows the first four as a mosaic."
+                    hint="The tour page shows the first four as a mosaic. Alt text describes each photo for screen readers and search engines."
                     values={form.images}
                     onChange={(v) => set("images", v)}
                   />
@@ -1200,7 +1203,12 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     title: text(row.title),
     category: (row.category as TourForm["category"]) ?? "multi-day",
     hero_image: text(row.hero_image),
-    images: list(row.images) as string[],
+    hero_image_alt: text(row.hero_image_alt),
+    images: list(row.images).map((entry) =>
+      typeof entry === "string"
+        ? { url: entry, alt: "" }
+        : { url: text((entry as Record<string, unknown>)?.url), alt: text((entry as Record<string, unknown>)?.alt) },
+    ),
     duration_label: text(row.duration_label),
     duration_days: Number(row.duration_days ?? 1),
     price_usd: numOrNull(row.price_usd),
