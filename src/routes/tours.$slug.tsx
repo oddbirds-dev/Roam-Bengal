@@ -415,8 +415,8 @@ function TourDetail() {
 
                       return [
                         <AdviceLine key={block.title} title={block.title} detail={block.items[0] ?? ""} />,
-                        ...block.items.slice(1).map((item, index) => {
-                          const { title, detail } = splitAdviceItem(item, index);
+                        ...block.items.slice(1).map((item) => {
+                          const { title, detail } = splitAdviceItem(item);
                           return <AdviceLine key={`${block.title}-${item}`} title={title} detail={detail} />;
                         }),
                       ];
@@ -666,12 +666,14 @@ function Section({
 function AdviceLine({ title, detail }: { title: string; detail: string }) {
   return (
     <p>
-      <strong className="font-semibold text-ink">
-        <FormatText>{title}</FormatText>
-      </strong>
+      {title ? (
+        <strong className="font-semibold text-ink">
+          <FormatText>{title}</FormatText>
+        </strong>
+      ) : null}
       {detail ? (
         <span className="text-muted">
-          {" – "}
+          {title ? " – " : ""}
           <FormatText>{detail}</FormatText>
         </span>
       ) : null}
@@ -679,11 +681,19 @@ function AdviceLine({ title, detail }: { title: string; detail: string }) {
   );
 }
 
-function splitAdviceItem(item: string, index: number): { title: string; detail: string } {
-  const match = item.match(/^\s*([^*<]*?)\s*(?:<strong>([\s\S]*?)<\/strong>|\*\*([\s\S]*?)\*\*)\s*(?:—|-|:\s*)\s*([\s\S]*)$/i);
-  if (!match) return { title: `Trip Advice ${index + 1}`, detail: item };
+function splitAdviceItem(item: string): { title: string; detail: string } {
+  // The bold phrase can sit behind wrapper markup the toolbar adds (e.g. a
+  // font-size <span>), so search for it anywhere rather than anchoring to
+  // the start of the string.
+  const bold = item.match(/<strong[^>]*>([\s\S]*?)<\/strong>|\*\*([\s\S]*?)\*\*/i);
+  if (!bold || bold.index === undefined) return { title: "", detail: item };
 
-  return { title: `${match[1] ?? ""}${match[2] ?? match[3] ?? `Trip Advice ${index + 1}`}`.trim(), detail: match[4] ?? "" };
+  const prefix = item.slice(0, bold.index);
+  const rest = item.slice(bold.index + bold[0].length);
+  const separator = rest.match(/^\s*(?:—|-|:)\s*/);
+  const detail = separator ? rest.slice(separator[0].length) : rest.trimStart();
+
+  return { title: `${prefix}${bold[1] ?? bold[2] ?? ""}`.trim(), detail };
 }
 
 function hasSection(tour: TourDTO, id: string): boolean {

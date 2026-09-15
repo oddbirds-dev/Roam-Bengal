@@ -99,6 +99,18 @@ export function SiteFooter() {
         </div>
         <span>{footer.site_label}</span>
       </div>
+
+      <div className="mt-[26px] border-t border-white/10 py-4 text-center text-[0.78rem] tracking-[0.04em] opacity-70">
+        DEVELOPED BY{" "}
+        <a
+          href="https://www.platiroll.com"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="font-bold text-gold opacity-100 transition-opacity hover:opacity-80"
+        >
+          PLATIROLL
+        </a>
+      </div>
     </footer>
   );
 }
