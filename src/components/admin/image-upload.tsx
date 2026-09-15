@@ -119,6 +119,7 @@ export function ImageField({
 export interface GalleryImage {
   url: string;
   alt: string;
+  title: string;
 }
 
 /**
@@ -146,7 +147,7 @@ export function GalleryFieldWithAlt({
     setError(null);
     try {
       const uploaded: GalleryImage[] = [];
-      for (const file of Array.from(files)) uploaded.push({ url: await uploadFile(file), alt: "" });
+      for (const file of Array.from(files)) uploaded.push({ url: await uploadFile(file), alt: "", title: "" });
       onChange([...values, ...uploaded]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
@@ -157,6 +158,10 @@ export function GalleryFieldWithAlt({
 
   function setAlt(i: number, alt: string) {
     onChange(values.map((img, idx) => (idx === i ? { ...img, alt } : img)));
+  }
+
+  function setTitle(i: number, title: string) {
+    onChange(values.map((img, idx) => (idx === i ? { ...img, title } : img)));
   }
 
   return (
@@ -185,6 +190,13 @@ export function GalleryFieldWithAlt({
                 onChange={(e) => setAlt(i, e.target.value)}
                 className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-2.5 py-1.5 text-[0.76rem] outline-none focus:border-green"
               />
+              <input
+                type="text"
+                value={img.title}
+                placeholder="Meta title"
+                onChange={(e) => setTitle(i, e.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-2.5 py-1.5 text-[0.76rem] outline-none focus:border-green"
+              />
             </div>
           ))}
         </div>
@@ -210,7 +222,7 @@ export function GalleryFieldWithAlt({
             e.preventDefault();
             const url = e.currentTarget.value.trim();
             if (!url) return;
-            onChange([...values, { url, alt: "" }]);
+            onChange([...values, { url, alt: "", title: "" }]);
             e.currentTarget.value = "";
           }}
           className="min-w-[220px] flex-1 rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2 text-[0.82rem] outline-none focus:border-green"

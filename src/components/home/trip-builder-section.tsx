@@ -128,8 +128,14 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   return (
     <section className="shell relative isolate overflow-hidden pt-[70px] pb-[60px]">
       <div className="tripBackground" />
+      <img
+        src="/tripbuilder.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+      />
       <TripBuilderDecor />
-      <div className="wide relative">
+      <div className="wide relative z-10">
         <div className="mx-auto mb-8 max-w-[1000px] text-center">
           <h2 className="mb-2 font-display text-[1.9rem] font-bold">
             {homepage.trip_builder_heading}
@@ -179,6 +185,13 @@ export function TripBuilderSection(_props: HomeSectionProps) {
             <div className="flex flex-col gap-7">
               {areasByRegion.map(({ region, areas: regionAreas }) => (
                 <div key={region}>
+                  <div className="mb-4 flex items-center gap-3" aria-label={`${region} region`}>
+                    <span className="h-px flex-1 bg-rule" />
+                    <span className="rounded-full bg-[#e5eafb] px-4 py-2 text-center text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#2f5aa8]">
+                      {region}
+                    </span>
+                    <span className="h-px flex-1 bg-rule" />
+                  </div>
                   <div className="grid grid-cols-1 gap-3 min-[640px]:grid-cols-2">
                     {regionAreas.map((area) => (
                       <AreaCard
@@ -509,19 +522,21 @@ function AreaCard({
   onToggle: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={selected}
-      className={`relative rounded-2xl border-[1.5px] p-4 text-left transition-colors ${
+    <label
+      className={`relative block cursor-pointer rounded-2xl border-[1.5px] p-4 text-left transition-colors ${
         selected ? "border-green-dark bg-mint/60" : "border-rule bg-paper hover:border-green"
       }`}
     >
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggle}
+        aria-label={`Select ${area.label}`}
+        className="peer absolute top-4 right-4 h-5 w-5 cursor-pointer appearance-none rounded-md border-[1.5px] border-rule bg-paper checked:border-orange checked:bg-orange"
+      />
       <span
-        className={`absolute top-4 right-4 flex h-5 w-5 items-center justify-center rounded-md border-[1.5px] text-[0.7rem] ${
-          selected ? "border-orange bg-orange text-white" : "border-rule text-transparent"
-        }`}
         aria-hidden="true"
+        className="pointer-events-none absolute top-4 right-4 flex h-5 w-5 items-center justify-center text-[0.7rem] text-white opacity-0 peer-checked:opacity-100"
       >
         ✓
       </span>
@@ -529,6 +544,6 @@ function AreaCard({
         <span className="font-body text-[0.92rem] font-bold">{area.label}</span>
       </span>
       <span className="mt-1.5 block text-[0.78rem] leading-5 text-muted">{area.blurb}</span>
-    </button>
+    </label>
   );
 }

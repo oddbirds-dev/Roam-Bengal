@@ -98,7 +98,7 @@ function emptyTour() {
     category: "multi-day" as TourCategory,
     hero_image: "",
     hero_image_alt: "",
-    images: [] as { url: string; alt: string }[],
+    images: [] as { url: string; alt: string; title: string }[],
     duration_label: "",
     duration_days: 1,
     price_usd: null as number | null,
@@ -1206,8 +1206,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     hero_image_alt: text(row.hero_image_alt),
     images: list(row.images).map((entry) =>
       typeof entry === "string"
-        ? { url: entry, alt: "" }
-        : { url: text((entry as Record<string, unknown>)?.url), alt: text((entry as Record<string, unknown>)?.alt) },
+        ? { url: entry, alt: "", title: "" } : { url: text((entry as Record<string, unknown>)?.url), alt: text((entry as Record<string, unknown>)?.alt), title: text((entry as Record<string, unknown>)?.title) },
     ),
     duration_label: text(row.duration_label),
     duration_days: Number(row.duration_days ?? 1),

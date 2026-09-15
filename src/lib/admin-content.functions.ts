@@ -125,6 +125,7 @@ const TourFaq = z.object({
 const TourImage = z.object({
   url: z.string().max(1000),
   alt: z.string().max(300).default(""),
+  title: z.string().max(300).default("").transform(stripUnsafeHtml),
 });
 
 /**
@@ -169,7 +170,7 @@ const TourInput = z.object({
   accessibility: z.array(AccessibilityEntry).default([]),
   advice: z.array(AdviceBlock).default([]),
   pledge: textArray(400),
-  why_items: textArray(400),
+  why_items: unrestrictedTextArray(),
   faqs: z.array(TourFaq).default([]),
   map_embed: optionalText(2000),
   video_url: optionalText(2000),

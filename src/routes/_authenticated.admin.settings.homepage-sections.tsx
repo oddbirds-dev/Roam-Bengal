@@ -8,7 +8,8 @@ import {
   FieldControl,
   hydrateSetting,
 } from "@/components/admin/settings-form";
-import { HOMEPAGE_SECTION_FIELDS } from "@/lib/content-schema";
+import { AreaIdsPicker, DraggableRepeaterField } from "@/components/admin/fields";
+import { HOMEPAGE_SECTION_FIELDS, asRows } from "@/lib/content-schema";
 import { adminPatchSetting, adminSaveSetting } from "@/lib/admin-content.functions";
 import {
   HOME_LAYOUT_KEY,
@@ -178,14 +179,42 @@ function HomepageSectionsScreen() {
 
                       {isExpanded ? (
                         <div className="flex flex-col gap-5 border-t border-rule p-4">
-                          {fields.map((field) => (
-                            <FieldControl
-                              key={field.key}
-                              field={field}
-                              value={copy[field.key]}
-                              onChange={(v) => setCopy((prev) => ({ ...prev, [field.key]: v }))}
-                            />
-                          ))}
+                          {fields.map((field) =>
+                            field.kind === "rows" && field.key === "trip_builder_presets" ? (
+                              <DraggableRepeaterField
+                                key={field.key}
+                                label={field.label}
+                                hint={field.hint}
+                                columns={field.columns.map((col) =>
+                                  col.key === "areaIds"
+                                    ? {
+                                        ...col,
+                                        render: (value: unknown, onChange: (v: unknown) => void) => (
+                                          <AreaIdsPicker
+                                            areas={asRows(copy.trip_builder_areas) as unknown as {
+                                              id: string;
+                                              label: string;
+                                            }[]}
+                                            value={String(value ?? "")}
+                                            onChange={onChange}
+                                          />
+                                        ),
+                                      }
+                                    : col,
+                                )}
+                                values={asRows(copy[field.key])}
+                                blank={() => ({ ...field.blank })}
+                                onChange={(v) => setCopy((prev) => ({ ...prev, [field.key]: v }))}
+                              />
+                            ) : (
+                              <FieldControl
+                                key={field.key}
+                                field={field}
+                                value={copy[field.key]}
+                                onChange={(v) => setCopy((prev) => ({ ...prev, [field.key]: v }))}
+                              />
+                            ),
+                          )}
                           <p className="flex items-center gap-1.5 text-[0.78rem] text-muted">
                             <AdminIcon name="eye" className="h-3.5 w-3.5" />
                             Watch the preview — changes show up as you type.

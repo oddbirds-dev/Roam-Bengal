@@ -98,13 +98,13 @@ function strArr(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : [];
 }
 
-/** `images` is jsonb `{url, alt}[]`; older rows (pre-migration) still carry plain URL strings. */
+/** `images` is jsonb `{url, alt, title}[]`; older rows still carry plain URL strings or omit title. */
 function imageArr(value: unknown): TourImage[] {
   if (!Array.isArray(value)) return [];
   return value.map((entry) =>
     typeof entry === "string"
-      ? { url: entry, alt: "" }
-      : { url: str((entry as Record<string, unknown>)?.url), alt: str((entry as Record<string, unknown>)?.alt) },
+      ? { url: entry, alt: "", title: "" }
+      : { url: str((entry as Record<string, unknown>)?.url), alt: str((entry as Record<string, unknown>)?.alt), title: str((entry as Record<string, unknown>)?.title) },
   );
 }
 

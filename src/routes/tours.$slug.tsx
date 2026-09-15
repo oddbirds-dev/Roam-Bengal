@@ -114,7 +114,7 @@ function TourDetail() {
   // also in the gallery must not take two tiles.
   const gallery = tour.heroImage
     ? [
-        { url: tour.heroImage, alt: tour.heroImageAlt },
+        { url: tour.heroImage, alt: tour.heroImageAlt, title: "" },
         ...tour.images.filter((img) => img.url !== tour.heroImage),
       ]
     : tour.images;
@@ -137,6 +137,7 @@ function TourDetail() {
           <PhotoFrame
             src={gallery[0]?.url}
             alt={gallery[0]?.alt || `${tour.title} — main photograph`}
+            title={gallery[0]?.title}
             gradient={gradientFor(tour.slug)}
             priority
             placeholderLabel={`images/pkg-${tour.slug}-1.jpg`}
@@ -147,6 +148,7 @@ function TourDetail() {
               key={i}
               src={gallery[i]?.url}
               alt={gallery[i]?.alt || `${tour.title} — photograph ${i + 1}`}
+              title={gallery[i]?.title}
               gradient={gradientFor(`${tour.slug}-${i}`)}
               placeholderLabel={`images/pkg-${tour.slug}-${i + 1}.jpg`}
               className={`aspect-[4/3] rounded-2xl md:aspect-auto ${i === 1 ? "md:col-span-2" : ""}`}
@@ -403,27 +405,19 @@ function TourDetail() {
 
               {tour.advice.length ? (
                 <Section id="advice" title="🎯 Trip Advice & Responsibilities" headingClassName="font-body text-base">
-                  <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-1 text-[0.92rem] leading-6">
                     {tour.advice.flatMap((block) => {
                       if (block.items.length <= 1) {
                         return [
-                          <AdviceCard key={block.title} title={block.title}>
-                            {block.items[0] ?? ""}
-                          </AdviceCard>,
+                          <AdviceLine key={block.title} title={block.title} detail={block.items[0] ?? ""} />,
                         ];
                       }
 
                       return [
-                        <AdviceCard key={block.title} title={block.title}>
-                          {block.items[0] ?? ""}
-                        </AdviceCard>,
+                        <AdviceLine key={block.title} title={block.title} detail={block.items[0] ?? ""} />,
                         ...block.items.slice(1).map((item, index) => {
                           const { title, detail } = splitAdviceItem(item, index);
-                          return (
-                            <AdviceCard key={`${block.title}-${item}`} title={title}>
-                              {detail}
-                            </AdviceCard>
-                          );
+                          return <AdviceLine key={`${block.title}-${item}`} title={title} detail={detail} />;
                         }),
                       ];
                     })}
@@ -669,18 +663,19 @@ function Section({
   );
 }
 
-function AdviceCard({ title, children }: { title: string; children: string }) {
+function AdviceLine({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-xl border border-rule p-5">
-      <h3 className="font-display text-[0.98rem] font-black text-green-dark">
+    <p>
+      <strong className="font-semibold text-ink">
         <FormatText>{title}</FormatText>
-      </h3>
-      {children ? (
-        <p className="mt-3 text-[0.86rem] leading-6">
-          <FormatText>{children}</FormatText>
-        </p>
+      </strong>
+      {detail ? (
+        <span className="text-muted">
+          {" – "}
+          <FormatText>{detail}</FormatText>
+        </span>
       ) : null}
-    </div>
+    </p>
   );
 }
 

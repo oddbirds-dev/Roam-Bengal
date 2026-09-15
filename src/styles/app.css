@@ -37,26 +37,10 @@
   z-index: -1;
   overflow: hidden;
   background:
-    radial-gradient(
-      circle at 10% 20%,
-      rgba(79, 124, 85, 0.12),
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 90% 30%,
-      rgba(216, 150, 60, 0.10),
-      transparent 22%
-    ),
-    radial-gradient(
-      circle at 15% 85%,
-      rgba(40, 90, 60, 0.12),
-      transparent 28%
-    ),
-    linear-gradient(
-      180deg,
-      #fffdf7 0%,
-      #f8f1e4 100%
-    );
+    radial-gradient(circle at 10% 20%, rgba(79, 124, 85, 0.12), transparent 25%),
+    radial-gradient(circle at 90% 30%, rgba(216, 150, 60, 0.10), transparent 22%),
+    radial-gradient(circle at 15% 85%, rgba(40, 90, 60, 0.12), transparent 28%),
+    linear-gradient(180deg, #fffdf7 0%, #f8f1e4 100%);
 }
 
 .tour-sections {

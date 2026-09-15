@@ -34,6 +34,7 @@ export function gradientFor(seed: string): FrameGradient {
 interface PhotoFrameProps {
   src?: string | null;
   alt: string;
+  title?: string;
   gradient?: FrameGradient;
   /** Raw CSS gradient, for the one-off frames the reference styles inline. */
   gradientCss?: string;
@@ -51,6 +52,7 @@ interface PhotoFrameProps {
 export function PhotoFrame({
   src,
   alt,
+  title,
   gradient = "green",
   gradientCss,
   className = "",
@@ -92,6 +94,7 @@ export function PhotoFrame({
         <img
           src={src!}
           alt={alt}
+          title={title || undefined}
           loading={priority ? "eager" : "lazy"}
           decoding={priority ? "sync" : "async"}
           fetchPriority={priority ? "high" : "auto"}

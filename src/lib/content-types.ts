@@ -176,6 +176,8 @@ export interface TourImage {
   url: string;
   /** Blank falls back to a generic "{title} — photograph" alt at render time. */
   alt: string;
+  /** Optional browser/SEO title for the image. */
+  title: string;
 }
 
 export interface TourDTO {

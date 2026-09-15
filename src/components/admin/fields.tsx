@@ -564,6 +564,63 @@ export function StringListField({
   );
 }
 
+/**
+ * Checkbox picker for a preset's `areaIds` cell — lets the admin tap areas by name instead
+ * of hand-typing comma-separated IDs that have to match the Areas list above exactly.
+ */
+export function AreaIdsPicker({
+  areas,
+  value,
+  onChange,
+}: {
+  areas: readonly { id: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const selected = new Set(
+    value
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean),
+  );
+
+  function toggle(id: string) {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onChange(Array.from(next).join(", "));
+  }
+
+  if (areas.length === 0) {
+    return (
+      <p className="rounded-[10px] border border-dashed border-rule px-3.5 py-2.5 text-[0.8rem] text-muted">
+        Add areas above first.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5 rounded-[10px] border border-rule bg-paper p-2.5">
+      {areas.map((area) => {
+        const on = selected.has(area.id);
+        return (
+          <button
+            key={area.id}
+            type="button"
+            aria-pressed={on}
+            onClick={() => toggle(area.id)}
+            className={`rounded-full border-[1.5px] px-3 py-1.5 text-[0.78rem] font-medium transition-colors ${
+              on ? "border-green-dark bg-mint text-green-dark" : "border-rule text-ink hover:border-green"
+            }`}
+          >
+            {area.label || area.id}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export interface RepeaterColumn<T> {
   key: keyof T & string;
   label: string;
