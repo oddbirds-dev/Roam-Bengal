@@ -8,13 +8,21 @@ alter table public.tours
 alter table public.tours
   alter column images drop default;
 
-alter table public.tours
-  alter column images type jsonb using (
-    coalesce(
-      (select jsonb_agg(jsonb_build_object('url', img, 'alt', '')) from unnest(images) as img),
-      '[]'::jsonb
-    )
+-- A `USING` expression can't contain a subquery, so the text[] -> jsonb conversion
+-- is done via a throwaway function instead of an inline `unnest`/`jsonb_agg`.
+create or replace function pg_temp.tour_images_to_jsonb(imgs text[])
+returns jsonb
+language sql
+immutable
+as $$
+  select coalesce(
+    (select jsonb_agg(jsonb_build_object('url', img, 'alt', '')) from unnest(imgs) as img),
+    '[]'::jsonb
   );
+$$;
+
+alter table public.tours
+  alter column images type jsonb using pg_temp.tour_images_to_jsonb(images);
 
 alter table public.tours
   alter column images set default '[]'::jsonb;

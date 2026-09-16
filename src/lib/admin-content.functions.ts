@@ -213,7 +213,15 @@ export const adminGetTour = createServerFn({ method: "GET" })
 
 export const adminUpsertTour = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ id: z.string().uuid().optional(), tour: TourInput }))
+  .validator(
+    z.object({
+      id: z.string().uuid().optional(),
+      // The editor creates this before inserting so the id remains available even if
+      // the server-function response is serialized without its return body.
+      create_id: z.string().uuid().optional(),
+      tour: TourInput,
+    }),
+  )
   .handler(async ({ context, data }): Promise<{ id: string }> => {
     await assertAdmin(context);
     const sb = context.supabase;
@@ -229,17 +237,22 @@ export const adminUpsertTour = createServerFn({ method: "POST" })
       // An update filtered to zero rows by RLS returns success with no row — that is a
       // silent no-op, not a save, so surface it.
       if (!row) httpError(404, "Tour not found, or you do not have permission to edit it");
-      return { id: row.id };
+      return { id: data.id };
     }
 
+    // Generate the id before the insert instead of depending on PostgREST returning the
+    // generated default. The client uses this id immediately to write theme links; if a
+    // proxy or response serializer drops the returned row, that handoff otherwise becomes
+    // `tourId: undefined` and fails the UUID validator.
+    const id = data.create_id ?? crypto.randomUUID();
     const { data: row, error } = await sb
       .from("tours")
-      .insert(data.tour as never)
+      .insert({ id, ...data.tour } as never)
       .select("id")
       .maybeSingle();
     orThrow("adminUpsertTour(insert)", error);
     if (!row) httpError(500, "Tour was not created");
-    return { id: row.id };
+    return { id };
   });
 
 export const adminDeleteTour = createServerFn({ method: "POST" })

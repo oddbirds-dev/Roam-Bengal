@@ -283,24 +283,35 @@ function TourEditor() {
 
   async function save() {
     const payload = { ...form, slug: form.slug.trim() || slugify(form.title) };
+    const createId = isNew ? crypto.randomUUID() : undefined;
     const result = await run(() =>
-      adminUpsertTour({ data: { ...(tour ? { id: tour.id } : {}), tour: payload as never } }),
+      adminUpsertTour({
+        data: {
+          ...(tour ? { id: tour.id } : { create_id: createId }),
+          tour: payload as never,
+        },
+      }),
     );
     if (!result) return;
 
+    // Keep the locally generated id as a fallback for older/stale server bundles that
+    // complete the insert but omit the return body during serialization.
+    const savedId = result.id ?? createId;
+    if (!savedId) return;
+
     const linked = await run(() =>
-      adminSetTourThemes({ data: { tourId: result.id, activityIds: themeIds } }),
+      adminSetTourThemes({ data: { tourId: savedId, activityIds: themeIds } }),
     );
     if (!linked) return;
 
-    if (!(await saveSeoMeta(result.id))) return;
+    if (!(await saveSeoMeta(savedId))) return;
 
     setForm((f) => ({ ...f, slug: payload.slug }));
     setBaseline(serialize({ form: payload, themeIds }));
     // The link picker caches its list per session; `router.invalidate()` doesn't reach it.
     invalidateLinkTargets();
     // A new tour lives at a placeholder route until it has an id.
-    if (isNew) await navigate({ to: "/admin/tours/$id", params: { id: result.id } });
+    if (isNew) await navigate({ to: "/admin/tours/$id", params: { id: savedId } });
   }
 
   return (
