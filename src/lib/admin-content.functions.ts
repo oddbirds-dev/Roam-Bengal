@@ -7,6 +7,7 @@ import {
   type SupabaseAuthContext,
 } from "@/integrations/supabase/auth-middleware";
 import { deepStripUnsafeHtml, stripUnsafeHtml } from "@/lib/sanitize";
+import { ADVICE_MAX_GAP } from "@/lib/content-types";
 
 /**
  * Admin write API.
@@ -115,6 +116,7 @@ const AccessibilityEntry = z.object({
 const AdviceBlock = z.object({
   title: unrestrictedText(),
   items: unrestrictedTextArray(),
+  gapBefore: z.number().int().min(0).max(ADVICE_MAX_GAP).default(0),
 });
 
 const TourFaq = z.object({
@@ -160,7 +162,7 @@ const TourInput = z.object({
   facts: z.record(z.string().max(40), z.string().max(200)).default({}),
   overview: optionalText(8000),
   overview_tip: optionalText(1000),
-  highlights: textArray(600),
+  highlights: unrestrictedTextArray(),
   glance: z.array(GlanceEntry).default([]),
   addons: z.array(AddonEntry).default([]),
   itinerary: z.array(ItineraryDay).default([]),

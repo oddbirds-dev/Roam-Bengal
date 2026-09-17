@@ -405,22 +405,20 @@ function TourDetail() {
 
               {tour.advice.length ? (
                 <Section id="advice" title="🎯 Trip Advice & Responsibilities" headingClassName="font-body text-base">
-                  <div className="flex flex-col gap-1 text-[0.92rem] leading-6">
-                    {tour.advice.flatMap((block) => {
-                      if (block.items.length <= 1) {
-                        return [
-                          <AdviceLine key={block.title} title={block.title} detail={block.items[0] ?? ""} />,
-                        ];
-                      }
-
-                      return [
-                        <AdviceLine key={block.title} title={block.title} detail={block.items[0] ?? ""} />,
-                        ...block.items.slice(1).map((item) => {
+                  <div className="flex flex-col text-[0.92rem] leading-6">
+                    {tour.advice.map((block, index) => (
+                      <div
+                        key={block.title}
+                        className="flex flex-col gap-1"
+                        style={index ? { marginTop: `${1 + (block.gapBefore ?? 0) * 0.75}rem` } : undefined}
+                      >
+                        <AdviceLine title={block.title} detail={block.items[0] ?? ""} />
+                        {block.items.slice(1).map((item) => {
                           const { title, detail } = splitAdviceItem(item);
                           return <AdviceLine key={`${block.title}-${item}`} title={title} detail={detail} />;
-                        }),
-                      ];
-                    })}
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </Section>
               ) : null}

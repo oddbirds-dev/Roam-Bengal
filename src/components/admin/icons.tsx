@@ -41,6 +41,7 @@ const PATHS: Record<string, string> = {
   quote: "M9 7H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3v1a3 3 0 0 1-3 3M20 7h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3v1a3 3 0 0 1-3 3",
   listBullet: "M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01",
   listOrdered: "M10 6h10M10 12h10M10 18h10M4 5h1v4M4 15.5h2M4 18.5h2M4 15.5a1 1 0 0 1 2 0c0 1-2 1.5-2 3h2",
+  lineSpacing: "M10 6h10M10 12h10M10 18h10M5 4v16M5 4l-2 3M5 4l2 3M5 20l-2-3M5 20l2-3",
 };
 
 export function AdminIcon({

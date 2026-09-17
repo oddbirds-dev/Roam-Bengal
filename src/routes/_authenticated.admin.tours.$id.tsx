@@ -46,6 +46,7 @@ import {
   type TourSectionId,
 } from "@/lib/tour-sections";
 import {
+  ADVICE_MAX_GAP,
   TOUR_FACT_DEFAULTS,
   TOUR_FACT_KEYS,
   TOUR_FACT_KEYS_EXTRA,
@@ -136,7 +137,7 @@ function emptyTour() {
     inclusions: [] as string[],
     exclusions: [] as string[],
     accessibility: [] as { label: string; detail: string }[],
-    advice: [] as { title: string; items: string[] }[],
+    advice: [] as { title: string; items: string[]; gapBefore?: number }[],
     pledge: [] as string[],
     why_items: [] as string[],
     faqs: [] as { question: string; answer: string }[],
@@ -795,9 +796,10 @@ function TourEditor() {
                 >
                   <InlineLinesField
                     label="Advice blocks"
-                    hint="One block per paragraph, separated by a blank line. First line of each is the heading, the rest are items."
+                    hint="Type a heading, press Enter to write its line, then Enter once more to start the next block. Shift+Enter adds another line to the current block instead. Press Enter extra times before a heading to add visible spacing before that block on the live page."
                     rows={8}
                     value={adviceDocument}
+                    blockSeparatorOnEnter
                     onChange={(value) => {
                       setAdviceDocument(value);
                       set("advice", parseAdvice(value));
@@ -1170,6 +1172,7 @@ function InlineLinesField({
   value,
   onChange,
   boldLinePrefixPattern,
+  blockSeparatorOnEnter,
 }: {
   label: string;
   hint?: string;
@@ -1177,6 +1180,7 @@ function InlineLinesField({
   value: string;
   onChange: (value: string) => void;
   boldLinePrefixPattern?: RegExp;
+  blockSeparatorOnEnter?: boolean;
 }) {
   return (
     <div>
@@ -1188,6 +1192,7 @@ function InlineLinesField({
         onChange={onChange}
         ariaLabel={label}
         boldLinePrefixPattern={boldLinePrefixPattern}
+        blockSeparatorOnEnter={blockSeparatorOnEnter}
       />
     </div>
   );
@@ -1290,28 +1295,39 @@ function parseInlineLines(documentHtml: string, keepEmpty = true): string[] {
     .map((line) => line.html);
 }
 
-function serializeAdvice(advice: { title: string; items: string[] }[]): string {
+function serializeAdvice(advice: { title: string; items: string[]; gapBefore?: number }[]): string {
   return serializeInlineLines(
     advice.flatMap((block, index) => [
-      ...(index ? [""] : []),
+      ...(index ? Array<string>(1 + (block.gapBefore ?? 0)).fill("") : []),
       block.title,
       ...block.items,
     ]),
   );
 }
 
-function parseAdvice(documentHtml: string): { title: string; items: string[] }[] {
-  const blocks: { title: string; items: string[] }[] = [];
+/** Blank lines beyond the mandatory single separator become `gapBefore` on the block that
+ *  follows them, so deliberate extra spacing survives a save/reload instead of collapsing. */
+function parseAdvice(documentHtml: string): { title: string; items: string[]; gapBefore?: number }[] {
+  const blocks: { title: string; items: string[]; gapBefore?: number }[] = [];
   let current: string[] = [];
+  let currentGap = 0;
+  let blankStreak = 0;
   const flush = () => {
     if (!current.length) return;
     const [title = "", ...items] = current;
-    blocks.push({ title, items });
+    blocks.push(currentGap ? { title, items, gapBefore: currentGap } : { title, items });
     current = [];
+    currentGap = 0;
   };
   for (const line of inlineParagraphs(documentHtml)) {
-    if (!line.text.trim()) flush();
-    else current.push(line.html);
+    if (!line.text.trim()) {
+      if (current.length) flush();
+      blankStreak += 1;
+    } else {
+      if (!current.length) currentGap = Math.min(ADVICE_MAX_GAP, Math.max(0, blankStreak - 1));
+      current.push(line.html);
+      blankStreak = 0;
+    }
   }
   flush();
   return blocks;

@@ -162,9 +162,15 @@ export interface AccessibilityEntry {
   detail: string;
 }
 
+/** Extra blank lines an admin left before this block in the "Advice blocks" editor,
+ *  beyond the mandatory single separator — translated into extra vertical spacing before
+ *  it on the public page. 0/undefined = normal spacing. Capped server-side by `ADVICE_MAX_GAP`. */
+export const ADVICE_MAX_GAP = 6;
+
 export interface AdviceBlock {
   title: string;
   items: string[];
+  gapBefore?: number;
 }
 
 export interface TourFaq {

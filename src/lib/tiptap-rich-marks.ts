@@ -99,3 +99,52 @@ function styleMark(name: string, property: "font-size" | "color", unit = "") {
 export const FontSizeMark = styleMark("fontSize", "font-size", "px");
 /** Arbitrary hex colours intentionally remain separate from palette class colours. */
 export const CustomColorMark = styleMark("customColor", "color");
+
+export const BASE_LINE_HEIGHT = 1.6;
+export const MIN_LINE_HEIGHT = 1;
+export const MAX_LINE_HEIGHT = 3;
+export const LINE_HEIGHT_STEP = 0.1;
+
+const clampLineHeight = (value: number) =>
+  Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Math.round(value * 10) / 10));
+
+/** Unlike font-size, line-height is unitless, so it needs its own float parsing rather
+ * than styleMark's integer-px handling. Mod-Shift-Up/Down mirror the toolbar stepper so
+ * the shortcut users reach for instinctively actually does something. */
+export const LineHeightMark = Mark.create({
+  name: "lineHeight",
+  addAttributes() {
+    return {
+      value: {
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const raw = element.style.getPropertyValue("line-height");
+          return raw ? Number.parseFloat(raw) || null : null;
+        },
+        renderHTML: (attributes: { value?: number | null }) =>
+          attributes.value !== null && attributes.value !== undefined
+            ? { style: `line-height: ${attributes.value}` }
+            : {},
+      },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'span[style*="line-height"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["span", mergeAttributes(HTMLAttributes), 0];
+  },
+  addKeyboardShortcuts() {
+    const step = (delta: number) => () => {
+      const { editor } = this;
+      if (editor.state.selection.empty) return false;
+      const current = Number(editor.getAttributes("lineHeight").value) || BASE_LINE_HEIGHT;
+      editor.chain().focus().setMark("lineHeight", { value: clampLineHeight(current + delta) }).run();
+      return true;
+    };
+    return {
+      "Mod-Shift-ArrowUp": step(LINE_HEIGHT_STEP),
+      "Mod-Shift-ArrowDown": step(-LINE_HEIGHT_STEP),
+    };
+  },
+});

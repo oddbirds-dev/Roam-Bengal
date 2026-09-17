@@ -12,13 +12,18 @@ import { resolveCustomFonts } from "@/lib/custom-fonts";
 import { markdown } from "@/lib/markdown";
 import {
   BASE_FONT_PX,
+  BASE_LINE_HEIGHT,
   COLOR_OPTIONS,
   ColorClassMark,
   CustomColorMark,
   FONT_OPTIONS,
   FontSizeMark,
+  LINE_HEIGHT_STEP,
+  LineHeightMark,
   MAX_FONT_PX,
+  MAX_LINE_HEIGHT,
   MIN_FONT_PX,
+  MIN_LINE_HEIGHT,
   createFontClassMark,
 } from "@/lib/tiptap-rich-marks";
 
@@ -63,6 +68,33 @@ const BoldLinePrefix = Extension.create<{ pattern: RegExp }>({
   },
 });
 
+/** In block-separated inline-lines fields (e.g. advice blocks), a paragraph preceded by
+ * an empty paragraph (or the very first paragraph in the document) is a block's heading —
+ * Enter there just starts that block's body line, same as before. Enter anywhere else ends
+ * the current block: it inserts the blank separator paragraph the parser needs *and* the
+ * next paragraph in one keystroke, so a single Enter is enough to start a new block.
+ * Shift+Enter always adds a plain line within the current block, for the rare multi-line block. */
+const BlockSeparatorEnter = Extension.create({
+  name: "blockSeparatorEnter",
+  addKeyboardShortcuts() {
+    return {
+      Enter: () => {
+        const { editor } = this;
+        const { selection } = editor.state;
+        if (!selection.empty) return false;
+        const { $from } = selection;
+        const index = $from.index(0);
+        const previous = index > 0 ? editor.state.doc.child(index - 1) : null;
+        const previousIsBlank = !previous || previous.textContent.trim() === "";
+        return previousIsBlank
+          ? editor.chain().focus().splitBlock().run()
+          : editor.chain().focus().splitBlock().splitBlock().run();
+      },
+      "Shift-Enter": () => this.editor.chain().focus().splitBlock().run(),
+    };
+  },
+});
+
 /** TipTap-backed WYSIWYG. Values are emitted as HTML; legacy Markdown is normalized on load. */
 export function RichTextarea({
   id,
@@ -73,6 +105,7 @@ export function RichTextarea({
   ariaLabel,
   mode = "document",
   boldLinePrefixPattern,
+  blockSeparatorOnEnter = false,
 }: {
   id?: string;
   rows?: number;
@@ -82,6 +115,9 @@ export function RichTextarea({
   ariaLabel?: string;
   mode?: "document" | "inline-lines";
   boldLinePrefixPattern?: RegExp;
+  /** Inline-lines only: Enter ends the current block (blank separator + new paragraph)
+   * unless the line being split is a block's first line. */
+  blockSeparatorOnEnter?: boolean;
 }) {
   const inlineLines = mode === "inline-lines";
   const { custom_fonts } = useSiteSettings();
@@ -119,10 +155,12 @@ export function RichTextarea({
         createFontClassMark(customFonts.map((font) => font.className)),
         ColorClassMark,
         FontSizeMark,
+        LineHeightMark,
         CustomColorMark,
         ...(inlineLines && boldLinePrefixPattern
           ? [BoldLinePrefix.configure({ pattern: boldLinePrefixPattern })]
           : []),
+        ...(inlineLines && blockSeparatorOnEnter ? [BlockSeparatorEnter] : []),
         Placeholder.configure({ placeholder: placeholder ?? "" }),
       ],
       content: markdown.parse(value || "") as string,
@@ -143,7 +181,7 @@ export function RichTextarea({
         },
       },
     },
-    [customFontKey, inlineLines, boldLinePrefixPattern?.source],
+    [customFontKey, inlineLines, boldLinePrefixPattern?.source, blockSeparatorOnEnter],
   );
 
   useEffect(() => {
@@ -165,6 +203,10 @@ export function RichTextarea({
             fontSize:
               Number.parseInt(String(current.getAttributes("fontSize").value ?? BASE_FONT_PX), 10) ||
               BASE_FONT_PX,
+            lineHeight:
+              Number.parseFloat(
+                String(current.getAttributes("lineHeight").value ?? BASE_LINE_HEIGHT),
+              ) || BASE_LINE_HEIGHT,
             headingLevel: current.isActive("heading")
               ? ((current.getAttributes("heading").level as number | undefined) ?? 0)
               : 0,
@@ -192,6 +234,7 @@ export function RichTextarea({
     italic: false,
     underline: false,
     fontSize: BASE_FONT_PX,
+    lineHeight: BASE_LINE_HEIGHT,
     headingLevel: 0,
     bulletList: false,
     orderedList: false,
@@ -208,6 +251,12 @@ export function RichTextarea({
     if (!Number.isFinite(raw) || editor.state.selection.empty) return;
     const size = Math.min(MAX_FONT_PX, Math.max(MIN_FONT_PX, Math.round(raw)));
     editor.chain().focus().setMark("fontSize", { value: size }).run();
+  };
+
+  const applyLineHeight = (raw: number) => {
+    if (!Number.isFinite(raw) || editor.state.selection.empty) return;
+    const spacing = Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Math.round(raw * 10) / 10));
+    editor.chain().focus().setMark("lineHeight", { value: spacing }).run();
   };
 
   const openLinkPicker = () => {
@@ -309,6 +358,27 @@ export function RichTextarea({
           className="w-11 rounded border border-rule bg-paper px-1 py-0.5 text-center text-[0.72rem] outline-none"
         />
         <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => applySize(toolbarState.fontSize + 1)} title="Increase text size" className={button}>
+          <AdminIcon name="plus" className="h-3.5 w-3.5" />
+        </button>
+        <span className="h-4 w-px bg-rule" />
+        <span title="Line spacing" className="flex h-6 w-6 items-center justify-center text-ink/70">
+          <AdminIcon name="lineSpacing" className="h-3.5 w-3.5" />
+        </span>
+        <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => applyLineHeight(toolbarState.lineHeight - LINE_HEIGHT_STEP)} title="Decrease line spacing (Ctrl/Cmd+Shift+Down)" className={button}>
+          <AdminIcon name="minus" className="h-3.5 w-3.5" />
+        </button>
+        <input
+          type="number"
+          value={toolbarState.lineHeight}
+          min={MIN_LINE_HEIGHT}
+          max={MAX_LINE_HEIGHT}
+          step={LINE_HEIGHT_STEP}
+          disabled={showSource}
+          title="Line spacing"
+          onChange={(event) => applyLineHeight(event.target.valueAsNumber)}
+          className="w-11 rounded border border-rule bg-paper px-1 py-0.5 text-center text-[0.72rem] outline-none"
+        />
+        <button type="button" disabled={showSource} onMouseDown={(e) => e.preventDefault()} onClick={() => applyLineHeight(toolbarState.lineHeight + LINE_HEIGHT_STEP)} title="Increase line spacing (Ctrl/Cmd+Shift+Up)" className={button}>
           <AdminIcon name="plus" className="h-3.5 w-3.5" />
         </button>
         <span className="h-4 w-px bg-rule" />
