@@ -160,6 +160,7 @@ const TourInput = z.object({
   group_size_max: z.coerce.number().int().min(1).max(999).nullish(),
   stops_count: z.coerce.number().int().min(0).max(999).nullish(),
   facts: z.record(z.string().max(40), z.string().max(200)).default({}),
+  summary: optionalText(500),
   overview: optionalText(8000),
   overview_tip: optionalText(1000),
   highlights: unrestrictedTextArray(),

@@ -30,7 +30,7 @@ export function TourCard({
   const hasDiscount = price !== null && discountPrice !== null && discountPrice < price;
   const discountPct = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : null;
   // The overview is authored with markup, so the card strips it rather than printing tags.
-  const teaser = overviewParagraphs(tour.overview).map(plainText).find(Boolean);
+  const teaser = tour.summary?.trim() || overviewParagraphs(tour.overview).map(plainText).find(Boolean);
 
   return (
     <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_10px_28px_rgba(0,0,0,0.08)] transition-transform duration-250 hover:-translate-y-1.5">

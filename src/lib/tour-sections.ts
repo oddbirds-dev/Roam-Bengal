@@ -54,6 +54,7 @@ export interface TourSectionFields {
   hero_image: string;
   images: readonly unknown[];
   facts: Record<string, string>;
+  summary: string;
   overview: string;
   overview_tip: string;
   highlights: readonly string[];
@@ -142,7 +143,7 @@ export const TOUR_SECTIONS: readonly TourSection[] = [
     id: "overview",
     label: "Tour Introduction / Overview",
     hint: "The opening description and the good-to-know tip.",
-    hasContent: (f) => f.overview.trim() !== "" || f.overview_tip.trim() !== "",
+    hasContent: (f) => f.summary.trim() !== "" || f.overview.trim() !== "" || f.overview_tip.trim() !== "",
   },
   {
     id: "highlights",

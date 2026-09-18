@@ -127,6 +127,7 @@ function emptyTour() {
     // A new tour starts on the house defaults so the fact grid is filled in from the
     // first save; every field stays editable, and clearing one leaves it out of the grid.
     facts: { ...TOUR_FACT_DEFAULTS } as Record<string, string>,
+    summary: "",
     overview: "",
     overview_tip: "",
     highlights: [] as string[],
@@ -675,6 +676,13 @@ function TourEditor() {
                   open={openSections.overview}
                   onToggle={() => toggleSection("overview")}
                 >
+                  <TextArea
+                    label="Tour summary"
+                    hint="Shown under the title on every Tour Card. Keep it short and plain text."
+                    rows={3}
+                    value={form.summary}
+                    onChange={(v) => set("summary", v)}
+                  />
                   <TextArea
                     label="Overview"
                     hint="Leave a blank line between paragraphs."
@@ -1243,6 +1251,7 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     group_size_max: numOrNull(row.group_size_max),
     stops_count: numOrNull(row.stops_count),
     facts: (row.facts && typeof row.facts === "object" ? row.facts : {}) as Record<string, string>,
+    summary: text(row.summary),
     overview: text(row.overview),
     overview_tip: text(row.overview_tip),
     highlights: list(row.highlights) as string[],

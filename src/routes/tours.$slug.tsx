@@ -302,7 +302,7 @@ function TourDetail() {
                               {day.title}
                             </h3>
                             {day.detail ? (
-                              <div className="mt-1.5 text-[0.9rem] leading-7 text-ink/85">
+                              <div className="blog-body mt-1.5 text-[0.9rem] leading-7 text-ink/85">
                                 <FormatDocument>{day.detail}</FormatDocument>
                               </div>
                             ) : null}

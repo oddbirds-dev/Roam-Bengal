@@ -214,6 +214,8 @@ export interface TourDTO {
   groupSizeMax: number | null;
   stopsCount: number | null;
   facts: TourFacts;
+  /** Short plain-text copy shown on tour cards. */
+  summary: string | null;
   /** Multiple paragraphs are blank-line separated within the one string; see `FormatDocument`. */
   overview: string | null;
   overviewTip: string | null;

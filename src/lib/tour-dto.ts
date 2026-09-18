@@ -49,6 +49,7 @@ export function toTourDTO(row: TourRowLike): TourDTO {
     groupSizeMax: num(row.group_size_max),
     stopsCount: num(row.stops_count),
     facts: jsonObject(row.facts) as TourFacts,
+    summary: text(row.summary),
     overview: text(row.overview),
     overviewTip: text(row.overview_tip),
     highlights: strArr(row.highlights),
