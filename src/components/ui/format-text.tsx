@@ -3,6 +3,7 @@ import parse, { domToReact, Element } from "html-react-parser";
 import type { DOMNode, HTMLReactParserOptions } from "html-react-parser";
 import { SmartLink } from "@/components/ui/smart-link";
 import { markdown } from "@/lib/markdown";
+import { stripUnsafeHtml } from "@/lib/sanitize";
 
 /**
  * The single markdown renderer for the whole site.
@@ -29,6 +30,12 @@ import { markdown } from "@/lib/markdown";
  * `sanitize.ts` describes has to be restored here.
  */
 const DROPPED_TAGS = new Set(["script", "style", "iframe", "object", "embed", "link", "meta"]);
+
+/** Tour cards only allow safe semantic text markup from the rich-text editor. */
+const TOUR_CARD_TAGS = new Set([
+  "p", "br", "strong", "b", "em", "i", "u", "s", "del", "span", "ul", "ol", "li",
+  "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "code", "pre", "a",
+]);
 
 const LINK_CLASS = "text-orange font-medium underline-offset-2 hover:underline";
 const STRONG_CLASS = "font-semibold text-ink";
@@ -103,5 +110,36 @@ export function FormatText({ children }: { children: string }) {
 export function FormatDocument({ children }: { children: string }) {
   if (!children || typeof children !== "string") return <Fragment>{children}</Fragment>;
 
+
   return <Fragment>{parse(markdown.parse(children) as string, options)}</Fragment>;
+}
+/**
+ * Full-document renderer for tour cards. Only text-oriented tags survive and all
+ * attributes are discarded, except an anchor href passed through SmartLink's validation.
+ */
+export function FormatTourCardDescription({ children }: { children: string }) {
+  if (!children || typeof children !== "string") return <Fragment>{children}</Fragment>;
+
+  const cardOptions: HTMLReactParserOptions = {
+    replace(node) {
+      if (!(node instanceof Element)) return;
+
+      const descendants = () => domToReact(node.children as DOMNode[], cardOptions);
+
+      if (DROPPED_TAGS.has(node.name)) return <Fragment />;
+      if (!TOUR_CARD_TAGS.has(node.name)) return <Fragment>{descendants()}</Fragment>;
+
+      if (node.name === "a") {
+        return <SmartLink href={node.attribs.href ?? ""} className={LINK_CLASS}>{descendants()}</SmartLink>;
+      }
+
+      if (node.name === "strong" || node.name === "b") {
+        return <strong className={STRONG_CLASS}>{descendants()}</strong>;
+      }
+
+      node.attribs = {};
+    },
+  };
+
+  return <Fragment>{parse(markdown.parse(stripUnsafeHtml(children)) as string, cardOptions)}</Fragment>;
 }
