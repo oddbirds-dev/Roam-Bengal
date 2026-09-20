@@ -8,8 +8,8 @@ import type { HomeSectionProps } from "./registry";
 
 export function PopularToursSection({ tours }: HomeSectionProps) {
   const { homepage } = useSiteSettings();
-  const featuredTours = [...tours]
-    .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured))
+  const featuredTours = tours
+    .filter((tour) => tour.category === "day-tour" && tour.isFeatured)
     .slice(0, 3);
 
   return (

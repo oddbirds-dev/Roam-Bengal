@@ -13,7 +13,7 @@ import type { HomeSectionProps } from "./registry";
 export function MultiDayToursSection({ tours }: HomeSectionProps) {
   const { homepage } = useSiteSettings();
   const multiDayTours = tours
-    .filter((tour) => tour.category === "multi-day")
+    .filter((tour) => tour.category === "multi-day" && tour.isFeatured)
     .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured))
     .slice(0, 3);
 return (

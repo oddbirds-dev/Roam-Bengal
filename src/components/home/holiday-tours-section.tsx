@@ -13,7 +13,7 @@ import type { HomeSectionProps } from "./registry";
 export function HolidayToursSection({ tours }: Pick<HomeSectionProps, "tours">) {
   const { homepage } = useSiteSettings();
   const holidayTours = tours
-    .filter((tour) => tour.category === "holiday")
+    .filter((tour) => tour.category === "holiday" && tour.isFeatured)
     .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured))
     .slice(0, 3);
 return (
