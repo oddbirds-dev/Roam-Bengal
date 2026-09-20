@@ -10,7 +10,7 @@ import type { HomeSectionProps } from "./registry";
  * `category: "holiday"` and on the light cream background, so the two tour bands don't
  * stack as two identical dark photo panels.
  */
-export function HolidayToursSection({ tours }: HomeSectionProps) {
+export function HolidayToursSection({ tours }: Pick<HomeSectionProps, "tours">) {
   const { homepage } = useSiteSettings();
   const holidayTours = tours
     .filter((tour) => tour.category === "holiday")

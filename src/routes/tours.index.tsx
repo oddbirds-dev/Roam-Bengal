@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
+import { HolidayToursSection } from "@/components/home/holiday-tours-section";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import {
   listActivities,
@@ -51,7 +52,7 @@ const DREAM_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
 /** Stacking order for the category sections below the theme filter. Holiday is included
  *  even though there is no quick-create button for it in the admin, so a tour saved with
  *  that category is never simply dropped from the listing. */
-const CATEGORY_ORDER: TourCategory[] = ["day-tour", "multi-day", "holiday"];
+const CATEGORY_ORDER: TourCategory[] = ["day-tour", "multi-day"];
 const CATEGORY_LABELS: Record<TourCategory, string> = {
   "day-tour": "Day Tours",
   "multi-day": "Multi-Day Tours",
@@ -228,6 +229,12 @@ function ToursIndex() {
         )}
 
         {/* Dream CTA — shared with the homepage */}
+        {/* Holiday tours get their own destination shelf just above the closing CTA,
+            rather than being buried after the duration-based tour grids. */}
+        {(!category || category === "holiday") && (
+          <HolidayToursSection tours={themeFiltered} />
+        )}
+
         <section id="contact" className="py-[70px]" style={{ background: DREAM_BG }}>
           <div className="wrap grid items-center gap-10 nav:grid-cols-2">
             <div>

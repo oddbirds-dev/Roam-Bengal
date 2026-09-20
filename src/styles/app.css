@@ -285,6 +285,25 @@
     margin-block-start: 1rem;
   }
 
+  /* Keep tour cards compact in a grid. Visitors can reveal the full rich-text
+     summary with the adjacent See more control. */
+  .tour-card-description--collapsed {
+    position: relative;
+    max-height: 12.4rem;
+    overflow: hidden;
+  }
+
+  .tour-card-description--collapsed::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3rem;
+    content: "";
+    background: linear-gradient(to bottom, transparent, var(--color-paper));
+    pointer-events: none;
+  }
+
   .blog-body h2,
   .blog-body h3,
   .blog-body h4 {

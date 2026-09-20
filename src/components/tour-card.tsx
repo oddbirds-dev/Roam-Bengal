@@ -25,13 +25,15 @@ export function TourCard({
 }) {
   // Purely a visual toggle — there is no wishlist backend to persist this to.
   const [saved, setSaved] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const price = tour.priceUsd;
   const discountPrice = tour.discountPriceUsd;
   const hasDiscount = price !== null && discountPrice !== null && discountPrice < price;
   const discountPct = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : null;
-  // Rich-text descriptions are deliberately not truncated: the card grows with its copy.
+  // Rich-text descriptions can be expanded when a visitor wants the full summary.
   const description = tour.summary?.trim() || tour.overview?.trim();
+  const descriptionId = `tour-description-${tour.id}`;
 
   return (
     <article className="overflow-hidden rounded-[22px] border border-rule bg-paper shadow-[0_10px_28px_rgba(0,0,0,0.08)] transition-transform duration-250 hover:-translate-y-1.5">
@@ -88,8 +90,22 @@ export function TourCard({
         <h4 className="mb-1.5 font-display text-[1.25rem] font-bold text-green">{tour.title}</h4>
 
         {description ? (
-          <div className="tour-card-description mb-4 text-[0.85rem] leading-[1.55] text-muted [&_a]:break-words [&_blockquote]:border-l-2 [&_blockquote]:border-rule [&_blockquote]:pl-3 [&_h1]:mb-2 [&_h1]:font-display [&_h1]:text-[1.2rem] [&_h1]:font-bold [&_h1]:text-green [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[1.1rem] [&_h2]:font-bold [&_h2]:text-green [&_h3]:mb-2 [&_h3]:font-display [&_h3]:text-[1rem] [&_h3]:font-bold [&_h3]:text-green [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_pre]:mb-3 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-cream [&_pre]:p-2 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5">
-            <FormatTourCardDescription>{description}</FormatTourCardDescription>
+          <div className="mb-4">
+            <div
+              id={descriptionId}
+              className={`tour-card-description text-[0.85rem] leading-[1.55] text-muted [&_a]:break-words [&_blockquote]:border-l-2 [&_blockquote]:border-rule [&_blockquote]:pl-3 [&_h1]:mb-2 [&_h1]:font-display [&_h1]:text-[1.2rem] [&_h1]:font-bold [&_h1]:text-green [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[1.1rem] [&_h2]:font-bold [&_h2]:text-green [&_h3]:mb-2 [&_h3]:font-display [&_h3]:text-[1rem] [&_h3]:font-bold [&_h3]:text-green [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_pre]:mb-3 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-cream [&_pre]:p-2 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 ${isDescriptionExpanded ? "" : "tour-card-description--collapsed"}`}
+            >
+              <FormatTourCardDescription>{description}</FormatTourCardDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+              aria-controls={descriptionId}
+              aria-expanded={isDescriptionExpanded}
+              className="mt-2 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-green transition-colors hover:text-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+            >
+              {isDescriptionExpanded ? "See less" : "See more"}
+            </button>
           </div>
         ) : null}
 
