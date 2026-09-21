@@ -31,8 +31,9 @@ export function TourCard({
   const discountPrice = tour.discountPriceUsd;
   const hasDiscount = price !== null && discountPrice !== null && discountPrice < price;
   const discountPct = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : null;
-  // Rich-text descriptions can be expanded when a visitor wants the full summary.
-  const description = tour.summary?.trim() || tour.overview?.trim();
+  // Only the admin's card summary belongs on the card. The longer overview is
+  // rendered on the tour detail page and must not appear as a fallback here.
+  const description = tour.summary?.trim();
   const descriptionId = `tour-description-${tour.id}`;
 
   return (
