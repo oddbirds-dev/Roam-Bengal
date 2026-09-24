@@ -133,7 +133,7 @@ function TourDetail() {
             here: the two rows are equal `1fr`, so the wide top-right tile's ratio would
             set both row heights and the row-spanning big tile would end up twice as tall
             as the column beside it. Ratios still drive the stacked mobile layout. */}
-        <div className="wrap grid gap-3 py-6 md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[510px] lg:grid-cols-[325px_325px_minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="wrap grid gap-3 py-6 md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[560px] lg:grid-cols-[325px_325px_minmax(0,1fr)_minmax(0,1fr)]">
           <PhotoFrame
             src={gallery[0]?.url}
             alt={gallery[0]?.alt || `${tour.title} — main photograph`}
@@ -151,7 +151,7 @@ function TourDetail() {
               title={gallery[i]?.title}
               gradient={gradientFor(`${tour.slug}-${i}`)}
               placeholderLabel={`images/pkg-${tour.slug}-${i + 1}.jpg`}
-              className={`aspect-[4/3] rounded-2xl md:aspect-auto ${i === 1 ? "md:col-span-2 lg:h-[250px] lg:w-[630px]" : i === 2 ? "lg:h-[250px] lg:w-[308.69px]" : i === 3 ? "lg:h-[250px] lg:w-[308.69px]" : ""}`}
+              className={`aspect-[4/3] rounded-2xl md:aspect-auto ${i === 1 ? "md:col-span-2 lg:h-[250px] lg:w-[630px]" : i === 2 ? "lg:h-[250px] lg:w-[308.69px]" : i === 3 ? "lg:h-[250px] lg:w-[308.69px] lg:translate-x-[78px]" : ""}`}
             />
           ))}
         </div>
