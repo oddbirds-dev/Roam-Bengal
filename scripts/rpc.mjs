@@ -5,7 +5,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { toJSONAsync } from "seroval";
 
-export const SUPABASE_URL = "https://ctrqaotwumvsetnpflvd.supabase.co";
+export const SUPABASE_URL = "https://ackvhrnlmlyzqycsjjht.supabase.co";
 export const KEY = "sb_publishable_FCCiLR0kjaLdC9_Pg-MrNA_Zdb7rvR-";
 export const APP = "http://localhost:3000";
 export const PASSWORD = "TestPass!2026";

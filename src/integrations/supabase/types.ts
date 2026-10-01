@@ -1,5 +1,5 @@
 /**
- * Database types for the `Roam Bengal` Supabase project (`ctrqaotwumvsetnpflvd`).
+ * Database types for the `Roam Bengal` Supabase project (`ackvhrnlmlyzqycsjjht`).
  *
  * DO NOT EDIT BY HAND. Regenerate after any schema change:
  *

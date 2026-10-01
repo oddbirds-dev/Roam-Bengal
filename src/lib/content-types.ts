@@ -2,7 +2,7 @@
  * DTO shapes shared between the server functions and the components.
  *
  * These mirror the Postgres schema in the `Roam Bengal` Supabase project
- * (ref `ctrqaotwumvsetnpflvd`) after normalisation: Postgres `numeric` arrives over the
+ * (ref `ackvhrnlmlyzqycsjjht`) after normalisation: Postgres `numeric` arrives over the
  * wire as a string, and `null` array columns become `[]`, so every mapper coerces.
  */
 

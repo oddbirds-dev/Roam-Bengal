@@ -536,8 +536,8 @@ dependency, not an engineering one — flag it early ([§17](#17-open-questions)
 | | |
 | --- | --- |
 | Project | **Roam Bengal** |
-| Ref | `ctrqaotwumvsetnpflvd` |
-| URL | `https://ctrqaotwumvsetnpflvd.supabase.co` |
+| Ref | `ackvhrnlmlyzqycsjjht` |
+| URL | `https://ackvhrnlmlyzqycsjjht.supabase.co` |
 | Org | Platiroll (`acnxxdxuctlflmtaattc`) |
 | Region | `ap-south-1` (Mumbai) |
 | Postgres | 17 |
@@ -596,7 +596,7 @@ testimonials 9 · faqs 6 · site_settings 12.
    source of truth. In Phase 1, after the toolchain exists:
 
    ```bash
-   npx supabase link --project-ref ctrqaotwumvsetnpflvd
+   npx supabase link --project-ref ackvhrnlmlyzqycsjjht
    npx supabase db pull        # writes supabase/migrations/*.sql
    ```
 

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-const url = "https://ctrqaotwumvsetnpflvd.supabase.co";
+const url = "https://ackvhrnlmlyzqycsjjht.supabase.co";
 const key = "sb_publishable_FCCiLR0kjaLdC9_Pg-MrNA_Zdb7rvR-";
 const f = (input, init) => {
   const h = new Headers(init?.headers);
