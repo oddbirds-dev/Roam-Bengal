@@ -1,7 +1,7 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { FormatText } from "@/components/ui/format-text";
-import { WhyIcon } from "@/components/art/icons";
+import { Bed, DollarSign, Earth, File, Lock, MessageCircle } from "lucide-react";
 import type { HomeSectionProps } from "./registry";
 
 /** `faith_list` rows used to be plain strings before each reason got an icon; sites with
@@ -20,6 +20,9 @@ const ICON_COLORS = [
   { bg: "#F0E6D8", fg: "#5A3E1B" }, // brown
   { bg: "#FCE8D6", fg: "#C4390E" }, // orange
 ];
+
+/** Icons are fixed by position, matching the order of the reasons in the list. */
+const ICONS = [Lock, DollarSign, File, Bed, Earth, MessageCircle];
 
 export function FaithSection(_props: HomeSectionProps) {
   const { homepage } = useSiteSettings();
@@ -45,12 +48,21 @@ export function FaithSection(_props: HomeSectionProps) {
           </h2>
 
           <ul className="flex flex-col gap-3.5">
-            {homepage.faith_list.map(faithListItem).map((item, i) => (
+            {homepage.faith_list.map(faithListItem).map((item, i) => {
+              const Icon = ICONS[i % ICONS.length]!;
+              const { bg, fg } = ICON_COLORS[i % ICON_COLORS.length]!;
+              return (
               <li key={item.text} className="flex items-center gap-3 text-[0.95rem] leading-[1.5] text-ink">
-                <WhyIcon name={item.icon} {...ICON_COLORS[i % ICON_COLORS.length]} />
+                <span
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+                  style={{ background: bg, color: fg }}
+                >
+                  <Icon size={20} strokeWidth={2} aria-hidden="true" />
+                </span>
                 <FormatText>{item.text}</FormatText>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
 

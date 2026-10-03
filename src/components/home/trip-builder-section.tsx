@@ -4,7 +4,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { submitInquiry } from "@/lib/capture.functions";
-import craftsCustomImage from "@/assets/crafts you custom.png";
+import craftsCustomImage from "@/assets/abcd.png";
 import type { HomeSectionProps } from "./registry";
 
 interface TripBuilderArea {
