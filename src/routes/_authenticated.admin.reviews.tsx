@@ -4,7 +4,7 @@ import { AdminButton, AdminPage, ConfirmButton, EmptyState, ErrorBanner, ListTab
 import { EditorShell } from "@/components/admin/editor-shell";
 import { NumberField, SelectField, TextArea, TextField, Toggle } from "@/components/admin/fields";
 import { AdminIcon } from "@/components/admin/icons";
-import { GalleryField, ImageField } from "@/components/admin/image-upload";
+import { GalleryFieldWithAlt, ImageField } from "@/components/admin/image-upload";
 import { adminDeleteTestimonial, adminListTestimonials, adminUpsertTestimonial } from "@/lib/admin-content.functions";
 import { testimonialPreviewChannel } from "@/lib/testimonial-preview";
 import { toTestimonialDTO } from "@/lib/testimonial-dto";
@@ -29,18 +29,33 @@ function ReviewsScreen() {
   </AdminPage>;
 }
 
-function blank(row?: Row) { return { author: row?.author ?? "", location: row?.location ?? "", headline: row?.headline ?? "", quote: row?.quote ?? "", tour_label: row?.tour_label ?? "", platform: (row?.platform ?? "direct") as (typeof PLATFORMS)[number]["value"], avatar_url: row?.avatar_url ?? "", images: row?.images ?? [], rating: row?.rating ?? 5 as number | null, is_featured: row?.is_featured ?? false, is_published: row?.is_published ?? true, sort_order: row?.sort_order ?? 0 }; }
+function blank(row?: Row) { return { author: row?.author ?? "", location: row?.location ?? "", headline: row?.headline ?? "", quote: row?.quote ?? "", tour_label: row?.tour_label ?? "", platform: (row?.platform ?? "direct") as (typeof PLATFORMS)[number]["value"], avatar_url: row?.avatar_url ?? "", avatar_alt: row?.avatar_alt ?? "", avatar_title: row?.avatar_title ?? "", avatar_description: row?.avatar_description ?? "", images: normalizeImages(row?.images), rating: row?.rating ?? 5 as number | null, is_featured: row?.is_featured ?? false, is_published: row?.is_published ?? true, sort_order: row?.sort_order ?? 0 }; }
+/** `images` moved from `text[]` to jsonb `{url, alt, title, description}[]`; older rows may
+ *  still carry plain URL strings. */
+function normalizeImages(value: unknown): { url: string; alt: string; title: string; description: string }[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry) =>
+    typeof entry === "string"
+      ? { url: entry, alt: "", title: "", description: "" }
+      : {
+          url: typeof (entry as Record<string, unknown>)?.url === "string" ? (entry as Record<string, unknown>).url as string : "",
+          alt: typeof (entry as Record<string, unknown>)?.alt === "string" ? (entry as Record<string, unknown>).alt as string : "",
+          title: typeof (entry as Record<string, unknown>)?.title === "string" ? (entry as Record<string, unknown>).title as string : "",
+          description: typeof (entry as Record<string, unknown>)?.description === "string" ? (entry as Record<string, unknown>).description as string : "",
+        },
+  );
+}
 type Form = ReturnType<typeof blank>;
 
 function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
   const router = useRouter(); const { run, busy, error } = useAction(); const [v, setV] = useState<Form>(() => blank(row)); const saved = useMemo(() => blank(row), [row]);
   const dirty = useMemo(() => !row || (Object.keys(saved) as (keyof Form)[]).some((k) => k === "images" ? JSON.stringify(v[k]) !== JSON.stringify(saved[k]) : v[k] !== saved[k]), [v, saved, row]);
   const set = <K extends keyof Form>(k: K, x: Form[K]) => setV((p) => ({ ...p, [k]: x }));
-  async function save() { const ok = await run(() => adminUpsertTestimonial({ data: { ...(row ? { id: row.id } : {}), testimonial: { ...v, location: v.location || null, headline: v.headline || null, tour_label: v.tour_label || null, avatar_url: v.avatar_url || null } as never } })); if (!ok) return; await router.invalidate(); toast.success(row ? "Review saved" : "Review added"); onBack(); }
+  async function save() { const ok = await run(() => adminUpsertTestimonial({ data: { ...(row ? { id: row.id } : {}), testimonial: { ...v, location: v.location || null, headline: v.headline || null, tour_label: v.tour_label || null, avatar_url: v.avatar_url || null, avatar_alt: v.avatar_alt || null, avatar_title: v.avatar_title || null, avatar_description: v.avatar_description || null } as never } })); if (!ok) return; await router.invalidate(); toast.success(row ? "Review saved" : "Review added"); onBack(); }
   async function remove() { if (!row) return; try { await adminDeleteTestimonial({ data: { id: row.id } }); await router.invalidate(); toast.success("Review deleted"); onBack(); } catch (e) { toast.error(getErrorMessage(e, "Could not delete. Please try again.")); } }
   return <EditorShell title={row ? "Edit review" : "Add a review"} blurb={v.author || "Manage the details of this review."} previewPath="/reviews" previewChannel={testimonialPreviewChannel} previewDraft={toTestimonialDTO({ ...v, id: row?.id ?? "preview" })} dirty={dirty} saving={busy} onSave={save} onDiscard={() => setV(blank(row))} onBack={onBack} backLabel="Reviews" footer={row ? <ConfirmButton title={`Delete review from ${row.author}?`} description="It will be removed from your website for good." onConfirm={remove}>Delete review</ConfirmButton> : null}>
     <ErrorBanner error={error} /><div className="mt-4 flex flex-col gap-5"><div className="grid gap-5 sm:grid-cols-2">
       <TextField label="Guest name" required value={v.author} onChange={(x) => set("author", x)} /><TextField label="Where they're from" value={v.location} onChange={(x) => set("location", x)} /><TextField label="Tour label" value={v.tour_label} onChange={(x) => set("tour_label", x)} /><SelectField label="Platform" value={v.platform} options={PLATFORMS} onChange={(x) => set("platform", x)} /><NumberField label="Rating (1–5)" min={1} max={5} value={v.rating} onChange={(x) => set("rating", x)} /><NumberField label="Order" min={0} value={v.sort_order} onChange={(x) => set("sort_order", x ?? 0)} />
-    </div><TextField label="Headline" value={v.headline} onChange={(x) => set("headline", x)} /><TextArea label="Review" rows={4} plain value={v.quote} onChange={(x) => set("quote", x)} /><ImageField label="Guest photo" value={v.avatar_url} onChange={(x) => set("avatar_url", x)} /><GalleryField label="Extra photos" values={v.images} onChange={(x) => set("images", x)} /><div className="flex flex-wrap gap-8"><Toggle label="Show on the website" checked={v.is_published} onChange={(x) => set("is_published", x)} /><Toggle label="Featured on homepage" checked={v.is_featured} onChange={(x) => set("is_featured", x)} /></div></div>
+    </div><TextField label="Headline" value={v.headline} onChange={(x) => set("headline", x)} /><TextArea label="Review" rows={4} plain value={v.quote} onChange={(x) => set("quote", x)} /><ImageField label="Guest photo" value={v.avatar_url} onChange={(x) => set("avatar_url", x)} alt={v.avatar_alt} onAltChange={(x) => set("avatar_alt", x)} title={v.avatar_title} onTitleChange={(x) => set("avatar_title", x)} description={v.avatar_description} onDescriptionChange={(x) => set("avatar_description", x)} /><GalleryFieldWithAlt label="Extra photos" values={v.images} onChange={(x) => set("images", x)} /><div className="flex flex-wrap gap-8"><Toggle label="Show on the website" checked={v.is_published} onChange={(x) => set("is_published", x)} /><Toggle label="Featured on homepage" checked={v.is_featured} onChange={(x) => set("is_featured", x)} /></div></div>
   </EditorShell>;
 }

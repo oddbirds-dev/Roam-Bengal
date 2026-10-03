@@ -184,6 +184,8 @@ export interface TourImage {
   alt: string;
   /** Optional browser/SEO title for the image. */
   title: string;
+  /** Optional long-form SEO description for the image. No length cap. */
+  description: string;
 }
 
 export interface TourDTO {
@@ -193,6 +195,8 @@ export interface TourDTO {
   category: TourCategory;
   heroImage: string | null;
   heroImageAlt: string | null;
+  heroImageTitle: string | null;
+  heroImageDescription: string | null;
   images: TourImage[];
   durationLabel: string | null;
   durationDays: number;
@@ -260,6 +264,9 @@ export interface DestinationDTO {
   tagline: string | null;
   region: string | null;
   imageUrl: string | null;
+  imageAlt: string | null;
+  imageTitle: string | null;
+  imageDescription: string | null;
   intro: string | null;
   highlights: string[];
   bestTime: string | null;
@@ -276,12 +283,26 @@ export interface BlogPostDTO {
   dateLabel: string | null;
   readTime: string | null;
   coverImage: string | null;
+  coverImageAlt: string | null;
+  coverImageTitle: string | null;
+  coverImageDescription: string | null;
   authorName: string | null;
   authorRole: string | null;
   authorAvatar: string | null;
+  authorAvatarAlt: string | null;
+  authorAvatarTitle: string | null;
+  authorAvatarDescription: string | null;
   isFeatured: boolean;
   /** Curated "read next" slugs. Empty means fall back to the newest other posts. */
   relatedSlugs: string[];
+}
+
+export interface TestimonialImage {
+  url: string;
+  alt: string;
+  title: string;
+  /** Optional long-form SEO description for the image. No length cap. */
+  description: string;
 }
 
 export interface TestimonialDTO {
@@ -293,7 +314,10 @@ export interface TestimonialDTO {
   tourLabel: string | null;
   platform: string | null;
   avatarUrl: string | null;
-  images: string[];
+  avatarAlt: string | null;
+  avatarTitle: string | null;
+  avatarDescription: string | null;
+  images: TestimonialImage[];
   rating: number | null;
   isFeatured: boolean;
 }

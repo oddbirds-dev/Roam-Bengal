@@ -137,6 +137,9 @@ function blank(row?: Row) {
     tagline: row?.tagline ?? "",
     region: row?.region ?? "",
     image_url: row?.image_url ?? "",
+    image_alt: row?.image_alt ?? "",
+    image_title: row?.image_title ?? "",
+    image_description: row?.image_description ?? "",
     intro: row?.intro ?? "",
     highlights: row?.highlights ?? [],
     best_time: row?.best_time ?? "",
@@ -175,6 +178,9 @@ function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
     tagline: v.tagline || null,
     region: v.region || null,
     imageUrl: v.image_url || null,
+    imageAlt: v.image_alt || null,
+    imageTitle: v.image_title || null,
+    imageDescription: v.image_description || null,
     intro: v.intro || null,
     highlights: v.highlights,
     bestTime: v.best_time || null,
@@ -192,6 +198,9 @@ function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
             tagline: v.tagline || null,
             region: v.region || null,
             image_url: v.image_url || null,
+            image_alt: v.image_alt || null,
+            image_title: v.image_title || null,
+            image_description: v.image_description || null,
             intro: v.intro || null,
             highlights: v.highlights.map((h) => h.trim()).filter(Boolean),
             best_time: v.best_time || null,
@@ -307,6 +316,12 @@ function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
           hint="Used wherever this destination is illustrated."
           value={v.image_url}
           onChange={(x) => set("image_url", x)}
+          alt={v.image_alt}
+          onAltChange={(x) => set("image_alt", x)}
+          title={v.image_title}
+          onTitleChange={(x) => set("image_title", x)}
+          description={v.image_description}
+          onDescriptionChange={(x) => set("image_description", x)}
         />
 
         <TextArea

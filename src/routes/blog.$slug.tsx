@@ -135,7 +135,8 @@ export const Route = createFileRoute("/blog/$slug")({
             <div className="overflow-hidden rounded-2xl border border-rule bg-paper shadow-lg">
               <PhotoFrame
                 src={post.coverImage}
-                alt={post.title}
+                alt={post.coverImageAlt || post.title}
+                title={post.coverImageTitle || undefined}
                 gradient={gradientFor(post.slug)}
                 priority
                 placeholderLabel={`images/blog-${post.slug}.jpg`}

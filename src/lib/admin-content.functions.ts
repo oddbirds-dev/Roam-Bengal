@@ -128,6 +128,8 @@ const TourImage = z.object({
   url: z.string().max(1000),
   alt: z.string().max(300).default(""),
   title: z.string().max(300).default("").transform(stripUnsafeHtml),
+  // Free-form admin copy: no length cap, same rationale as `unrestrictedText`.
+  description: z.string().default("").transform(stripUnsafeHtml),
 });
 
 /**
@@ -140,6 +142,8 @@ const TourInput = z.object({
   category: z.enum(["day-tour", "multi-day", "holiday"]),
   hero_image: optionalText(1000),
   hero_image_alt: optionalText(300),
+  hero_image_title: optionalText(300),
+  hero_image_description: unrestrictedText(),
   images: z.array(TourImage).default([]),
   duration_label: optionalText(120),
   duration_days: z.coerce.number().int().min(1).max(365),
@@ -303,6 +307,9 @@ const DestinationInput = z.object({
   tagline: optionalText(300),
   region: optionalText(120),
   image_url: optionalText(1000),
+  image_alt: optionalText(300),
+  image_title: optionalText(300),
+  image_description: unrestrictedText(),
   intro: optionalText(4000),
   highlights: textArray(400),
   best_time: optionalText(200),
@@ -390,9 +397,15 @@ const PostInput = z.object({
   date_label: optionalText(60),
   read_time: optionalText(40),
   cover_image: optionalText(1000),
+  cover_image_alt: optionalText(300),
+  cover_image_title: optionalText(300),
+  cover_image_description: unrestrictedText(),
   author_name: optionalText(120),
   author_role: optionalText(120),
   author_avatar: optionalText(1000),
+  author_avatar_alt: optionalText(300),
+  author_avatar_title: optionalText(300),
+  author_avatar_description: unrestrictedText(),
   related_slugs: z.array(slug).max(12).default([]),
   is_featured: z.boolean().default(false),
   is_published: z.boolean().default(true),
@@ -431,6 +444,14 @@ export const adminDeletePost = createServerFn({ method: "POST" })
 // Testimonials
 // ---------------------------------------------------------------------------
 
+const TestimonialImage = z.object({
+  url: z.string().max(1000),
+  alt: z.string().max(300).default(""),
+  title: z.string().max(300).default("").transform(stripUnsafeHtml),
+  // Free-form admin copy: no length cap, same rationale as `unrestrictedText`.
+  description: z.string().default("").transform(stripUnsafeHtml),
+});
+
 const TestimonialInput = z.object({
   author: z.string().min(1).max(160),
   location: optionalText(120),
@@ -439,7 +460,10 @@ const TestimonialInput = z.object({
   tour_label: optionalText(200),
   platform: z.enum(["tripadvisor", "google", "trustpilot", "facebook", "direct"]).nullish(),
   avatar_url: optionalText(1000),
-  images: textArray(1000),
+  avatar_alt: optionalText(300),
+  avatar_title: optionalText(300),
+  avatar_description: unrestrictedText(),
+  images: z.array(TestimonialImage).default([]),
   rating: z.coerce.number().int().min(1).max(5).nullish(),
   is_featured: z.boolean().default(false),
   is_published: z.boolean().default(true),

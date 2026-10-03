@@ -60,11 +60,17 @@ export type Database = {
       blog_posts: {
         Row: {
           author_avatar: string | null;
+          author_avatar_alt: string | null;
+          author_avatar_title: string | null;
+          author_avatar_description: string | null;
           author_name: string | null;
           author_role: string | null;
           body: Json;
           category: string | null;
           cover_image: string | null;
+          cover_image_alt: string | null;
+          cover_image_title: string | null;
+          cover_image_description: string | null;
           created_at: string;
           date_label: string | null;
           excerpt: string | null;
@@ -80,11 +86,17 @@ export type Database = {
         };
         Insert: {
           author_avatar?: string | null;
+          author_avatar_alt?: string | null;
+          author_avatar_title?: string | null;
+          author_avatar_description?: string | null;
           author_name?: string | null;
           author_role?: string | null;
           body?: Json;
           category?: string | null;
           cover_image?: string | null;
+          cover_image_alt?: string | null;
+          cover_image_title?: string | null;
+          cover_image_description?: string | null;
           created_at?: string;
           date_label?: string | null;
           excerpt?: string | null;
@@ -100,11 +112,17 @@ export type Database = {
         };
         Update: {
           author_avatar?: string | null;
+          author_avatar_alt?: string | null;
+          author_avatar_title?: string | null;
+          author_avatar_description?: string | null;
           author_name?: string | null;
           author_role?: string | null;
           body?: Json;
           category?: string | null;
           cover_image?: string | null;
+          cover_image_alt?: string | null;
+          cover_image_title?: string | null;
+          cover_image_description?: string | null;
           created_at?: string;
           date_label?: string | null;
           excerpt?: string | null;
@@ -127,6 +145,9 @@ export type Database = {
           highlights: string[];
           id: string;
           image_url: string | null;
+          image_alt: string | null;
+          image_title: string | null;
+          image_description: string | null;
           intro: string | null;
           is_published: boolean;
           name: string;
@@ -142,6 +163,9 @@ export type Database = {
           highlights?: string[];
           id?: string;
           image_url?: string | null;
+          image_alt?: string | null;
+          image_title?: string | null;
+          image_description?: string | null;
           intro?: string | null;
           is_published?: boolean;
           name: string;
@@ -157,6 +181,9 @@ export type Database = {
           highlights?: string[];
           id?: string;
           image_url?: string | null;
+          image_alt?: string | null;
+          image_title?: string | null;
+          image_description?: string | null;
           intro?: string | null;
           is_published?: boolean;
           name?: string;
@@ -415,10 +442,13 @@ export type Database = {
         Row: {
           author: string;
           avatar_url: string | null;
+          avatar_alt: string | null;
+          avatar_title: string | null;
+          avatar_description: string | null;
           created_at: string;
           headline: string | null;
           id: string;
-          images: string[];
+          images: Json;
           is_featured: boolean;
           is_published: boolean;
           location: string | null;
@@ -432,10 +462,13 @@ export type Database = {
         Insert: {
           author: string;
           avatar_url?: string | null;
+          avatar_alt?: string | null;
+          avatar_title?: string | null;
+          avatar_description?: string | null;
           created_at?: string;
           headline?: string | null;
           id?: string;
-          images?: string[];
+          images?: Json;
           is_featured?: boolean;
           is_published?: boolean;
           location?: string | null;
@@ -449,10 +482,13 @@ export type Database = {
         Update: {
           author?: string;
           avatar_url?: string | null;
+          avatar_alt?: string | null;
+          avatar_title?: string | null;
+          avatar_description?: string | null;
           created_at?: string;
           headline?: string | null;
           id?: string;
-          images?: string[];
+          images?: Json;
           is_featured?: boolean;
           is_published?: boolean;
           location?: string | null;
@@ -517,6 +553,8 @@ export type Database = {
           group_size_max: number | null;
           hero_image: string | null;
           hero_image_alt: string | null;
+          hero_image_title: string | null;
+          hero_image_description: string | null;
           hidden_sections: string[];
           highlights: string[];
           id: string;
@@ -569,6 +607,8 @@ export type Database = {
           group_size_max?: number | null;
           hero_image?: string | null;
           hero_image_alt?: string | null;
+          hero_image_title?: string | null;
+          hero_image_description?: string | null;
           hidden_sections?: string[];
           highlights?: string[];
           id?: string;
@@ -621,6 +661,8 @@ export type Database = {
           group_size_max?: number | null;
           hero_image?: string | null;
           hero_image_alt?: string | null;
+          hero_image_title?: string | null;
+          hero_image_description?: string | null;
           hidden_sections?: string[];
           highlights?: string[];
           id?: string;

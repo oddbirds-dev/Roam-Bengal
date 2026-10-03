@@ -29,6 +29,8 @@ export function toTourDTO(row: TourRowLike): TourDTO {
       : "multi-day",
     heroImage: text(row.hero_image),
     heroImageAlt: text(row.hero_image_alt),
+    heroImageTitle: text(row.hero_image_title),
+    heroImageDescription: text(row.hero_image_description),
     images: imageArr(row.images),
     durationLabel: text(row.duration_label),
     durationDays: intOr(row.duration_days, 1),
@@ -99,13 +101,19 @@ function strArr(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : [];
 }
 
-/** `images` is jsonb `{url, alt, title}[]`; older rows still carry plain URL strings or omit title. */
+/** `images` is jsonb `{url, alt, title, description}[]`; older rows still carry plain URL
+ *  strings or omit title/description. */
 function imageArr(value: unknown): TourImage[] {
   if (!Array.isArray(value)) return [];
   return value.map((entry) =>
     typeof entry === "string"
-      ? { url: entry, alt: "", title: "" }
-      : { url: str((entry as Record<string, unknown>)?.url), alt: str((entry as Record<string, unknown>)?.alt), title: str((entry as Record<string, unknown>)?.title) },
+      ? { url: entry, alt: "", title: "", description: "" }
+      : {
+          url: str((entry as Record<string, unknown>)?.url),
+          alt: str((entry as Record<string, unknown>)?.alt),
+          title: str((entry as Record<string, unknown>)?.title),
+          description: str((entry as Record<string, unknown>)?.description),
+        },
   );
 }
 

@@ -31,6 +31,10 @@ export function ImageField({
   hint,
   alt,
   onAltChange,
+  title,
+  onTitleChange,
+  description,
+  onDescriptionChange,
 }: {
   /** Omitted inside a repeater cell, which prints its own column heading. */
   label?: string;
@@ -40,6 +44,12 @@ export function ImageField({
   /** Omitted when this image has no alt-text field (e.g. purely decorative uses). */
   alt?: string;
   onAltChange?: (alt: string) => void;
+  /** Omitted when this image has no meta-title field. */
+  title?: string;
+  onTitleChange?: (title: string) => void;
+  /** Omitted when this image has no meta-description field. Free text — no length cap. */
+  description?: string;
+  onDescriptionChange?: (description: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +98,24 @@ export function ImageField({
               className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2.5 text-[0.84rem] outline-none focus:border-green"
             />
           ) : null}
+          {onTitleChange ? (
+            <input
+              type="text"
+              value={title ?? ""}
+              placeholder="Meta title"
+              onChange={(e) => onTitleChange(e.target.value)}
+              className="w-full rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2.5 text-[0.84rem] outline-none focus:border-green"
+            />
+          ) : null}
+          {onDescriptionChange ? (
+            <textarea
+              value={description ?? ""}
+              placeholder="Meta description (no length limit)"
+              onChange={(e) => onDescriptionChange(e.target.value)}
+              rows={3}
+              className="w-full resize-y rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2.5 text-[0.84rem] outline-none focus:border-green"
+            />
+          ) : null}
           <div className="flex items-center gap-2">
             <label className="cursor-pointer rounded-[30px] border-[1.5px] border-rule px-4 py-2 text-[0.78rem] font-semibold text-muted transition-colors hover:border-green hover:text-green">
               {busy ? "Uploading…" : "Upload image"}
@@ -120,12 +148,13 @@ export interface GalleryImage {
   url: string;
   alt: string;
   title: string;
+  /** Free text — no length cap. */
+  description: string;
 }
 
 /**
- * Multi-image variant for gallery fields whose images carry alt text (currently just
- * tours). Testimonials' "Extra photos" field has no metadata, so it keeps using the plain
- * `GalleryField` below rather than this one.
+ * Multi-image variant for gallery fields whose images carry alt/title/description
+ * metadata (tours' gallery, testimonials' extra photos).
  */
 export function GalleryFieldWithAlt({
   label,
@@ -147,7 +176,8 @@ export function GalleryFieldWithAlt({
     setError(null);
     try {
       const uploaded: GalleryImage[] = [];
-      for (const file of Array.from(files)) uploaded.push({ url: await uploadFile(file), alt: "", title: "" });
+      for (const file of Array.from(files))
+        uploaded.push({ url: await uploadFile(file), alt: "", title: "", description: "" });
       onChange([...values, ...uploaded]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
@@ -162,6 +192,10 @@ export function GalleryFieldWithAlt({
 
   function setTitle(i: number, title: string) {
     onChange(values.map((img, idx) => (idx === i ? { ...img, title } : img)));
+  }
+
+  function setDescription(i: number, description: string) {
+    onChange(values.map((img, idx) => (idx === i ? { ...img, description } : img)));
   }
 
   return (
@@ -197,6 +231,13 @@ export function GalleryFieldWithAlt({
                 onChange={(e) => setTitle(i, e.target.value)}
                 className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-2.5 py-1.5 text-[0.76rem] outline-none focus:border-green"
               />
+              <textarea
+                value={img.description}
+                placeholder="Meta description (no length limit)"
+                onChange={(e) => setDescription(i, e.target.value)}
+                rows={2}
+                className="mt-1.5 w-full resize-y rounded-lg border border-rule bg-paper px-2.5 py-1.5 text-[0.76rem] outline-none focus:border-green"
+              />
             </div>
           ))}
         </div>
@@ -222,7 +263,7 @@ export function GalleryFieldWithAlt({
             e.preventDefault();
             const url = e.currentTarget.value.trim();
             if (!url) return;
-            onChange([...values, { url, alt: "", title: "" }]);
+            onChange([...values, { url, alt: "", title: "", description: "" }]);
             e.currentTarget.value = "";
           }}
           className="min-w-[220px] flex-1 rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2 text-[0.82rem] outline-none focus:border-green"
@@ -233,87 +274,3 @@ export function GalleryFieldWithAlt({
   );
 }
 
-/** Plain multi-image variant (no per-image metadata) — used for testimonials' extra photos. */
-export function GalleryField({
-  label,
-  values,
-  onChange,
-  hint,
-}: {
-  label: string;
-  values: string[];
-  onChange: (v: string[]) => void;
-  hint?: string;
-}) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function onPick(files: FileList | null) {
-    if (!files?.length) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const urls: string[] = [];
-      for (const file of Array.from(files)) urls.push(await uploadFile(file));
-      onChange([...values, ...urls]);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div>
-      <Label hint={hint}>{label}</Label>
-
-      {values.length ? (
-        <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {values.map((url, i) => (
-            <div key={`${url}-${i}`} className="relative">
-              <div className="aspect-[4/3] overflow-hidden rounded-xl border border-rule bg-cream">
-                <img src={url} alt="" className="h-full w-full object-cover" />
-              </div>
-              <button
-                type="button"
-                aria-label="Remove image"
-                onClick={() => onChange(values.filter((_, idx) => idx !== i))}
-                className="absolute -top-2 -right-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-rule bg-paper text-[0.75rem] text-muted shadow hover:border-rust hover:text-rust"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer rounded-[30px] border-[1.5px] border-dashed border-rule px-4 py-2 text-[0.78rem] font-semibold text-muted transition-colors hover:border-green hover:text-green">
-          {busy ? "Uploading…" : "+ Add images"}
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            disabled={busy}
-            onChange={(e) => onPick(e.target.files)}
-          />
-        </label>
-        <input
-          type="url"
-          placeholder="…or paste a URL and press Enter"
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            e.preventDefault();
-            const url = e.currentTarget.value.trim();
-            if (!url) return;
-            onChange([...values, url]);
-            e.currentTarget.value = "";
-          }}
-          className="min-w-[220px] flex-1 rounded-xl border-[1.5px] border-rule bg-paper px-3.5 py-2 text-[0.82rem] outline-none focus:border-green"
-        />
-      </div>
-      {error ? <p className="mt-2 text-[0.78rem] text-rust">{error}</p> : null}
-    </div>
-  );
-}

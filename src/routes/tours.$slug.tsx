@@ -114,7 +114,7 @@ function TourDetail() {
   // also in the gallery must not take two tiles.
   const gallery = tour.heroImage
     ? [
-        { url: tour.heroImage, alt: tour.heroImageAlt, title: "" },
+        { url: tour.heroImage, alt: tour.heroImageAlt, title: tour.heroImageTitle ?? "" },
         ...tour.images.filter((img) => img.url !== tour.heroImage),
       ]
     : tour.images;

@@ -99,7 +99,9 @@ function emptyTour() {
     category: "multi-day" as TourCategory,
     hero_image: "",
     hero_image_alt: "",
-    images: [] as { url: string; alt: string; title: string }[],
+    hero_image_title: "",
+    hero_image_description: "",
+    images: [] as { url: string; alt: string; title: string; description: string }[],
     duration_label: "",
     duration_days: 1,
     price_usd: null as number | null,
@@ -594,6 +596,10 @@ function TourEditor() {
                     onChange={(v) => set("hero_image", v)}
                     alt={form.hero_image_alt}
                     onAltChange={(v) => set("hero_image_alt", v)}
+                    title={form.hero_image_title}
+                    onTitleChange={(v) => set("hero_image_title", v)}
+                    description={form.hero_image_description}
+                    onDescriptionChange={(v) => set("hero_image_description", v)}
                   />
                   <GalleryFieldWithAlt
                     label="Gallery"
@@ -1228,9 +1234,17 @@ function hydrate(row: Record<string, unknown>): Partial<TourForm> {
     category: (row.category as TourForm["category"]) ?? "multi-day",
     hero_image: text(row.hero_image),
     hero_image_alt: text(row.hero_image_alt),
+    hero_image_title: text(row.hero_image_title),
+    hero_image_description: text(row.hero_image_description),
     images: list(row.images).map((entry) =>
       typeof entry === "string"
-        ? { url: entry, alt: "", title: "" } : { url: text((entry as Record<string, unknown>)?.url), alt: text((entry as Record<string, unknown>)?.alt), title: text((entry as Record<string, unknown>)?.title) },
+        ? { url: entry, alt: "", title: "", description: "" }
+        : {
+            url: text((entry as Record<string, unknown>)?.url),
+            alt: text((entry as Record<string, unknown>)?.alt),
+            title: text((entry as Record<string, unknown>)?.title),
+            description: text((entry as Record<string, unknown>)?.description),
+          },
     ),
     duration_label: text(row.duration_label),
     duration_days: Number(row.duration_days ?? 1),

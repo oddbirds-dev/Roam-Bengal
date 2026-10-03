@@ -1,4 +1,4 @@
-import type { TestimonialDTO } from "@/lib/content-types";
+import type { TestimonialDTO, TestimonialImage } from "@/lib/content-types";
 
 /**
  * Row → DTO for a `testimonials` record.
@@ -19,7 +19,10 @@ export function toTestimonialDTO(row: TestimonialRowLike): TestimonialDTO {
     tourLabel: text(row.tour_label),
     platform: text(row.platform),
     avatarUrl: text(row.avatar_url),
-    images: strArr(row.images),
+    avatarAlt: text(row.avatar_alt),
+    avatarTitle: text(row.avatar_title),
+    avatarDescription: text(row.avatar_description),
+    images: imageArr(row.images),
     rating: num(row.rating),
     isFeatured: Boolean(row.is_featured),
   };
@@ -34,8 +37,20 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() !== "" ? value : null;
 }
 
-function strArr(value: unknown): string[] {
-  return Array.isArray(value) ? (value as string[]) : [];
+/** `images` is jsonb `{url, alt, title, description}[]`; older rows still carry plain URL
+ *  strings. */
+function imageArr(value: unknown): TestimonialImage[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry) =>
+    typeof entry === "string"
+      ? { url: entry, alt: "", title: "", description: "" }
+      : {
+          url: str((entry as Record<string, unknown>)?.url),
+          alt: str((entry as Record<string, unknown>)?.alt),
+          title: str((entry as Record<string, unknown>)?.title),
+          description: str((entry as Record<string, unknown>)?.description),
+        },
+  );
 }
 
 function num(value: unknown): number | null {

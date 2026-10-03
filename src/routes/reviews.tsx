@@ -169,8 +169,9 @@ function Reviews() {
               >
                 <div className="flex items-center gap-3.5">
                   <PhotoFrame
-                    src={t.avatarUrl ?? t.images[0]}
-                    alt={`${t.author} on tour with Roam Bengal`}
+                    src={t.avatarUrl ?? t.images[0]?.url}
+                    alt={t.avatarAlt || `${t.author} on tour with Roam Bengal`}
+                    title={t.avatarTitle || undefined}
                     gradientCss={PHOTO_FRAMES[i % PHOTO_FRAMES.length]}
                     placeholderLabel={`${t.author.split(" ")[0]?.toLowerCase()}.jpg`}
                     className="h-[66px] w-[66px] shrink-0 rounded-xl"

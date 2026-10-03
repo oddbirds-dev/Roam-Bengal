@@ -227,7 +227,8 @@ function ReviewCard({ review, tint }: { review: TestimonialDTO; tint: number }) 
         {review.avatarUrl ? (
           <img
             src={review.avatarUrl}
-            alt=""
+            alt={review.avatarAlt || ""}
+            title={review.avatarTitle || undefined}
             loading="lazy"
             className="h-[46px] w-[46px] rounded-full object-cover"
           />
