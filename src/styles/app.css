@@ -31,6 +31,24 @@
 @media (prefers-reduced-motion: reduce) {
   .home-section-seam { animation: home-seam-blink 1.1s ease-in-out infinite; }
 }
+/* Stable by default; blinking ring only pulses on hover, and it never touches
+   the button's own background opacity, so the fill colour stays constant. */
+.cta-pulse-glow {
+  animation: none;
+}
+
+.cta-pulse-glow:hover {
+  animation: cta-pulse-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes cta-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-orange) 55%, transparent); }
+  50% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-orange) 0%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-pulse-glow:hover { animation: none; }
+}
 .tripBackground {
   position: absolute;
   inset: 0;

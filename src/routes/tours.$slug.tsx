@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
@@ -549,10 +549,11 @@ function TourDetail() {
               <ButtonLink
                 to="/contact"
                 variant="ember"
-                className="mt-6 w-full"
+                className="mt-6 w-full cta-pulse-glow hover:scale-[1.05]"
                 search={{ tour: tour.slug }}
               >
                 Book Now
+                <ArrowRight className="h-4 w-4" />
               </ButtonLink>
             </div>
 
