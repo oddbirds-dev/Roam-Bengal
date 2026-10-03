@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ImageOff } from "lucide-react";
 
 /**
  * Every image in reference design/ is a placeholder: a gradient-filled frame, a visible
@@ -8,7 +7,7 @@ import { ImageOff } from "lucide-react";
  * This reproduces that behaviour with two differences the PRD calls for (§12):
  *   - `alt` is required, not optional
  *   - the empty-state renders in development only, styled as an intentional "no image
- *     yet" card (icon + friendly copy) rather than a raw debug label, with the expected
+ *     yet" label (small friendly copy) rather than a raw debug label, with the expected
  *     file path shown small underneath for content-ops reference
  */
 
@@ -73,17 +72,32 @@ export function PhotoFrame({
   // `absolute`/`fixed` no matter the class order. Only add it when nothing else sets one.
   const positioned = /(?:^|\s)(?:absolute|fixed|sticky)(?:\s|$)/.test(className);
 
+  // With no photo, collapse to a short strip with no gradient instead of the full frame.
+  // Positioned frames fill a parent (banners, backgrounds) and keep their size and gradient.
+  const collapsed = !showImage && showPlaceholder && !positioned;
+
   return (
     <div
       className={`${positioned ? "" : "relative"} overflow-hidden ${className}`}
-      style={{ background: gradientCss ?? FRAME_GRADIENTS[gradient], ...style }}
+      style={{
+        background: gradientCss ?? FRAME_GRADIENTS[gradient],
+        ...style,
+        ...(collapsed ? { background: "none", aspectRatio: "auto", height: "6rem" } : null),
+      }}
     >
       {import.meta.env.DEV && !showImage && showPlaceholder ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-3 text-center text-white/80">
-          <ImageOff className="h-5 w-5 opacity-70" strokeWidth={1.5} />
-          <span className="text-[0.7rem] font-medium tracking-wide">No image yet</span>
+        <div
+          className={`absolute inset-0 flex flex-col items-center justify-center px-1.5 text-center leading-tight ${
+            collapsed ? "text-muted" : "text-white/80"
+          }`}
+        >
+          <span className="text-[0.5rem] font-medium tracking-wide">No image yet</span>
           {placeholderLabel ? (
-            <span className="text-[0.6rem] font-normal tracking-wide text-white/50">
+            <span
+              className={`text-[0.45rem] font-normal tracking-wide ${
+                collapsed ? "text-muted/70" : "text-white/50"
+              }`}
+            >
               {placeholderLabel}
             </span>
           ) : null}
@@ -107,6 +121,3 @@ export function PhotoFrame({
     </div>
   );
 }
-
-
-

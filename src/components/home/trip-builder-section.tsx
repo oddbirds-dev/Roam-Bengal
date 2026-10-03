@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { submitInquiry } from "@/lib/capture.functions";
+import craftsCustomImage from "@/assets/crafts you custom.png";
 import type { HomeSectionProps } from "./registry";
 
 interface TripBuilderArea {
@@ -126,15 +127,17 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   }
 
   return (
-    <section className="shell relative isolate overflow-hidden pt-[70px] pb-[60px]">
+    <section className="shell relative isolate overflow-hidden bg-[#fffdf7] pt-[70px] pb-[60px]">
       <div className="tripBackground" />
-      <img
-        src="/tripbuilder.png"
-        alt=""
+      <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 z-0 bg-no-repeat"
+        style={{
+          backgroundImage: `url(${craftsCustomImage})`,
+          backgroundPosition: "center bottom",
+          backgroundSize: "100% 100%",
+        }}
       />
-      <TripBuilderDecor />
       <div className="wide relative z-10">
         <div className="mx-auto mb-8 max-w-[1000px] text-center">
           <h2 className="mb-2 font-display text-[1.9rem] font-bold">

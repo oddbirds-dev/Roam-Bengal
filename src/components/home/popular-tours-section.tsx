@@ -17,7 +17,10 @@ export function PopularToursSection({ tours }: HomeSectionProps) {
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${homepage.popular_bg_image || toursBg})`, opacity: 1 }}
+        // Keep the homepage background fixed to the photo used in the design.
+        // The CMS field is intentionally not used here so it cannot rotate or
+        // replace this image after the page has loaded.
+        style={{ backgroundImage: `url(${toursBg})`, opacity: 1 }}
       />
       <div aria-hidden className="absolute inset-0 bg-black/60" />
 

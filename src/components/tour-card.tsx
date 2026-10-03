@@ -41,7 +41,7 @@ export function TourCard({
         alt={tour.heroImage ? tour.heroImageAlt || tour.title : tour.images[0]?.alt || tour.title}
         gradientCss={gradientCss ?? FRAME_GRADIENTS[gradientFor(tour.slug)]}
         placeholderLabel={`images/tour-${tour.slug}.jpg`}
-        className="aspect-4/3 w-full"
+        className="aspect-16/10 w-full"
       >
         <div className="absolute top-4 left-4 z-3 flex flex-col items-start gap-2">
           {tour.isFeatured ? (
