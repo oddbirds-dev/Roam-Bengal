@@ -166,7 +166,7 @@ export function TripBuilderSection(_props: HomeSectionProps) {
         style={{
           backgroundImage: `url(${craftsCustomImage})`,
           backgroundPosition: "center bottom",
-          backgroundSize: "100% 100%",
+          backgroundSize: "100% auto",
         }}
       />
       <div className="wide relative z-10">
