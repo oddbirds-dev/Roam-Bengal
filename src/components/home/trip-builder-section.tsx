@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { submitInquiry } from "@/lib/capture.functions";
 import craftsCustomImage from "@/assets/crafts you custom.png";
@@ -23,6 +24,33 @@ interface TripBuilderPreset {
   areaIds: string;
 }
 
+const FALLBACK_PRESETS: TripBuilderPreset[] = [
+  {
+    id: "first-time",
+    label: "First time in Bangladesh",
+    sublabel: "The classic loop",
+    areaIds: "dhaka, sonargaon, bagerhat, sundarbans, sreemangal, chittagong, bandarban",
+  },
+  {
+    id: "archaeology-heritage",
+    label: "Archaeology & heritage",
+    sublabel: "UNESCO sites, ruins, temples",
+    areaIds: "dhaka-archaeology, sonargaon, bagerhat, puthia, natore-bagha, gaur, paharpur",
+  },
+  {
+    id: "nature-wildlife",
+    label: "Nature & wildlife",
+    sublabel: "Forest, tigers, tea, birds",
+    areaIds: "sundarbans, sreemangal, bandarban, barisal-backwaters",
+  },
+  {
+    id: "photography",
+    label: "Photography trip",
+    sublabel: "Rivers, ships, markets, hills",
+    areaIds: "dhaka-photography, barisal-backwaters, sundarbans, bandarban, chittagong",
+  },
+];
+
 function splitAreaIds(areaIds: string): string[] {
   return areaIds
     .split(",")
@@ -39,7 +67,10 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   const send = useServerFn(submitInquiry);
 
   const areas = homepage.trip_builder_areas as unknown as TripBuilderArea[];
-  const presets = homepage.trip_builder_presets as unknown as TripBuilderPreset[];
+  const configuredPresets = homepage.trip_builder_presets as unknown as TripBuilderPreset[];
+  // Older CMS records may contain an empty array, which would otherwise leave the
+  // ready-made-trip row invisible despite the feature being enabled in the UI.
+  const presets = configuredPresets.length > 0 ? configuredPresets : FALLBACK_PRESETS;
 
   const areasByRegion = useMemo(() => {
     const regions: string[] = [];
@@ -139,11 +170,16 @@ export function TripBuilderSection(_props: HomeSectionProps) {
         }}
       />
       <div className="wide relative z-10">
-        <div className="mx-auto mb-8 max-w-[1000px] text-center">
+        <div
+          aria-label="Ready-made trip ideas"
+          className="mx-auto mb-8 max-w-[1000px] text-center"
+        >
           <h2 className="mb-2 font-display text-[1.9rem] font-bold">
             {homepage.trip_builder_heading}
           </h2>
-          <p className="text-[0.92rem] text-muted">{homepage.trip_builder_intro}</p>
+          <p className="text-[0.92rem] text-muted">
+            <FormatText>{homepage.trip_builder_intro}</FormatText>
+          </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2.5 min-[980px]:flex-nowrap">
             {presets.map((preset) => (
               <button
@@ -151,16 +187,16 @@ export function TripBuilderSection(_props: HomeSectionProps) {
                 type="button"
                 onClick={() => applyPreset(preset.id)}
                 aria-pressed={activePreset === preset.id}
-                className={`rounded-2xl border-[1.5px] px-5 py-2.5 text-left transition-colors ${
+                className={`rounded-full border-[1.5px] px-5 py-2.5 text-left transition-colors ${
                   activePreset === preset.id
-                    ? "border-orange bg-orange text-white"
+                    ? "border-[#111827] bg-[#1249e8] text-white"
                     : "border-rule bg-paper text-ink hover:border-green"
                 }`}
               >
                 <span className="block text-[0.86rem] font-bold">{preset.label}</span>
                 <span
                   className={`block text-[0.72rem] ${
-                    activePreset === preset.id ? "text-white/75" : "text-muted"
+                    activePreset === preset.id ? "text-white/80" : "text-muted"
                   }`}
                 >
                   {preset.sublabel}

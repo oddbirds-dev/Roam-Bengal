@@ -385,7 +385,7 @@ const PostInput = z.object({
   slug,
   title: z.string().min(1).max(240),
   excerpt: optionalText(1000),
-  body: textArray(8000),
+  body: unrestrictedTextArray(),
   category: optionalText(80),
   date_label: optionalText(60),
   read_time: optionalText(40),
