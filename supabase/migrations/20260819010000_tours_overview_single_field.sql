@@ -1,22 +1,30 @@
--- `overview` moves from an array of paragraphs (one admin-repeater row each) to a single
--- text field, matching how `blog_posts.body` variants are authored: paragraphs are
--- separated by a blank line and split back apart on render (see `overviewParagraphs` in
--- src/lib/content-types.ts). This also lets a tour's opening paragraph double as its card
--- teaser and SEO description now that `summary` is gone.
+-- `overview` moves from `jsonb` to a single text field, matching how `blog_posts.body`
+-- variants are authored: paragraphs are separated by a blank line and split back apart on
+-- render (see `overviewParagraphs` in src/lib/content-types.ts).
 --
--- Existing paragraphs are joined with a blank line rather than dropped, so a tour that had
--- multiple paragraphs (only `sundarbans-wildlife-tour` did, with 3) keeps every paragraph —
--- `overviewParagraphs` splits the blank-line-joined text back into the same paragraphs it
--- started as.
+-- The column has held two shapes over time: an array of paragraphs (the original admin
+-- repeater) and a single JSON string of rich-text HTML (the current editor). Strings are
+-- unwrapped as-is; arrays are joined with a blank line so every paragraph survives. An
+-- earlier version of this file assumed arrays only and failed on string rows.
+--
+-- Converted in place rather than via add/drop/rename so the column keeps its position, and
+-- made nullable with no default, since the admin form saves an empty overview as null.
 
-alter table public.tours add column if not exists overview_text text;
+create or replace function pg_temp.tour_overview_to_text(ov jsonb)
+returns text
+language sql
+immutable
+as $$
+  select case jsonb_typeof(ov)
+    when 'string' then nullif(ov #>> '{}', '')
+    when 'array' then nullif(
+      (select string_agg(value, e'\n\n' order by ordinality)
+       from jsonb_array_elements_text(ov) with ordinality), '')
+    else null
+  end;
+$$;
 
-update public.tours
-set overview_text = (
-  select string_agg(value, e'\n\n' order by ordinality)
-  from jsonb_array_elements_text(coalesce(overview, '[]'::jsonb)) with ordinality
-)
-where jsonb_array_length(coalesce(overview, '[]'::jsonb)) > 0;
-
-alter table public.tours drop column if exists overview;
-alter table public.tours rename column overview_text to overview;
+alter table public.tours alter column overview drop default;
+alter table public.tours alter column overview drop not null;
+alter table public.tours
+  alter column overview type text using pg_temp.tour_overview_to_text(overview);
