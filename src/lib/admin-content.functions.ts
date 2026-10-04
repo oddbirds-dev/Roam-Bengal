@@ -53,6 +53,12 @@ const optionalText = (max: number) =>
 const safeText = (max: number) => z.string().max(max).transform(stripUnsafeHtml);
 /** Free-form admin copy: still sanitized, but intentionally not capped by character count. */
 const unrestrictedText = () => z.string().transform(stripUnsafeHtml);
+/** Uncapped like `unrestrictedText`, but for nullable columns: editors send `null` when empty. */
+const optionalUnrestrictedText = () =>
+  z
+    .string()
+    .nullish()
+    .transform((v) => (typeof v === "string" ? stripUnsafeHtml(v) : v));
 const textArray = (max = 400) =>
   z
     .array(z.string().max(max))
@@ -143,7 +149,7 @@ const TourInput = z.object({
   hero_image: optionalText(1000),
   hero_image_alt: optionalText(300),
   hero_image_title: optionalText(300),
-  hero_image_description: unrestrictedText(),
+  hero_image_description: optionalUnrestrictedText(),
   images: z.array(TourImage).default([]),
   duration_label: optionalText(120),
   duration_days: z.coerce.number().int().min(1).max(365),
@@ -309,7 +315,7 @@ const DestinationInput = z.object({
   image_url: optionalText(1000),
   image_alt: optionalText(300),
   image_title: optionalText(300),
-  image_description: unrestrictedText(),
+  image_description: optionalUnrestrictedText(),
   intro: optionalText(4000),
   highlights: textArray(400),
   best_time: optionalText(200),
@@ -399,13 +405,13 @@ const PostInput = z.object({
   cover_image: optionalText(1000),
   cover_image_alt: optionalText(300),
   cover_image_title: optionalText(300),
-  cover_image_description: unrestrictedText(),
+  cover_image_description: optionalUnrestrictedText(),
   author_name: optionalText(120),
   author_role: optionalText(120),
   author_avatar: optionalText(1000),
   author_avatar_alt: optionalText(300),
   author_avatar_title: optionalText(300),
-  author_avatar_description: unrestrictedText(),
+  author_avatar_description: optionalUnrestrictedText(),
   related_slugs: z.array(slug).max(12).default([]),
   is_featured: z.boolean().default(false),
   is_published: z.boolean().default(true),
@@ -462,7 +468,7 @@ const TestimonialInput = z.object({
   avatar_url: optionalText(1000),
   avatar_alt: optionalText(300),
   avatar_title: optionalText(300),
-  avatar_description: unrestrictedText(),
+  avatar_description: optionalUnrestrictedText(),
   images: z.array(TestimonialImage).default([]),
   rating: z.coerce.number().int().min(1).max(5).nullish(),
   is_featured: z.boolean().default(false),
