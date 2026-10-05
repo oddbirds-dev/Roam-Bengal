@@ -185,17 +185,17 @@ function TourDetail() {
             <div className="mt-5 h-px bg-rule" />
 
             {facts.length ? (
-              <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3">
+              <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3">
                 {facts.map(([key, value]) => (
-                  <div key={key} className="flex items-start gap-3">
-                    <span aria-hidden="true" className="text-[2rem] leading-none">
+                  <div key={key} className="flex items-start gap-2.5">
+                    <span aria-hidden="true" className="text-[1.5rem] leading-none">
                       {TOUR_FACT_META[key].icon}
                     </span>
                     <div>
-                      <div className="text-[0.85rem] tracking-wide text-muted uppercase">
+                      <div className="text-[0.72rem] tracking-wide text-muted uppercase">
                         {TOUR_FACT_META[key].label}
                       </div>
-                      <div className="text-[1.12rem] font-semibold text-ink">{value}</div>
+                      <div className="text-[0.98rem] font-semibold text-ink">{value}</div>
                     </div>
                   </div>
                 ))}

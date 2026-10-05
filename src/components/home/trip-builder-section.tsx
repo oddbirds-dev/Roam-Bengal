@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Minus, ShoppingCart } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
@@ -247,9 +248,15 @@ export function TripBuilderSection(_props: HomeSectionProps) {
           </div>
 
           <aside className="rounded-2xl border border-rule bg-paper p-6 min-[980px]:sticky min-[980px]:top-24">
-            <h3 className="mb-1 font-display text-[1.1rem] font-bold">
-              2. Where should we send the plan?
-            </h3>
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-display text-[1.1rem] font-bold">
+                2. Where should we send the plan?
+              </h3>
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#eef3ff] px-3 py-1.5 text-[0.74rem] font-bold text-[#2f5aa8]">
+                <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
+                Cart · {selected.size}
+              </span>
+            </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2.5">
               <span className="rounded-full bg-cream px-3 py-1 text-[0.78rem] font-semibold text-ink">
@@ -263,15 +270,29 @@ export function TripBuilderSection(_props: HomeSectionProps) {
             </div>
 
             {selectedAreas.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
+              <div className="mt-3 rounded-xl border border-rule bg-cream/60 p-3">
+                <div className="mb-2 flex items-center justify-between text-[0.72rem] font-bold uppercase tracking-[0.08em] text-muted">
+                  <span>Your trip cart</span>
+                  <span>{selectedAreas.length} place{selectedAreas.length === 1 ? "" : "s"}</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
                 {selectedAreas.map((a) => (
-                  <span
+                  <div
                     key={a.id}
-                    className="rounded-full bg-mint px-2.5 py-1 text-[0.74rem] font-medium text-green-dark"
+                    className="flex items-center justify-between gap-2 rounded-lg bg-mint px-2.5 py-1.5 text-[0.74rem] font-medium text-green-dark"
                   >
-                    {a.label}
-                  </span>
+                    <span className="min-w-0 truncate">{a.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleArea(a.id)}
+                      aria-label={`Remove ${a.label} from trip cart`}
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-green-dark/70 hover:bg-white hover:text-rust"
+                    >
+                      <Minus className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  </div>
                 ))}
+                </div>
               </div>
             ) : null}
 
