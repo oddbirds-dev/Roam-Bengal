@@ -565,7 +565,7 @@ export type Database = {
           itinerary: Json;
           map_embed: string | null;
           offers: Json;
-          overview: Json;
+          overview: string | null;
           overview_tip: string | null;
           pledge: string[];
           price_bdt: number | null;
@@ -619,7 +619,7 @@ export type Database = {
           itinerary?: Json;
           map_embed?: string | null;
           offers?: Json;
-          overview?: Json;
+          overview?: string | null;
           overview_tip?: string | null;
           pledge?: string[];
           price_bdt?: number | null;
@@ -673,7 +673,7 @@ export type Database = {
           itinerary?: Json;
           map_embed?: string | null;
           offers?: Json;
-          overview?: Json;
+          overview?: string | null;
           overview_tip?: string | null;
           pledge?: string[];
           price_bdt?: number | null;
