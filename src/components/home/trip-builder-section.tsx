@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Minus, ShoppingCart } from "lucide-react";
+import { ChevronDown, Minus, ShoppingCart } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
@@ -85,6 +85,11 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState("");
+  // Accordion: one region open at a time; all collapsed until the visitor picks one.
+  const [openRegion, setOpenRegion] = useState<string | null>(null);
+
+  const pickedInRegion = (regionAreas: TripBuilderArea[]) =>
+    regionAreas.filter((a) => selected.has(a.id)).length;
 
   const selectedAreas = useMemo(
     () => areas.filter((a) => selected.has(a.id)),
@@ -105,8 +110,14 @@ export function TripBuilderSection(_props: HomeSectionProps) {
   function applyPreset(presetId: string) {
     const preset = presets.find((p) => p.id === presetId);
     if (!preset) return;
+    const ids = splitAreaIds(preset.areaIds);
     setActivePreset(presetId);
-    setSelected(new Set(splitAreaIds(preset.areaIds)));
+    setSelected(new Set(ids));
+    // Open the first region the preset touches so the change is visible right away.
+    const firstRegion = areasByRegion.find(({ areas: regionAreas }) =>
+      regionAreas.some((a) => ids.includes(a.id)),
+    );
+    if (firstRegion) setOpenRegion(firstRegion.region);
   }
 
   function clearAll() {
@@ -208,7 +219,7 @@ export function TripBuilderSection(_props: HomeSectionProps) {
         </div>
 
         <div className="grid gap-8 min-[980px]:grid-cols-[1.6fr_1fr] min-[980px]:items-start">
-          <div>
+          <div className="min-w-0">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-display text-[1.1rem] font-bold">1. Tap the areas you want</h3>
               {selected.size > 0 ? (
@@ -222,28 +233,64 @@ export function TripBuilderSection(_props: HomeSectionProps) {
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-7">
-              {areasByRegion.map(({ region, areas: regionAreas }) => (
-                <div key={region}>
-                  <div className="mb-4 flex items-center gap-3" aria-label={`${region} region`}>
-                    <span className="h-px flex-1 bg-rule" />
-                    <span className="rounded-full bg-[#e5eafb] px-4 py-2 text-center text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#2f5aa8]">
-                      {region}
-                    </span>
-                    <span className="h-px flex-1 bg-rule" />
+            <div className="flex flex-col gap-2.5">
+              {areasByRegion.map(({ region, areas: regionAreas }) => {
+                const picked = pickedInRegion(regionAreas);
+                const isOpen = openRegion === region;
+                const panelId = `trip-region-${region.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
+                return (
+                  <div
+                    key={region}
+                    className={`rounded-xl border-[1.5px] bg-paper transition-colors ${
+                      isOpen ? "border-[#1249e8]/40" : "border-rule"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenRegion(isOpen ? null : region)}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-cream/60"
+                    >
+                      <span
+                        className={`min-w-0 truncate text-[0.78rem] font-bold uppercase tracking-[0.06em] ${
+                          isOpen ? "text-[#1249e8]" : "text-[#2f5aa8]"
+                        }`}
+                      >
+                        {region}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-2 text-[0.7rem] font-semibold text-muted">
+                        {picked > 0 ? (
+                          <span className="rounded-full bg-orange px-2 font-bold text-white">
+                            {picked}
+                          </span>
+                        ) : null}
+                        {regionAreas.length} place{regionAreas.length === 1 ? "" : "s"}
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </button>
+
+                    {isOpen ? (
+                      <div
+                        id={panelId}
+                        className="grid grid-cols-1 gap-3 px-3 pb-3 animate-[tripSlideIn_0.25s_ease-out] min-[640px]:grid-cols-2"
+                      >
+                        {regionAreas.map((area) => (
+                          <AreaCard
+                            key={area.id}
+                            area={area}
+                            selected={selected.has(area.id)}
+                            onToggle={() => toggleArea(area.id)}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="grid grid-cols-1 gap-3 min-[640px]:grid-cols-2">
-                    {regionAreas.map((area) => (
-                      <AreaCard
-                        key={area.id}
-                        area={area}
-                        selected={selected.has(area.id)}
-                        onToggle={() => toggleArea(area.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

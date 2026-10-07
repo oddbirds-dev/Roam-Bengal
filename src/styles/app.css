@@ -49,6 +49,17 @@
 @media (prefers-reduced-motion: reduce) {
   .cta-pulse-glow:hover { animation: none; }
 }
+
+/* Trip builder region slider: each region's cards fade/slide in when switched to. */
+@keyframes tripSlideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[tripSlideIn_0\.25s_ease-out\] { animation: none; }
+}
+
 .tripBackground {
   position: absolute;
   inset: 0;
