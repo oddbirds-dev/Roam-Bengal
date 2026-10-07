@@ -57,7 +57,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-\[tripSlideIn_0\.25s_ease-out\] { animation: none; }
+  .animate-\[tripSlideIn_0\.3s_ease-out_both\] { animation: none; }
 }
 
 .tripBackground {

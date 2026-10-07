@@ -59,6 +59,34 @@ function splitAreaIds(areaIds: string): string[] {
     .filter(Boolean);
 }
 
+function prefersReducedMotion() {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** Blink an element twice with a blue glow — click feedback for the region rows. */
+function flash(el: Element | null) {
+  if (!el || prefersReducedMotion()) return;
+  el.animate(
+    [
+      { boxShadow: "0 0 0 0 rgba(18,73,232,0)", backgroundColor: "" },
+      { boxShadow: "0 0 0 4px rgba(18,73,232,0.35)", backgroundColor: "#e5eafb" },
+      { boxShadow: "0 0 0 0 rgba(18,73,232,0)", backgroundColor: "" },
+      { boxShadow: "0 0 0 4px rgba(18,73,232,0.25)", backgroundColor: "#e5eafb" },
+      { boxShadow: "0 0 0 0 rgba(18,73,232,0)", backgroundColor: "" },
+    ],
+    { duration: 700, easing: "ease-out" },
+  );
+}
+
+/** Quick scale "pop" for a card that was just ticked or unticked. */
+function pop(el: Element | null) {
+  if (!el || prefersReducedMotion()) return;
+  el.animate(
+    [{ transform: "scale(1)" }, { transform: "scale(0.96)" }, { transform: "scale(1.02)" }, { transform: "scale(1)" }],
+    { duration: 320, easing: "ease-out" },
+  );
+}
+
 const FIELD =
   "w-full rounded-[10px] border-[1.5px] border-rule bg-paper px-3.5 py-2.5 " +
   "font-body text-[0.86rem] text-ink outline-none focus:border-green";
@@ -103,6 +131,18 @@ export function TripBuilderSection(_props: HomeSectionProps) {
       const next = new Set(current);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      return next;
+    });
+  }
+
+  function setRegionSelected(regionAreas: TripBuilderArea[], on: boolean) {
+    setActivePreset(null);
+    setSelected((current) => {
+      const next = new Set(current);
+      for (const a of regionAreas) {
+        if (on) next.add(a.id);
+        else next.delete(a.id);
+      }
       return next;
     });
   }
@@ -241,53 +281,116 @@ export function TripBuilderSection(_props: HomeSectionProps) {
                 return (
                   <div
                     key={region}
-                    className={`rounded-xl border-[1.5px] bg-paper transition-colors ${
-                      isOpen ? "border-[#1249e8]/40" : "border-rule"
+                    className={`group rounded-xl border-[1.5px] transition-[border-color,background-color,box-shadow,transform] duration-300 ${
+                      isOpen
+                        ? "border-[#1249e8]/50 bg-[#f5f7ff] shadow-[0_8px_24px_-12px_rgba(18,73,232,0.35)]"
+                        : "border-rule bg-paper hover:-translate-y-0.5 hover:border-[#1249e8]/40 hover:shadow-[0_6px_18px_-10px_rgba(18,73,232,0.3)]"
                     }`}
                   >
                     <button
                       type="button"
-                      onClick={() => setOpenRegion(isOpen ? null : region)}
+                      onClick={(e) => {
+                        flash(e.currentTarget.parentElement);
+                        setOpenRegion(isOpen ? null : region);
+                      }}
                       aria-expanded={isOpen}
                       aria-controls={panelId}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-cream/60"
+                      className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-transform active:scale-[0.985]"
                     >
-                      <span
-                        className={`min-w-0 truncate text-[0.78rem] font-bold uppercase tracking-[0.06em] ${
-                          isOpen ? "text-[#1249e8]" : "text-[#2f5aa8]"
-                        }`}
-                      >
-                        {region}
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span
+                          aria-hidden="true"
+                          className={`h-2 w-2 shrink-0 rounded-full transition-colors ${
+                            isOpen
+                              ? "bg-[#1249e8] animate-pulse"
+                              : picked > 0
+                                ? "bg-orange"
+                                : "bg-rule group-hover:bg-[#1249e8]/50"
+                          }`}
+                        />
+                        <span
+                          className={`min-w-0 truncate text-[0.78rem] font-bold uppercase tracking-[0.06em] ${
+                            isOpen ? "text-[#1249e8]" : "text-[#2f5aa8]"
+                          }`}
+                        >
+                          {region}
+                        </span>
                       </span>
                       <span className="flex shrink-0 items-center gap-2 text-[0.7rem] font-semibold text-muted">
                         {picked > 0 ? (
                           <span className="rounded-full bg-orange px-2 font-bold text-white">
-                            {picked}
+                            {picked} picked
                           </span>
                         ) : null}
                         {regionAreas.length} place{regionAreas.length === 1 ? "" : "s"}
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                          aria-hidden="true"
-                        />
+                        <span
+                          className={`inline-flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+                            isOpen
+                              ? "bg-[#1249e8] text-white"
+                              : "bg-[#e5eafb] text-[#2f5aa8] group-hover:bg-[#1249e8] group-hover:text-white"
+                          }`}
+                        >
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                              isOpen ? "rotate-180" : ""
+                            }`}
+                            aria-hidden="true"
+                          />
+                        </span>
                       </span>
                     </button>
 
-                    {isOpen ? (
-                      <div
-                        id={panelId}
-                        className="grid grid-cols-1 gap-3 px-3 pb-3 animate-[tripSlideIn_0.25s_ease-out] min-[640px]:grid-cols-2"
-                      >
-                        {regionAreas.map((area) => (
-                          <AreaCard
-                            key={area.id}
-                            area={area}
-                            selected={selected.has(area.id)}
-                            onToggle={() => toggleArea(area.id)}
-                          />
-                        ))}
+                    {/* Animate height by transitioning grid rows 0fr → 1fr. */}
+                    <div
+                      id={panelId}
+                      inert={!isOpen}
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                        isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="grid grid-cols-1 gap-3 px-3 pb-3 min-[640px]:grid-cols-2">
+                          {regionAreas.map((area, i) => (
+                            <div
+                              key={area.id}
+                              className={isOpen ? "animate-[tripSlideIn_0.3s_ease-out_both]" : ""}
+                              style={{ animationDelay: `${i * 50}ms` }}
+                            >
+                              <AreaCard
+                                area={area}
+                                selected={selected.has(area.id)}
+                                onToggle={() => toggleArea(area.id)}
+                              />
+                            </div>
+                          ))}
+                          <div className="flex items-center justify-between gap-2 min-[640px]:col-span-2">
+                            <span className="text-[0.74rem] text-muted">
+                              {picked} of {regionAreas.length} picked
+                            </span>
+                            <span className="flex gap-3">
+                              {picked < regionAreas.length ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setRegionSelected(regionAreas, true)}
+                                  className="text-[0.78rem] font-semibold text-green hover:underline"
+                                >
+                                  Select all
+                                </button>
+                              ) : null}
+                              {picked > 0 ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setRegionSelected(regionAreas, false)}
+                                  className="text-[0.78rem] font-semibold text-rust hover:underline"
+                                >
+                                  Clear
+                                </button>
+                              ) : null}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    ) : null}
+                    </div>
                   </div>
                 );
               })}
@@ -637,7 +740,10 @@ function AreaCard({
       <input
         type="checkbox"
         checked={selected}
-        onChange={onToggle}
+        onChange={(e) => {
+          pop(e.currentTarget.parentElement);
+          onToggle();
+        }}
         aria-label={`Select ${area.label}`}
         className="peer absolute top-4 right-4 h-5 w-5 cursor-pointer appearance-none rounded-md border-[1.5px] border-rule bg-paper checked:border-orange checked:bg-orange"
       />
