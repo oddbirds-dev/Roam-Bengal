@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { serverClient } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import { serverClient } from "@/integrations/mysql/client.server";
 import { toTourDTO } from "@/lib/tour-dto";
 import { toPostDTO } from "@/lib/post-dto";
 import { toTestimonialDTO } from "@/lib/testimonial-dto";
@@ -15,11 +14,11 @@ import type {
   TourDTO,
 } from "@/lib/content-types";
 
-type TourRow = Database["public"]["Tables"]["tours"]["Row"];
-type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
-type TestimonialRow = Database["public"]["Tables"]["testimonials"]["Row"];
-type FaqRow = Database["public"]["Tables"]["faqs"]["Row"];
-type ActivityRow = Database["public"]["Tables"]["activities"]["Row"];
+type TourRow = Record<string, any>;
+type PostRow = Record<string, any>;
+type TestimonialRow = Record<string, any>;
+type FaqRow = Record<string, any>;
+type ActivityRow = Record<string, any>;
 
 /** Tours map through the shared mapper — the admin preview runs the same code. */
 const toTour = (row: TourRow): TourDTO => toTourDTO(row);

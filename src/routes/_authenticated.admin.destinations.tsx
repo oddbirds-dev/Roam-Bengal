@@ -202,7 +202,7 @@ function RowForm({ row, onBack }: { row?: Row; onBack: () => void }) {
             image_title: v.image_title || null,
             image_description: v.image_description || null,
             intro: v.intro || null,
-            highlights: v.highlights.map((h) => h.trim()).filter(Boolean),
+            highlights: v.highlights.map((h: string) => h.trim()).filter(Boolean),
             best_time: v.best_time || null,
             sort_order: Number(v.sort_order),
             is_published: v.is_published,

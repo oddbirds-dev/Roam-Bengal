@@ -10,7 +10,7 @@ import {
 import { Toaster, setSidebarCollapsed, useSidebarCollapsed } from "@/components/admin/admin-ui";
 import { AdminIcon } from "@/components/admin/icons";
 import { SETTINGS_ORDER, SETTINGS_SCHEMA } from "@/lib/content-schema";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/integrations/mysql/auth-client";
 import { adminStats, whoAmI } from "@/lib/admin.functions";
 
 /**
@@ -93,7 +93,7 @@ function AdminShell() {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await auth.signOut();
     await navigate({ to: "/auth" });
   }
 

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { serverClient } from "@/integrations/supabase/client";
+import { serverClient } from "@/integrations/mysql/client.server";
 
 /**
  * The two public writes.

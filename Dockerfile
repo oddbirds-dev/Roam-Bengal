@@ -16,26 +16,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Vite inlines VITE_* into the browser bundle, so these must be present *at build
-# time* and are baked into the image. Only publishable values belong here — never
-# pass SUPABASE_SERVICE_ROLE_KEY as a build arg; supply it at run time instead.
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_PUBLISHABLE_KEY
-ARG VITE_SUPABASE_PROJECT_ID
+# Vite inlines VITE_* into the browser bundle, so the public site URL must be present
+# at build time. Database credentials and SESSION_SECRET remain runtime-only.
 ARG VITE_SITE_URL
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
-    VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY \
-    VITE_SUPABASE_PROJECT_ID=$VITE_SUPABASE_PROJECT_ID \
-    VITE_SITE_URL=$VITE_SITE_URL
-
-RUN test -n "$VITE_SUPABASE_URL" || (echo "build arg VITE_SUPABASE_URL is required" && exit 1)
-RUN test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || (echo "build arg VITE_SUPABASE_PUBLISHABLE_KEY is required" && exit 1)
+ENV VITE_SITE_URL=$VITE_SITE_URL
 
 RUN npm run build
 
 # ---------------------------------------------------------------------------
 # prod-deps — runtime dependencies only; the SSR bundle imports react,
-# @tanstack/*, @supabase/supabase-js and srvx as externals
+# @tanstack/*, mysql2, bcryptjs, and srvx as externals
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS prod-deps
 WORKDIR /app

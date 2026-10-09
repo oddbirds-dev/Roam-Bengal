@@ -1,27 +1,25 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadMedia } from "@/integrations/mysql/media.functions";
 import { Label } from "@/components/admin/fields";
 
 /**
- * Uploads go browser-direct to Supabase Storage using the admin's own session — they do
- * not pass through the app server. The `content-images` bucket is public, so we store the
- * plain public URL rather than a signed one: signed URLs eventually expire inside content
- * columns and are opaque to any CDN rewriting.
+ * Uploads go through the protected app server into MySQL's `media` table. Public content
+ * stores a stable `/media/<id>` URL, so deployment does not depend on a writable filesystem.
  *
- * A pasted URL is always accepted too, so images can live off-Supabase.
+ * A pasted URL is always accepted too, so images can live on another CDN when desired.
  */
 
-const BUCKET = "content-images";
-
 async function uploadFile(file: File): Promise<string> {
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  const random = Math.random().toString(36).slice(2, 8);
-  const path = `${Date.now()}-${random}.${ext}`;
-
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
-  if (error) throw new Error(error.message);
-
-  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read the image"));
+    reader.onload = () => resolve(String(reader.result).split(",", 2)[1] ?? "");
+    reader.readAsDataURL(file);
+  });
+  const result = await uploadMedia({
+    data: { filename: file.name, contentType: file.type as "image/jpeg", base64 },
+  });
+  return result.url;
 }
 
 export function ImageField({
@@ -121,7 +119,7 @@ export function ImageField({
               {busy ? "Uploading…" : "Upload image"}
               <input
                 type="file"
-                accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
                 className="hidden"
                 disabled={busy}
                 onChange={(e) => onPick(e.target.files?.[0])}
@@ -248,7 +246,7 @@ export function GalleryFieldWithAlt({
           {busy ? "Uploading…" : "+ Add images"}
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
             multiple
             className="hidden"
             disabled={busy}

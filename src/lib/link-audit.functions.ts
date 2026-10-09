@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assertAdmin, requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdmin, requireMySqlAuth as requireSupabaseAuth } from "@/integrations/mysql/auth-middleware";
 import {
   buildLinkGraph,
   buildReport,

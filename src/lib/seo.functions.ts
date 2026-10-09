@@ -1,16 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { serverClient } from "@/integrations/supabase/client";
+import { serverClient } from "@/integrations/mysql/client.server";
 import {
   assertAdmin,
-  requireSupabaseAuth,
+  requireMySqlAuth as requireSupabaseAuth,
   httpError,
-} from "@/integrations/supabase/auth-middleware";
+} from "@/integrations/mysql/auth-middleware";
 import { STATIC_LINK_TARGETS } from "@/lib/link-targets";
-import type { Database } from "@/integrations/supabase/types";
-
-export type SeoMetaRow = Database["public"]["Tables"]["seo_meta"]["Row"];
-export type RedirectRow = Database["public"]["Tables"]["redirects"]["Row"];
+export type SeoMetaRow = Record<string, any>;
+export type RedirectRow = Record<string, any>;
 
 /** Surfaces the Postgres message to the admin UI — acceptable behind the admin gate. */
 function orThrow(label: string, error: { message: string; code?: string } | null): void {
@@ -86,8 +84,8 @@ export const listSitemapEntries = createServerFn({ method: "GET" }).handler(
         .eq("is_published", true),
     ]);
     return {
-      tours: tours.data ?? [],
-      posts: posts.data ?? [],
+      tours: (tours.data ?? []) as SitemapEntry[],
+      posts: (posts.data ?? []) as SitemapEntry[],
     };
   },
 );

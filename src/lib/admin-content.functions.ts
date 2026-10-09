@@ -2,10 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
   assertAdmin,
-  requireSupabaseAuth,
+  requireMySqlAuth as requireSupabaseAuth,
   httpError,
-  type SupabaseAuthContext,
-} from "@/integrations/supabase/auth-middleware";
+  type MySqlAuthContext as SupabaseAuthContext,
+} from "@/integrations/mysql/auth-middleware";
 import { deepStripUnsafeHtml, stripUnsafeHtml } from "@/lib/sanitize";
 import { ADVICE_MAX_GAP } from "@/lib/content-types";
 

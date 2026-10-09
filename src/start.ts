@@ -1,7 +1,7 @@
 import { createStart, createCsrfMiddleware } from "@tanstack/react-start";
-import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+import { attachMySqlAuth } from "@/integrations/mysql/auth-attacher";
 import { createMiddleware } from "@tanstack/react-start";
-import { serverClient } from "@/integrations/supabase/client";
+import { serverClient } from "@/integrations/mysql/client.server";
 import { renderErrorPage } from "@/lib/error-page";
 
 /**
@@ -109,6 +109,6 @@ export const startInstance = createStart(() => ({
   requestMiddleware: [errorMiddleware, redirectsMiddleware, csrfMiddleware],
   // Runs on the CLIENT before every server function call, attaching the caller's JWT.
   // Removing this breaks every admin RPC — see auth-attacher.ts.
-  functionMiddleware: [attachSupabaseAuth],
+  functionMiddleware: [attachMySqlAuth],
 }));
 

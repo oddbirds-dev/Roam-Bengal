@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/integrations/mysql/auth-client";
 
 /**
  * Staff sign-in. Email/password via GoTrue.
@@ -34,7 +34,7 @@ function AuthPage() {
     setState("signing-in");
     setError("");
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await auth.signInWithPassword({
       email,
       password,
     });

@@ -2,8 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import {
   assertAdmin,
   isAdmin,
-  requireSupabaseAuth,
-} from "@/integrations/supabase/auth-middleware";
+  requireMySqlAuth as requireSupabaseAuth,
+} from "@/integrations/mysql/auth-middleware";
 
 /**
  * Identity and dashboard functions.

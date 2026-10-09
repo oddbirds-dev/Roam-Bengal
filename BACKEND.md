@@ -1,5 +1,9 @@
 # Backend — End to End
 
+> **Historical Supabase design.** The production implementation now uses MySQL, local
+> Node.js authentication, and MySQL-backed media. Use [MYSQL_HOSTINGER.md](MYSQL_HOSTINGER.md)
+> for deployment and cutover; do not follow the Supabase-specific instructions below.
+
 Everything server-side in this project, from the HTTP request that hits the Node/Worker
 process down to the Postgres row and back.
 

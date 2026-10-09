@@ -76,7 +76,15 @@ export const Route = createFileRoute("/_authenticated/admin/tours/$id")({
     const seoMeta = tour
       ? await getSeoMeta({ data: { entity_type: "tour", entity_id: tour.id } })
       : null;
-    return { tour, activities, destinations, themes, siteFaqs, isNew, seoMeta };
+    return {
+      tour,
+      activities,
+      destinations,
+      themes,
+      siteFaqs: siteFaqs as Array<{ id: string; question: string; answer: string }>,
+      isNew,
+      seoMeta,
+    };
   },
   component: TourEditorRoute,
 });
