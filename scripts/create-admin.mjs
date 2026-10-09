@@ -3,8 +3,8 @@ import bcrypt from "bcryptjs";
 import mysql from "mysql2/promise";
 
 const [email, password] = process.argv.slice(2);
-if (!email || !password || password.length < 12) {
-  throw new Error("Usage: npm run db:admin -- admin@example.com a-strong-password (minimum 12 characters)");
+if (!email || !password || password.length < 10) {
+  throw new Error("Usage: npm run db:admin -- admin@example.com a-strong-password (minimum 10 characters)");
 }
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
 

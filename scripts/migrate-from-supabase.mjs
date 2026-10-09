@@ -7,9 +7,12 @@ import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import mysql from "mysql2/promise";
 
-const required = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "DATABASE_URL", "MIGRATION_ADMIN_EMAIL", "MIGRATION_ADMIN_PASSWORD"];
+const required = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "MIGRATION_ADMIN_EMAIL", "MIGRATION_ADMIN_PASSWORD"];
 for (const key of required) if (!process.env[key]) throw new Error(`Missing ${key} in .env.migration`);
-if (process.env.MIGRATION_ADMIN_PASSWORD.length < 12) throw new Error("MIGRATION_ADMIN_PASSWORD must be at least 12 characters");
+if (!process.env.DATABASE_URL && (!process.env.MYSQL_HOST || !process.env.MYSQL_USER || !process.env.MYSQL_DATABASE)) {
+  throw new Error("Set DATABASE_URL, or MYSQL_HOST, MYSQL_USER, and MYSQL_DATABASE in .env.migration");
+}
+if (process.env.MIGRATION_ADMIN_PASSWORD.length < 10) throw new Error("MIGRATION_ADMIN_PASSWORD must be at least 10 characters");
 
 const baseUrl = process.env.SUPABASE_URL.replace(/\/$/, "");
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -25,11 +28,13 @@ const jsonColumns = {
   tours: new Set(["accessibility", "addons", "advice", "exclusions", "facts", "faqs", "glance", "hidden_sections", "highlights", "images", "inclusions", "itinerary", "offers", "pledge", "price_tiers", "related_post_slugs", "related_slugs", "why_items"]),
 };
 
-const mysqlUrl = new URL(process.env.DATABASE_URL);
-const db = await mysql.createConnection({
-  host: mysqlUrl.hostname, port: Number(mysqlUrl.port || 3306), user: decodeURIComponent(mysqlUrl.username),
-  password: decodeURIComponent(mysqlUrl.password), database: decodeURIComponent(mysqlUrl.pathname.slice(1)), charset: "utf8mb4",
-});
+const db = await mysql.createConnection(process.env.DATABASE_URL
+  ? (() => {
+      const url = new URL(process.env.DATABASE_URL);
+      return { host: url.hostname, port: Number(url.port || 3306), user: decodeURIComponent(url.username), password: decodeURIComponent(url.password), database: decodeURIComponent(url.pathname.slice(1)), charset: "utf8mb4" };
+    })()
+  : { host: process.env.MYSQL_HOST, port: Number(process.env.MYSQL_PORT || 3306), user: process.env.MYSQL_USER, password: process.env.MYSQL_PASSWORD, database: process.env.MYSQL_DATABASE, charset: "utf8mb4" },
+);
 
 async function getAll(table) {
   const rows = [];

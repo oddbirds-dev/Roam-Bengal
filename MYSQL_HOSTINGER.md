@@ -6,7 +6,7 @@ It has no runtime dependency on Supabase.
 ## First-time cutover
 
 1. In Hostinger, create a MySQL database and user, then import [`mysql/schema.sql`](mysql/schema.sql) through phpMyAdmin.
-2. From a local machine with remote MySQL access enabled, copy `.env.migration.example` to `.env.migration`, add the old Supabase service-role key and the new MySQL connection URL, then run:
+2. From a local machine with remote MySQL access enabled, copy `.env.migration.example` to `.env.migration`, add the old Supabase service-role key and the new MySQL details, then run:
 
    ```sh
    npm run db:migrate-from-supabase
