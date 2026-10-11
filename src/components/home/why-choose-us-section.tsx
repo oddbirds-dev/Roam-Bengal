@@ -39,9 +39,9 @@ export function WhyChooseUsSection(_props: HomeSectionProps) {
           alt="Traveller hiking a forest trail in Bangladesh"
           gradientCss="linear-gradient(150deg,#22B57A,#F2B705 60%,#C4390E)"
           placeholderLabel="images/why-choose-us.jpg"
-          // From `nav` up the frame drops its aspect ratio and stretches to the full
-          // height of the text column beside it, instead of sitting centred and short.
-          className="order-first aspect-[4/4.6] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)] nav:order-none nav:aspect-auto nav:h-full nav:self-stretch"
+          // Keep the desktop image visually balanced with the feature list instead of
+          // stretching to its full height.
+          className="order-first aspect-[4/4.6] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)] nav:order-none nav:aspect-auto nav:h-[640px]"
         />
       </div>
     </section>
