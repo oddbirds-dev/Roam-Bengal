@@ -532,7 +532,7 @@ function TourDetail() {
               ) : null}
               <PriceTierCards
                 tour={tour}
-                className="mt-6 grid grid-cols-2 gap-2.5"
+                className="mt-5 divide-y divide-rule rounded-lg border border-rule bg-paper px-4"
                 compact
               />
 
