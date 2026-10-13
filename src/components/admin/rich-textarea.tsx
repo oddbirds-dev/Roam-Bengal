@@ -28,7 +28,7 @@ import {
 } from "@/lib/tiptap-rich-marks";
 
 const HEADING_LEVELS = [2, 3, 4] as const;
-const DEFAULT_CUSTOM_COLOR = "#1E5F3B";
+const DEFAULT_CUSTOM_COLOR = "#000000";
 
 interface PickerState {
   range: [number, number];

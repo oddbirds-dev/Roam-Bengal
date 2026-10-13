@@ -479,13 +479,29 @@ export const siteDefaults = {
     heading: "Notes From The *Rivers, Hills* & Tea Gardens",
     subtext:
       "Field notes, guides, and honest advice from the boatmen and guides who call these routes home.",
-    featured_eyebrow: "Featured Story",
-    latest_heading: "Latest Stories",
-    newsletter_heading: "Get New Stories In Your Inbox",
-    newsletter_body:
-      "No spam — just field notes and travel advice from Bangladesh, a few times a month.",
-    newsletter_cta: "Subscribe",
     banner_image: "",
+    intro_heading_1: "Beyond The Itinerary",
+    intro_heading_2: "Stories, Places & People",
+    intro_paragraphs: [
+      "Our blog is **where journeys slow down, and stories unfold**.",
+      "From forgotten palaces and river life to crafts, cuisine, and culture, these thoughtful travel narratives are written for curious minds—perfect inspiration for your next escape.",
+    ],
+    submit_label: "Submit your Bangladesh **Travel Stories** at:",
+    submit_email: "hello@roambengal.com",
+    share_line:
+      "Share your experience and inspire fellow travellers planning their trip to Bangladesh.",
+    /** Label picks the icon: Facebook, X, LinkedIn, Instagram, Threads, Pinterest, Flickr, TikTok, YouTube. */
+    social_links: [
+      { label: "Facebook", to: "https://www.facebook.com/" },
+      { label: "X", to: "https://x.com/" },
+      { label: "LinkedIn", to: "https://www.linkedin.com/" },
+      { label: "Instagram", to: "https://www.instagram.com/" },
+      { label: "Threads", to: "https://www.threads.net/" },
+      { label: "Pinterest", to: "https://www.pinterest.com/" },
+      { label: "Flickr", to: "https://www.flickr.com/" },
+      { label: "TikTok", to: "https://www.tiktok.com/" },
+      { label: "YouTube", to: "https://www.youtube.com/" },
+    ],
   },
 
   contact: {

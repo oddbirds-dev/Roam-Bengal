@@ -678,7 +678,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
 
   blog_page: {
     title: "Blog page",
-    description: "Headings on the blog index and the newsletter box.",
+    description: "The blog index banner, introduction and social icons.",
     where: "/blog",
     previewPath: "/blog",
     sections: [
@@ -702,18 +702,27 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
         ],
       },
       {
-        title: "Section labels",
+        title: "Introduction",
         fields: [
-          { kind: "text", key: "featured_eyebrow", label: "Label on the featured post" },
-          { kind: "text", key: "latest_heading", label: "Heading above the post list" },
-        ],
-      },
-      {
-        title: "Newsletter box",
-        fields: [
-          { kind: "text", key: "newsletter_heading", label: "Heading" },
-          { kind: "textarea", key: "newsletter_body", label: "Paragraph", rows: 2 },
-          { kind: "text", key: "newsletter_cta", label: "Button text" },
+          { kind: "text", key: "intro_heading_1", label: "Heading — first line" },
+          { kind: "text", key: "intro_heading_2", label: "Heading — second line" },
+          {
+            kind: "list",
+            key: "intro_paragraphs",
+            label: "Paragraphs",
+            multiline: true,
+            hint: "Each box is one paragraph.",
+          },
+          { kind: "text", key: "submit_label", label: "Story submission line" },
+          { kind: "text", key: "submit_email", label: "Story submission email" },
+          { kind: "text", key: "share_line", label: "Handwritten line beside the social icons" },
+          {
+            kind: "links",
+            key: "social_links",
+            label: "Social icons",
+            hint: "The label picks the icon: Facebook, X, LinkedIn, Instagram, Threads, Pinterest, Flickr, TikTok or YouTube.",
+            addLabel: "Add social link",
+          },
         ],
       },
     ],

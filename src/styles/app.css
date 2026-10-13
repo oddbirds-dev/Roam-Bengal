@@ -13,6 +13,11 @@
 @import "@fontsource/caveat/latin-700.css";
 @import "@fontsource/permanent-marker/latin-400.css";
 @import "@fontsource/kalam/latin-700.css";
+/* Blog index reference: hand-lettered intro, Open Sans copy, Montserrat card titles. */
+@import "@fontsource/architects-daughter/latin-400.css";
+@import "@fontsource/open-sans/latin-400.css";
+@import "@fontsource/open-sans/latin-700.css";
+@import "@fontsource/montserrat/latin-700.css";
 .home-section-seam {
   background-size: 220% 100% !important;
   animation: home-seam-flow 7s linear infinite, home-seam-blink 1.1s ease-in-out infinite;
@@ -120,6 +125,9 @@
   --font-script: "Caveat", cursive;
   --font-marker: "Permanent Marker", cursive;
   --font-kalam: "Kalam", cursive;
+  --font-architect: "Architects Daughter", cursive;
+  --font-opensans: "Open Sans", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
 
   /* The reference designs use a single 980px breakpoint (plus 640px on contact). */
   --breakpoint-nav: 980px;
