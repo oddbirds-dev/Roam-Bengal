@@ -641,8 +641,14 @@ export interface RepeaterColumn<T> {
   /**
    * Custom control for this cell. Used for image pickers: the uploader lives in
    * image-upload.tsx, which imports from this file, so it cannot be imported back here.
+   * `row` and `onFieldChange` let a cell also edit sibling keys (an image's alt text etc.).
    */
-  render?: (value: unknown, onChange: (v: unknown) => void) => ReactNode;
+  render?: (
+    value: unknown,
+    onChange: (v: unknown) => void,
+    row: T,
+    onFieldChange: (key: string, v: unknown) => void,
+  ) => ReactNode;
 }
 
 /** Array of objects — itinerary days, add-ons, offer cards, FAQs. */
@@ -662,7 +668,7 @@ function RepeaterColumnsGrid<T extends Record<string, unknown>>({
         <div key={col.key} style={{ gridColumn: `span ${col.span ?? 12}` }}>
           <span className="mb-1 block text-[0.72rem] font-medium text-muted">{col.label}</span>
           {col.render ? (
-            col.render(row[col.key], (v) => onFieldChange(col.key, v))
+            col.render(row[col.key], (v) => onFieldChange(col.key, v), row, onFieldChange)
           ) : col.type === "list" && col.nested ? (
             <RepeaterField
               label={col.nested.addLabel ?? col.label}

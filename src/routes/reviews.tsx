@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
@@ -88,7 +89,7 @@ function Reviews() {
         <main id="main">
           {/* Hero */}
           <section className="full-bleed relative flex min-h-[500px] flex-col overflow-hidden pb-[30px] text-center text-white">
-            <PhotoFrame src={reviews.banner_image} alt={reviews.heading_1} gradientCss={HERO_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
+            <PhotoFrame src={reviews.banner_image} alt={imageMeta(reviews, "banner_image").alt || reviews.heading_1} title={imageMeta(reviews, "banner_image").title} gradientCss={HERO_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
             <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden="true" />
             <SiteHeader logo="light" />
             <div

@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { buttonClass } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import birdsImg from "@/assets/bird.webp";
 import routeImg from "@/assets/map.webp";
@@ -38,6 +39,8 @@ const PLATFORM_LOGOS: Record<string, IconType> = {
 
 export function ReviewsSection({ testimonials }: HomeSectionProps) {
   const { homepage, reviews } = useSiteSettings();
+  const leftMeta = imageMeta(homepage, "reviews_photo_left");
+  const rightMeta = imageMeta(homepage, "reviews_photo_right");
   const featured = testimonials.filter((t) => t.isFeatured);
   const pool = (featured.length ? featured : testimonials).slice(0, MAX_REVIEWS);
   const slides = chunk(pool, PER_SLIDE);
@@ -59,13 +62,15 @@ export function ReviewsSection({ testimonials }: HomeSectionProps) {
       <EdgePhoto
         side="left"
         src={homepage.reviews_photo_left}
-        alt="Traveller photograph from a Roam Bengal trip"
+        alt={leftMeta.alt || "Traveller photograph from a Roam Bengal trip"}
+        title={leftMeta.title}
         placeholderLabel="images/reviews-print-left.jpg"
       />
       <EdgePhoto
         side="right"
         src={homepage.reviews_photo_right}
-        alt="Traveller photograph from a Roam Bengal trip"
+        alt={rightMeta.alt || "Traveller photograph from a Roam Bengal trip"}
+        title={rightMeta.title}
         placeholderLabel="images/reviews-print-right.jpg"
       />
       <Shoreline />
@@ -320,11 +325,13 @@ function EdgePhoto({
   side,
   src,
   alt,
+  title,
   placeholderLabel,
 }: {
   side: "left" | "right";
   src?: string;
   alt: string;
+  title?: string;
   placeholderLabel: string;
 }) {
   return (
@@ -337,6 +344,7 @@ function EdgePhoto({
       <PhotoFrame
         src={src}
         alt={alt}
+        title={title}
         gradientCss={
           side === "left"
             ? "linear-gradient(160deg,#3E7A6E,#123D30)"

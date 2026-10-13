@@ -9,7 +9,7 @@ import {
   hydrateSetting,
 } from "@/components/admin/settings-form";
 import { AreaIdsPicker, DraggableRepeaterField } from "@/components/admin/fields";
-import { HOMEPAGE_SECTION_FIELDS, asRows } from "@/lib/content-schema";
+import { HOMEPAGE_SECTION_FIELDS, asRows, fieldStorageKeys } from "@/lib/content-schema";
 import { adminPatchSetting, adminSaveSetting } from "@/lib/admin-content.functions";
 import {
   HOME_LAYOUT_KEY,
@@ -70,7 +70,10 @@ function HomepageSectionsScreen() {
     const homepagePatch = Object.fromEntries(
       Object.values(HOMEPAGE_SECTION_FIELDS)
         .flat()
-        .map((field) => [field.key, copy[field.key]] as const),
+        .flatMap(fieldStorageKeys)
+        .map((key) => [key, copy[key]] as const)
+        // Image metadata never set before hydrates to `undefined`, which isn't JSON.
+        .filter(([, value]) => value !== undefined),
     );
     // Two independent rows (different keys), so the calls can run concurrently rather than
     // paying two round trips back-to-back.
@@ -212,6 +215,8 @@ function HomepageSectionsScreen() {
                                 field={field}
                                 value={copy[field.key]}
                                 onChange={(v) => setCopy((prev) => ({ ...prev, [field.key]: v }))}
+                                siblings={copy}
+                                onSiblingChange={(key, v) => setCopy((prev) => ({ ...prev, [key]: v }))}
                               />
                             ),
                           )}

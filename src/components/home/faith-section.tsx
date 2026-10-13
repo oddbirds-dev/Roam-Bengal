@@ -1,5 +1,6 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { Bed, DollarSign, Earth, File, Lock, MessageCircle } from "lucide-react";
 import type { HomeSectionProps } from "./registry";
@@ -26,6 +27,8 @@ const ICONS = [Lock, DollarSign, File, Bed, Earth, MessageCircle];
 
 export function FaithSection(_props: HomeSectionProps) {
   const { homepage } = useSiteSettings();
+  const photo1 = imageMeta(homepage, "faith_image_1");
+  const photo2 = imageMeta(homepage, "faith_image_2");
   return (
     <section className="pt-[100px] pb-[90px]">
       <div className="wrap grid grid-cols-1 items-start gap-10 nav:grid-cols-2 nav:gap-x-[60px] nav:gap-y-14">
@@ -33,7 +36,8 @@ export function FaithSection(_props: HomeSectionProps) {
           <div className="absolute -top-4 -left-4 h-full w-full rounded-[20px] bg-green" />
           <PhotoFrame
             src={homepage.faith_image_1}
-            alt="Local guide talking with a group of travellers in Bangladesh"
+            alt={photo1.alt || "Local guide talking with a group of travellers in Bangladesh"}
+            title={photo1.title}
             gradientCss="linear-gradient(150deg,#22B57A,#0B6B47)"
             placeholderLabel="images/why-trust-guide.jpg"
             className="relative aspect-[4/3] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)]"
@@ -41,10 +45,10 @@ export function FaithSection(_props: HomeSectionProps) {
         </div>
 
         <div className="nav:col-start-2 nav:row-start-1">
-          <h2 className="mb-5 font-kalam text-[clamp(1.9rem,3.2vw,2.5rem)] leading-[1.25] font-bold text-ink">
-            {homepage.faith_heading_1}
+          <h2 className="mb-5 font-kalam text-[clamp(1.9rem,3.2vw,2.5rem)] leading-[1.25] font-bold">
+            <span className="text-green">{homepage.faith_heading_1}</span>
             <br />
-            {homepage.faith_heading_2}
+            <span className="text-accent">{homepage.faith_heading_2}</span>
           </h2>
 
           <ul className="flex flex-col gap-3.5">
@@ -81,7 +85,8 @@ export function FaithSection(_props: HomeSectionProps) {
           <div className="absolute -right-4 -bottom-4 h-full w-full rounded-[20px] bg-orange" />
           <PhotoFrame
             src={homepage.faith_image_2}
-            alt="Travellers on a private boat tour through the Sundarbans"
+            alt={photo2.alt || "Travellers on a private boat tour through the Sundarbans"}
+            title={photo2.title}
             gradientCss="linear-gradient(150deg,#F0791E,#C4390E)"
             placeholderLabel="images/why-trust-boat.jpg"
             className="relative aspect-[4/3] w-full rounded-[20px] shadow-[0_20px_46px_rgba(0,0,0,0.16)]"

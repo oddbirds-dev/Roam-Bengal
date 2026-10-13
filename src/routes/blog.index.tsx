@@ -15,6 +15,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { toPlainText } from "@/lib/markdown";
@@ -74,7 +75,7 @@ function BlogIndex() {
       <main id="main">
         {/* Masthead */}
         <section className="full-bleed relative flex min-h-[480px] flex-col overflow-hidden text-center text-white">
-          <PhotoFrame src={blog_page.banner_image} alt={toPlainText(blog_page.heading)} gradientCss={FEATURED_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
+          <PhotoFrame src={blog_page.banner_image} alt={imageMeta(blog_page, "banner_image").alt || toPlainText(blog_page.heading)} title={imageMeta(blog_page, "banner_image").title} gradientCss={FEATURED_BG} priority showPlaceholder={false} className="absolute inset-0 z-0 h-full w-full" />
           <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden="true" />
           <SiteHeader logo="light" />
           <div className="relative z-[1]">

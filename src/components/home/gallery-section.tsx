@@ -1,6 +1,7 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { GALLERY_FRAMES } from "./palette";
 import type { HomeSectionProps } from "./registry";
@@ -41,7 +42,8 @@ export function GallerySection(_props: HomeSectionProps) {
           <PhotoFrame
             key={photo.tag}
             src={photo.image_url}
-            alt={photo.tag}
+            alt={imageMeta(photo, "image_url").alt || photo.tag}
+            title={imageMeta(photo, "image_url").title}
             gradientCss={GALLERY_FRAMES[i % GALLERY_FRAMES.length]}
             placeholderLabel={photo.tag}
             className="group aspect-square rounded-[14px] transition-transform duration-300 hover:-translate-y-1.5"

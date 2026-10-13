@@ -5,6 +5,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { SectionHead, Eyebrow, Stars, InitialAvatar } from "@/components/sections";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { listPublishedTestimonials } from "@/lib/site-content.functions";
@@ -27,6 +28,9 @@ export const Route = createFileRoute("/about")({
 function About() {
   const testimonials = Route.useLoaderData();
   const { about, homepage } = useSiteSettings();
+  const heroPhoto = imageMeta(about, "hero_image");
+  // The founder slot reuses the hero photo when it has none of its own, so its text follows.
+  const founderPhoto = about.founder_image ? imageMeta(about, "founder_image") : heroPhoto;
   const shown = testimonials.slice(0, 3);
 
   return (
@@ -55,7 +59,8 @@ function About() {
           </div>
           <PhotoFrame
             src={about.hero_image}
-            alt="Roam Bengal guide on a Sundarbans river boat"
+            alt={heroPhoto.alt || "Roam Bengal guide on a Sundarbans river boat"}
+            title={heroPhoto.title}
             gradient="green"
             priority
             placeholderLabel="images/about-hero.jpg"
@@ -86,7 +91,8 @@ function About() {
             <div className="mx-auto w-full max-w-sm text-center lg:mx-0 lg:justify-self-end">
               <PhotoFrame
                 src={about.founder_image || about.hero_image}
-                alt="Roam Bengal founder in Bangladesh"
+                alt={founderPhoto.alt || "Roam Bengal founder in Bangladesh"}
+                title={founderPhoto.title}
                 gradient="green"
                 placeholderLabel="images/founder.jpg"
                 className="aspect-[4/5] rounded-2xl"

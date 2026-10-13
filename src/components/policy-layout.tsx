@@ -6,6 +6,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { FormatDocument, FormatText } from "@/components/ui/format-text";
 import { BannerPhoto } from "@/components/ui/banner-photo";
+import { imageMeta } from "@/lib/image-meta";
 import { PolicyGallery, PolicyReviews } from "@/components/policy-extras";
 import type { PolicyPage } from "@/content/policy-defaults";
 import type { TestimonialDTO } from "@/lib/content-types";
@@ -23,7 +24,11 @@ export function PolicyLayout({
   return (
     <>
       <div className="full-bleed relative isolate bg-green-dark">
-        <BannerPhoto src={page.banner_image} alt={page.title} />
+        <BannerPhoto
+          src={page.banner_image}
+          alt={imageMeta(page, "banner_image").alt || page.title}
+          title={imageMeta(page, "banner_image").title}
+        />
         <SiteHeader />
         <div className="relative z-[1] wrap py-14 text-center">
           <span className="text-[0.72rem] font-semibold tracking-[0.2em] text-gold uppercase">

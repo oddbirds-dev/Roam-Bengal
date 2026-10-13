@@ -6,6 +6,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { TourCard } from "@/components/tour-card";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
 import { HolidayToursSection } from "@/components/home/holiday-tours-section";
@@ -81,6 +82,7 @@ function ToursIndex() {
   const { theme, category } = Route.useSearch();
   const navigate = useNavigate({ from: "/tours/" });
   const { tours_page, homepage } = useSiteSettings();
+  const bannerPhoto = imageMeta(tours_page, "banner_image");
 
   const active = theme ?? "all";
   const themeFiltered =
@@ -116,7 +118,8 @@ function ToursIndex() {
       >
         <PhotoFrame
           src={tours_page.banner_image}
-          alt="Person walking a forest railway track in Bangladesh at sunrise"
+          alt={bannerPhoto.alt || "Person walking a forest railway track in Bangladesh at sunrise"}
+          title={bannerPhoto.title}
           gradientCss="transparent"
           priority
           placeholderLabel="images/tours-banner.jpg"

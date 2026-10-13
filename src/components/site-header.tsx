@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ButtonLink, normalizePath } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { imageMeta } from "@/lib/image-meta";
 
 const TOUR_MENU_ITEMS = [
   { label: "Day Tour", category: "day-tour" },
@@ -33,6 +34,11 @@ export function SiteHeader({
     logo === "light"
       ? header.logo_url_light || "/logo-white.png"
       : header.logo_url || "/logo.png";
+  // The light logo falls back to the main logo's alt text, which every page has always used.
+  const mainLogoMeta = imageMeta(header, "logo_url");
+  const lightLogoMeta = imageMeta(header, "logo_url_light");
+  const logoAlt = (logo === "light" && lightLogoMeta.alt) || mainLogoMeta.alt;
+  const logoTitle = (logo === "light" && lightLogoMeta.title) || mainLogoMeta.title;
   const [open, setOpen] = useState(false);
   const [mobileToursOpen, setMobileToursOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -64,10 +70,11 @@ export function SiteHeader({
       }
     >
       <nav className="wrap flex items-center justify-between gap-6 py-[22px]">
-        <Link to="/" className="block leading-none" aria-label={header.logo_alt}>
+        <Link to="/" className="block leading-none" aria-label={logoAlt}>
           <img
             src={logoSrc}
-            alt={header.logo_alt}
+            alt={logoAlt}
+            title={logoTitle || undefined}
             className="h-[52px] w-auto shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.25)]"
           />
         </Link>

@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings, useHomeLayout } from "@/hooks/use-site-settings";
 import {
@@ -43,6 +44,7 @@ function Home() {
         <PhotoFrame
           src={hero.background_url}
           alt={hero.background_alt}
+          title={imageMeta(hero, "background_url").title}
           gradientCss="transparent"
           priority
           className="absolute inset-0 z-0 h-full w-full"

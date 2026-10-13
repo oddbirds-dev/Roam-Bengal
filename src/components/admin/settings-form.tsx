@@ -12,6 +12,7 @@ import {
   Toggle,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import { imageMeta, imageMetaKeys } from "@/lib/image-meta";
 import {
   asGroups,
   asLinkGroups,
@@ -55,6 +56,8 @@ export function SettingsSections({
               field={field}
               value={value[field.key]}
               onChange={(v) => set(field.key, v)}
+              siblings={value}
+              onSiblingChange={set}
             />
           ))}
         </Card>
@@ -67,10 +70,15 @@ export function FieldControl({
   field,
   value,
   onChange,
+  siblings,
+  onSiblingChange,
 }: {
   field: SettingsField;
   value: unknown;
   onChange: (v: unknown) => void;
+  /** The whole settings object, so an image can read the alt text etc. stored beside it. */
+  siblings?: SettingsObject;
+  onSiblingChange?: (key: string, v: unknown) => void;
 }) {
   switch (field.kind) {
     case "text":
@@ -94,8 +102,27 @@ export function FieldControl({
           onChange={onChange}
         />
       );
-    case "image":
-      return <ImageField label={field.label} hint={field.hint} value={asText(value)} onChange={onChange} />;
+    case "image": {
+      // Without a settings object to write into, the image shows no metadata inputs.
+      const keys = imageMetaKeys(field.key);
+      const meta = imageMeta(siblings, field.key);
+      const setMeta = (key: string) =>
+        onSiblingChange ? (v: string) => onSiblingChange(key, v) : undefined;
+      return (
+        <ImageField
+          label={field.label}
+          hint={field.hint}
+          value={asText(value)}
+          onChange={onChange}
+          alt={meta.alt}
+          onAltChange={setMeta(keys.alt)}
+          title={meta.title}
+          onTitleChange={setMeta(keys.title)}
+          description={meta.description}
+          onDescriptionChange={setMeta(keys.description)}
+        />
+      );
+    }
     case "select":
       return (
         <SelectField

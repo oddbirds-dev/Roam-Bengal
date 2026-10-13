@@ -1,5 +1,6 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { PhotoFrame } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
 import { WhyIcon } from "@/components/art/icons";
 import { STORY_BG } from "./palette";
@@ -7,6 +8,7 @@ import type { HomeSectionProps } from "./registry";
 
 export function WhyChooseUsSection(_props: HomeSectionProps) {
   const { homepage } = useSiteSettings();
+  const photo = imageMeta(homepage, "why_image");
   return (
     <section id="section-why-choose-us" className="py-[90px]" style={{ background: STORY_BG }}>
       <div className="wrap grid items-center gap-10 nav:grid-cols-2 nav:gap-[60px]">
@@ -36,7 +38,8 @@ export function WhyChooseUsSection(_props: HomeSectionProps) {
 
         <PhotoFrame
           src={homepage.why_image}
-          alt="Traveller hiking a forest trail in Bangladesh"
+          alt={photo.alt || "Traveller hiking a forest trail in Bangladesh"}
+          title={photo.title}
           gradientCss="linear-gradient(150deg,#22B57A,#F2B705 60%,#C4390E)"
           placeholderLabel="images/why-choose-us.jpg"
           // Keep the desktop image visually balanced with the feature list instead of

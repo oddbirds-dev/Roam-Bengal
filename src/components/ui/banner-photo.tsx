@@ -15,10 +15,12 @@ import { PhotoFrame } from "@/components/ui/photo-frame";
 export function BannerPhoto({
   src,
   alt,
+  title,
   overlayClassName = "bg-black/60",
 }: {
   src?: string | null;
   alt: string;
+  title?: string;
   /** Scrim over the photo. Raise the opacity for banners with small or thin type. */
   overlayClassName?: string;
 }) {
@@ -29,6 +31,7 @@ export function BannerPhoto({
       <PhotoFrame
         src={src}
         alt={alt}
+        title={title}
         gradientCss="transparent"
         priority
         className="absolute inset-0 z-0 h-full w-full"

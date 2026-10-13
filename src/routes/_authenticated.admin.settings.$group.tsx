@@ -3,7 +3,7 @@ import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { AdminButton, ErrorBanner, useAction } from "@/components/admin/admin-ui";
 import { EditorShell } from "@/components/admin/editor-shell";
 import { SettingsSections, hydrateSetting } from "@/components/admin/settings-form";
-import { SETTINGS_SCHEMA, asObject, type SettingsSchema } from "@/lib/content-schema";
+import { SETTINGS_SCHEMA, asObject, fieldStorageKeys, type SettingsSchema } from "@/lib/content-schema";
 import { infoDefaults, policyDefaults } from "@/content/policy-defaults";
 import { siteDefaults } from "@/content/site-defaults";
 import { adminPatchSetting } from "@/lib/admin-content.functions";
@@ -102,7 +102,8 @@ function SchemaEditor({
     const patch = Object.fromEntries(
       schema.sections.flatMap((section) =>
         section.fields
-          .map((field) => [field.key, draft[field.key]] as const)
+          .flatMap(fieldStorageKeys)
+          .map((key) => [key, draft[key]] as const)
           .filter(([, value]) => value !== undefined),
       ),
     );

@@ -3,9 +3,11 @@ import { Link } from "@tanstack/react-router";
 import { isExternal, normalizePath } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { imageMeta } from "@/lib/image-meta";
 
 export function SiteFooter() {
   const { footer, header } = useSiteSettings();
+  const logoMeta = imageMeta(footer, "logo_url");
 
   // Rendered under the logo/intro rather than inside a column, so the gap above
   // the copyright row carries them.
@@ -37,7 +39,8 @@ export function SiteFooter() {
         <div className="col-span-2 nav:col-span-1">
           <img
             src={footer.logo_url || "/logo-white.png"}
-            alt={header.logo_alt}
+            alt={logoMeta.alt || header.logo_alt}
+            title={logoMeta.title || undefined}
             className="h-14 w-auto"
           />
           {/* Left-aligned against the base `p { text-align: justify }`: this column is only
@@ -97,19 +100,17 @@ export function SiteFooter() {
             </Link>
           ))}
         </div>
-        <span>{footer.site_label}</span>
-      </div>
-
-      <div className="mt-[26px] border-t border-white/10 py-4 text-center text-[0.78rem] tracking-[0.04em] opacity-70">
-        DEVELOPED BY{" "}
-        <a
-          href="https://www.platiroll.com"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="font-bold text-gold opacity-100 transition-opacity hover:opacity-80"
-        >
-          PLATIROLL
-        </a>
+        <span className="tracking-[0.04em]">
+          DEVELOPED BY{" "}
+          <a
+            href="https://www.platiroll.com"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="font-bold text-gold transition-opacity hover:opacity-80"
+          >
+            PLATIROLL
+          </a>
+        </span>
       </div>
     </footer>
   );

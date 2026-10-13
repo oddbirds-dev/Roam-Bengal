@@ -10,6 +10,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { ContactScene } from "@/components/art/dhaka-scene";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { imageMeta } from "@/lib/image-meta";
 import { listPublishedTours } from "@/lib/site-content.functions";
 import { submitInquiry } from "@/lib/capture.functions";
 
@@ -73,7 +74,11 @@ function Contact() {
       <main id="main">
         {/* Hero — flat cream by default, a full-bleed photo band once one is set in the admin */}
         <section className={`full-bleed relative isolate ${banner ? "overflow-hidden py-16" : ""}`}>
-          <BannerPhoto src={contact.banner_image} alt={contact.banner_title} />
+          <BannerPhoto
+            src={contact.banner_image}
+            alt={imageMeta(contact, "banner_image").alt || contact.banner_title}
+            title={imageMeta(contact, "banner_image").title}
+          />
           <div
             className={`relative z-[1] shell mx-auto max-w-[760px] text-center ${
               banner ? "" : "pt-16 pb-5"

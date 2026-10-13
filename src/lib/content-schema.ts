@@ -5,6 +5,7 @@ import {
   type RepeaterColumn,
 } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/image-upload";
+import { imageMeta, imageMetaKeys } from "@/lib/image-meta";
 import { TOUR_SECTION_OPTIONS } from "@/lib/tour-sections";
 import type { HomeSectionId } from "@/components/home/registry";
 import {
@@ -147,13 +148,32 @@ const WHY_ICONS = [
   { value: "chat", label: "Chat" },
 ] as const;
 
-/** Image cell for repeaters — see the `render` note on RepeaterColumn. */
-const imageCell = (value: unknown, onChange: (v: unknown) => void): ReactNode =>
-  createElement(ImageField, {
-    label: "",
-    value: typeof value === "string" ? value : "",
-    onChange,
-  });
+/**
+ * Image cell for repeaters — see the `render` note on RepeaterColumn. Alt text, meta title
+ * and meta description are stored on the same row under the keys `imageMetaKeys` derives.
+ */
+const imageCell =
+  (urlKey: string) =>
+  (
+    value: unknown,
+    onChange: (v: unknown) => void,
+    row: Record<string, unknown>,
+    onFieldChange: (key: string, v: unknown) => void,
+  ): ReactNode => {
+    const keys = imageMetaKeys(urlKey);
+    const meta = imageMeta(row, urlKey);
+    return createElement(ImageField, {
+      label: "",
+      value: typeof value === "string" ? value : "",
+      onChange,
+      alt: meta.alt,
+      onAltChange: (v: string) => onFieldChange(keys.alt, v),
+      title: meta.title,
+      onTitleChange: (v: string) => onFieldChange(keys.title, v),
+      description: meta.description,
+      onDescriptionChange: (v: string) => onFieldChange(keys.description, v),
+    });
+  };
 
 /**
  * The optional hero photo every page banner accepts. Left empty, the banner keeps the
@@ -312,19 +332,13 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             kind: "image",
             key: "logo_url",
             label: "Logo image",
-            hint: "Leave empty to use the default logo.",
+            hint: "Leave empty to use the default logo. The alt text is read aloud by screen readers and shown if the image fails to load.",
           },
           {
             kind: "image",
             key: "logo_url_light",
             label: "Logo image (light)",
             hint: "Used on pages with a photo banner behind the header, e.g. Tours. Leave empty to reuse the default light logo.",
-          },
-          {
-            kind: "text",
-            key: "logo_alt",
-            label: "Logo description",
-            hint: "Read aloud by screen readers and shown if the image fails to load.",
           },
           { kind: "text", key: "wordmark_1", label: "Name — first word" },
           { kind: "text", key: "wordmark_2", label: "Name — second word" },
@@ -406,12 +420,6 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
         title: "Background",
         fields: [
           { kind: "image", key: "background_url", label: "Background photo" },
-          {
-            kind: "text",
-            key: "background_alt",
-            label: "Photo description",
-            hint: "Describe the photo for people using screen readers.",
-          },
         ],
       },
       {
@@ -520,7 +528,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             title: (_row, i) => `Photo ${i + 1}`,
             columns: [
               { key: "tag", label: "Caption", placeholder: "Sundarbans River" },
-              { key: "image_url", label: "Photo", render: imageCell },
+              { key: "image_url", label: "Photo", render: imageCell("image_url") },
             ],
             blank: { tag: "", image_url: "" },
           },
@@ -1066,12 +1074,6 @@ export const HOMEPAGE_SECTION_FIELDS: Partial<Record<HomeSectionId, SettingsFiel
       label: "Photo beside the text",
       hint: "Leave empty to keep the drawn Dhaka skyline.",
     },
-    {
-      kind: "text",
-      key: "cta_image_alt",
-      label: "Photo description",
-      hint: "Describe the photo for screen readers and search engines. Ignored while the drawing is showing.",
-    },
   ],
 };
 
@@ -1225,5 +1227,16 @@ const asGroups = (v: unknown): GroupRow[] =>
     : [];
 
 export type SettingsObject = Obj;
+
+/**
+ * Every settings key a field writes. An image field also owns the alt text, meta title and
+ * meta description stored beside it, so savers that patch only the schema's keys must
+ * include these or the metadata is silently dropped.
+ */
+export function fieldStorageKeys(field: SettingsField): string[] {
+  if (field.kind !== "image") return [field.key];
+  const meta = imageMetaKeys(field.key);
+  return [field.key, meta.alt, meta.title, meta.description];
+}
 
 export { asObject, asText, asTextList, asRows, asLinks, asLinkGroups, asGroups };

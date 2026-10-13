@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/button";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
+import { imageMeta } from "@/lib/image-meta";
 import { Stars, InitialAvatar } from "@/components/sections";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import type { TestimonialDTO } from "@/lib/content-types";
@@ -43,7 +44,8 @@ export function PolicyGallery() {
             <PhotoFrame
               key={photo.tag}
               src={photo.image_url}
-              alt={photo.tag}
+              alt={imageMeta(photo, "image_url").alt || photo.tag}
+              title={imageMeta(photo, "image_url").title}
               gradient={gradientFor(photo.tag)}
               placeholderLabel={photo.tag}
               className="aspect-square rounded-xl transition-transform duration-300 hover:-translate-y-1"

@@ -1,4 +1,5 @@
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { imageMeta } from "@/lib/image-meta";
 import { ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { DhakaScene } from "@/components/art/dhaka-scene";
@@ -7,6 +8,7 @@ import type { HomeSectionProps } from "./registry";
 
 export function DreamCtaSection(_props: HomeSectionProps) {
   const { homepage } = useSiteSettings();
+  const photo = imageMeta(homepage, "cta_image");
   return (
     <section id="contact" className="py-[70px]" style={{ background: DREAM_BG }}>
       <div className="wrap grid items-center gap-10 nav:grid-cols-2">
@@ -32,7 +34,8 @@ export function DreamCtaSection(_props: HomeSectionProps) {
         {homepage.cta_image ? (
           <img
             src={homepage.cta_image}
-            alt={homepage.cta_image_alt}
+            alt={photo.alt}
+            title={photo.title || undefined}
             loading="lazy"
             decoding="async"
             className="aspect-[46/38] w-full object-contain"
