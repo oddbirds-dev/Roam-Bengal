@@ -506,7 +506,9 @@ function TourDetail() {
             </div>
           </main>
 
-          <aside className="lg:sticky lg:top-6 lg:h-fit">
+          {/* The gallery's fixed tile widths run 148px past `.wrap`; widen the sidebar to
+              line up with its right edge, keeping a 16px gap to the viewport on narrower screens. */}
+          <aside className="lg:sticky lg:top-6 lg:mr-[calc(-1*clamp(0px,calc((100vw-1240px)/2+24px),148px))] lg:h-fit">
             <div className="rounded-2xl border border-rule bg-cream p-6 shadow-sm">
               <div className="text-[0.72rem] tracking-wide text-muted uppercase">
                 Tour Cost

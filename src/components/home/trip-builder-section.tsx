@@ -229,7 +229,7 @@ export function TripBuilderSection(_props: HomeSectionProps) {
           <h2 className="mb-2 font-display text-[1.9rem] font-bold">
             {homepage.trip_builder_heading}
           </h2>
-          <p className="text-[0.92rem] text-muted">
+          <p className="text-center text-[0.92rem] text-muted">
             <FormatText>{homepage.trip_builder_intro}</FormatText>
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2.5 min-[980px]:flex-nowrap">
