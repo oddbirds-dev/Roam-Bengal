@@ -133,7 +133,7 @@ function TourDetail() {
             here: the two rows are equal `1fr`, so the wide top-right tile's ratio would
             set both row heights and the row-spanning big tile would end up twice as tall
             as the column beside it. Ratios still drive the stacked mobile layout. */}
-        <div className="wrap grid gap-3 py-6 md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[560px] lg:grid-cols-[325px_325px_minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="wrap grid gap-3 py-6 lg:-translate-x-[clamp(0px,calc((100vw-1240px)/2+24px),74px)] md:h-[400px] md:grid-cols-4 md:grid-rows-2 lg:h-[560px] lg:grid-cols-[325px_325px_minmax(0,1fr)_minmax(0,1fr)]">
           <PhotoFrame
             src={gallery[0]?.url}
             alt={gallery[0]?.alt || `${tour.title} — main photograph`}
@@ -156,7 +156,7 @@ function TourDetail() {
           ))}
         </div>
 
-        <div className="wrap grid gap-10 pb-20 lg:grid-cols-[1fr_340px]">
+        <div className="wrap grid gap-10 pb-20 lg:-translate-x-[clamp(0px,calc((100vw-1240px)/2+24px),74px)] lg:grid-cols-[1fr_340px]">
           <main id="main" className="min-w-0">
             <nav className="text-[0.78rem] text-muted" aria-label="Breadcrumb">
               <Link to="/" className="hover:text-green">
