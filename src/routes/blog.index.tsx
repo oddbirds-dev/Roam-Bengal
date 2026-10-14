@@ -1,22 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { IconType } from "react-icons";
-import {
-  FaCalendar,
-  FaFacebookF,
-  FaFlickr,
-  FaInstagram,
-  FaLinkedinIn,
-  FaPinterestP,
-  FaTiktok,
-  FaYoutube,
-} from "react-icons/fa";
-import { SiThreads, SiX } from "react-icons/si";
+import { FaCalendar } from "react-icons/fa";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { imageMeta } from "@/lib/image-meta";
-import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { toPlainText } from "@/lib/markdown";
 import { listPublishedPosts } from "@/lib/site-content.functions";
@@ -48,26 +36,9 @@ const STORY_FRAMES = [
   "linear-gradient(160deg,#D9450F,#7A2408)",
 ];
 
-/** Brand circle per platform, keyed by the lower-cased admin label. */
-const SOCIAL_ICONS: Record<string, { icon: IconType; bg: string }> = {
-  facebook: { icon: FaFacebookF, bg: "#3B5998" },
-  x: { icon: SiX, bg: "#000000" },
-  twitter: { icon: SiX, bg: "#000000" },
-  linkedin: { icon: FaLinkedinIn, bg: "#0077B5" },
-  instagram: { icon: FaInstagram, bg: "#262626" },
-  threads: { icon: SiThreads, bg: "#000000" },
-  pinterest: { icon: FaPinterestP, bg: "#BD081C" },
-  flickr: { icon: FaFlickr, bg: "#0063DC" },
-  tiktok: { icon: FaTiktok, bg: "#000000" },
-  youtube: { icon: FaYoutube, bg: "#CD201F" },
-};
-
 function BlogIndex() {
   const posts = Route.useLoaderData();
   const { blog_page } = useSiteSettings();
-  const socials = blog_page.social_links.filter(
-    (s) => s.to && SOCIAL_ICONS[s.label.trim().toLowerCase()],
-  );
 
   return (
     <>
@@ -91,60 +62,9 @@ function BlogIndex() {
         </section>
 
         <div className="mx-auto w-full max-w-[1340px] px-5 pt-[81px] pb-[90px] font-opensans text-[#2B2B2B]">
-          {/* Introduction */}
-          <section>
-            <h2 className="mb-[19px] font-architect text-[clamp(1.6rem,3vw,2.375rem)] leading-none font-normal uppercase">
-              <span className="font-bold text-[#115436]">{blog_page.intro_heading_1}</span>
-              <br />
-              <span className="text-[#FDBC13] [-webkit-text-stroke:0.8px_currentColor]">
-                {blog_page.intro_heading_2}
-              </span>
-            </h2>
-            {blog_page.intro_paragraphs.map((p) => (
-              <p key={p} className="mb-[15px] text-[18px] leading-[27px] [&_strong]:font-bold [&_strong]:text-[#2B2B2B]">
-                <FormatText>{p}</FormatText>
-              </p>
-            ))}
-            {blog_page.submit_email ? (
-              <p className="mb-[15px] text-left text-[18px] leading-[27px] [&_strong]:font-bold [&_strong]:text-[#2B2B2B]">
-                <FormatText>{blog_page.submit_label}</FormatText>{" "}
-                <span aria-hidden="true">📨</span>{" "}
-                <a href={`mailto:${blog_page.submit_email}`} className="text-[#0000FF] hover:underline">
-                  {blog_page.submit_email}
-                </a>
-              </p>
-            ) : null}
-            <div className="mt-[21px] flex flex-wrap items-center gap-x-5 gap-y-3">
-              <p className="text-left font-architect text-[clamp(1.15rem,2.2vw,23.5px)] leading-[1.3] [-webkit-text-stroke:0.4px_currentColor]">
-                {blog_page.share_line}
-              </p>
-              {socials.length ? (
-                <ul className="flex flex-wrap gap-[5px]">
-                  {socials.map((s) => {
-                    const { icon: Icon, bg } = SOCIAL_ICONS[s.label.trim().toLowerCase()]!;
-                    return (
-                      <li key={s.label}>
-                        <a
-                          href={s.to}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={s.label}
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-[15px] text-white transition-opacity hover:opacity-85"
-                          style={{ background: bg }}
-                        >
-                          <Icon aria-hidden="true" />
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
-            </div>
-          </section>
-
           {/* Story grid */}
           {posts.length ? (
-            <div className="mt-[42px] grid gap-[31px] min-[640px]:grid-cols-2 min-[980px]:grid-cols-3">
+            <div className="grid gap-[31px] min-[640px]:grid-cols-2 min-[980px]:grid-cols-3">
               {posts.map((post, i) => (
                 <article
                   key={post.id}
@@ -189,7 +109,7 @@ function BlogIndex() {
               ))}
             </div>
           ) : (
-            <p className="mt-[46px] rounded-2xl border border-dashed border-rule py-16 text-center text-muted">
+            <p className="rounded-2xl border border-dashed border-rule py-16 text-center text-muted">
               No stories published yet.
             </p>
           )}
