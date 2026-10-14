@@ -135,6 +135,8 @@ export function RichTextarea({
   const lastEmitted = useRef(value);
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [showSource, setShowSource] = useState(false);
+  /** Sticky bold: while on, every finished selection is bolded (or un-bolded) at once. */
+  const [boldBrush, setBoldBrush] = useState(false);
 
   const editor = useEditor(
     {
@@ -257,6 +259,12 @@ export function RichTextarea({
     if (!Number.isFinite(raw) || editor.state.selection.empty) return;
     const spacing = Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Math.round(raw * 10) / 10));
     editor.chain().focus().setMark("lineHeight", { value: spacing }).run();
+  };
+
+  const applyBrush = () => {
+    if (!boldBrush || editor.state.selection.empty) return;
+    const end = editor.state.selection.to;
+    editor.chain().focus().toggleBold().setTextSelection(end).run();
   };
 
   const openLinkPicker = () => {
@@ -400,6 +408,17 @@ export function RichTextarea({
             <AdminIcon name={icon} className="h-3.5 w-3.5" />
           </button>
         ))}
+        <button
+          type="button"
+          disabled={showSource}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setBoldBrush((current) => !current)}
+          title={boldBrush ? "Bold brush on — select text to bold it (Esc to stop)" : "Bold brush — keep bolding every selection"}
+          aria-pressed={boldBrush}
+          className={`${button} ${boldBrush ? active : ""}`}
+        >
+          <AdminIcon name="boldBrush" className="h-3.5 w-3.5" />
+        </button>
         <span className="h-4 w-px bg-rule" />
         <select
           title="Text colour"
@@ -456,7 +475,10 @@ export function RichTextarea({
           </button>
         ) : null}
         {!inlineLines ? (
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setShowSource((current) => !current)} title={showSource ? "Back to formatted view" : "Edit HTML source"} aria-pressed={showSource} className={`${button} ${showSource ? active : ""}`}>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+            setBoldBrush(false);
+            setShowSource((current) => !current);
+          }} title={showSource ? "Back to formatted view" : "Edit HTML source"} aria-pressed={showSource} className={`${button} ${showSource ? active : ""}`}>
             <AdminIcon name="code" className="h-3.5 w-3.5" />
           </button>
         ) : null}
@@ -477,7 +499,12 @@ export function RichTextarea({
           editor={editor}
           id={id}
           style={{ minHeight: `${rows * 1.5 + 1.25}rem` }}
-          className="rich-textarea-content min-w-0"
+          className={`rich-textarea-content min-w-0 ${boldBrush ? "ring-1 ring-green/40 ring-inset" : ""}`}
+          onMouseUp={applyBrush}
+          onKeyUp={(event) => {
+            if (event.key === "Escape") setBoldBrush(false);
+            else if (event.shiftKey) applyBrush();
+          }}
         />
       )}
 
