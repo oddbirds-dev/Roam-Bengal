@@ -146,6 +146,7 @@ export function TextArea({
   plain,
   boldButton,
   boldLinePrefixPattern,
+  keepPastedFormatting,
 }: {
   label: string;
   value: string;
@@ -164,6 +165,8 @@ export function TextArea({
   /** When set, the part of every line before the first match is semantically bold in the
    *  public layout, so the editor preview mirrors that weight without changing the text. */
   boldLinePrefixPattern?: RegExp;
+  /** Rich editor only: pasting from Word / Google Docs keeps fonts, highlight and alignment. */
+  keepPastedFormatting?: boolean;
 }) {
   const id = useFieldId(label);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -300,6 +303,7 @@ export function TextArea({
           placeholder={placeholder}
           onChange={onChange}
           ariaLabel={label}
+          keepPastedFormatting={keepPastedFormatting}
         />
       )}
     </div>

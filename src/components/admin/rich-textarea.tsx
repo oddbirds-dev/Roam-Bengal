@@ -17,14 +17,19 @@ import {
   ColorClassMark,
   CustomColorMark,
   FONT_OPTIONS,
+  FontFamilyMark,
   FontSizeMark,
+  HighlightMark,
   LINE_HEIGHT_STEP,
   LineHeightMark,
   MAX_FONT_PX,
   MAX_LINE_HEIGHT,
   MIN_FONT_PX,
   MIN_LINE_HEIGHT,
+  TEXT_ALIGNS,
+  TextAlignAttribute,
   createFontClassMark,
+  demotePastedHeadings,
 } from "@/lib/tiptap-rich-marks";
 
 const HEADING_LEVELS = [2, 3, 4] as const;
@@ -106,6 +111,7 @@ export function RichTextarea({
   mode = "document",
   boldLinePrefixPattern,
   blockSeparatorOnEnter = false,
+  keepPastedFormatting = false,
 }: {
   id?: string;
   rows?: number;
@@ -118,8 +124,12 @@ export function RichTextarea({
   /** Inline-lines only: Enter ends the current block (blank separator + new paragraph)
    * unless the line being split is a block's first line. */
   blockSeparatorOnEnter?: boolean;
+  /** Document mode only: text pasted from Word / Google Docs keeps its own font family,
+   * highlight and paragraph alignment, and its headings shift down to the allowed levels. */
+  keepPastedFormatting?: boolean;
 }) {
   const inlineLines = mode === "inline-lines";
+  const pasteFormatting = keepPastedFormatting && !inlineLines;
   const { custom_fonts } = useSiteSettings();
   const customFonts = resolveCustomFonts(custom_fonts);
   const customFontKey = customFonts.map((font) => font.className).join("|");
@@ -159,6 +169,7 @@ export function RichTextarea({
         FontSizeMark,
         LineHeightMark,
         CustomColorMark,
+        ...(pasteFormatting ? [FontFamilyMark, HighlightMark, TextAlignAttribute] : []),
         ...(inlineLines && boldLinePrefixPattern
           ? [BoldLinePrefix.configure({ pattern: boldLinePrefixPattern })]
           : []),
@@ -172,6 +183,7 @@ export function RichTextarea({
         onChange(html);
       },
       editorProps: {
+        ...(pasteFormatting ? { transformPastedHTML: demotePastedHeadings } : {}),
         attributes: {
           class:
             "min-w-0 px-3.5 py-2.5 text-[0.88rem] leading-[1.6] outline-none " +
@@ -183,7 +195,7 @@ export function RichTextarea({
         },
       },
     },
-    [customFontKey, inlineLines, boldLinePrefixPattern?.source, blockSeparatorOnEnter],
+    [customFontKey, inlineLines, boldLinePrefixPattern?.source, blockSeparatorOnEnter, pasteFormatting],
   );
 
   useEffect(() => {
@@ -209,6 +221,9 @@ export function RichTextarea({
               Number.parseFloat(
                 String(current.getAttributes("lineHeight").value ?? BASE_LINE_HEIGHT),
               ) || BASE_LINE_HEIGHT,
+            textAlign:
+              (current.getAttributes(current.isActive("heading") ? "heading" : "paragraph")
+                .textAlign as string | null | undefined) ?? "left",
             headingLevel: current.isActive("heading")
               ? ((current.getAttributes("heading").level as number | undefined) ?? 0)
               : 0,
@@ -237,6 +252,7 @@ export function RichTextarea({
     underline: false,
     fontSize: BASE_FONT_PX,
     lineHeight: BASE_LINE_HEIGHT,
+    textAlign: "left",
     headingLevel: 0,
     bulletList: false,
     orderedList: false,
@@ -341,8 +357,11 @@ export function RichTextarea({
           disabled={showSource}
           value=""
           onChange={(event) => {
-            if (event.target.value)
-              editor.chain().focus().setMark("fontClass", { value: event.target.value }).run();
+            if (!event.target.value) return;
+            const chain = editor.chain().focus();
+            // A pasted document's own font would otherwise sit inside and win over the pick.
+            if (pasteFormatting) chain.unsetMark("fontFamily");
+            chain.setMark("fontClass", { value: event.target.value }).run();
           }}
           className={select}
         >
@@ -445,6 +464,30 @@ export function RichTextarea({
             className="h-4 w-4 cursor-pointer border-0 bg-transparent p-0"
           />
         </label>
+        {pasteFormatting ? (
+          <>
+            <span className="h-4 w-px bg-rule" />
+            <select
+              title="Paragraph alignment"
+              disabled={showSource}
+              value={toolbarState.textAlign}
+              onChange={(event) => {
+                const value = event.target.value === "left" ? null : event.target.value;
+                editor
+                  .chain()
+                  .focus()
+                  .updateAttributes("paragraph", { textAlign: value })
+                  .updateAttributes("heading", { textAlign: value })
+                  .run();
+              }}
+              className={select}
+            >
+              {TEXT_ALIGNS.map((align) => (
+                <option key={align} value={align}>Align {align}</option>
+              ))}
+            </select>
+          </>
+        ) : null}
         {!inlineLines ? (
           <>
             <span className="h-4 w-px bg-rule" />

@@ -1,4 +1,4 @@
-import { Mark, mergeAttributes } from "@tiptap/core";
+import { Extension, Mark, mergeAttributes } from "@tiptap/core";
 
 /** Built-in families. Admin-managed families are appended by `RichTextarea`. */
 export const FONT_OPTIONS = [
@@ -68,18 +68,42 @@ export const ColorClassMark = classSpanMark(
   COLOR_OPTIONS.map((option) => option.value),
 );
 
-function styleMark(name: string, property: "font-size" | "color", unit = "") {
+/** Word and Google Docs size text in points (`11pt`, `11.0pt`); the editor stores px. */
+function toPx(raw: string): number | null {
+  const match = /^(-?[\d.]+)\s*(px|pt|r?em)?$/i.exec(raw.trim());
+  if (!match) return null;
+  const amount = Number.parseFloat(match[1] ?? "");
+  const unit = (match[2] ?? "px").toLowerCase();
+  const px = unit === "pt" ? (amount * 4) / 3 : unit === "px" ? amount : amount * BASE_FONT_PX;
+  if (!Number.isFinite(px) || px <= 0) return null;
+  return Math.min(MAX_FONT_PX, Math.max(MIN_FONT_PX, Math.round(px)));
+}
+
+/** Keeps a font stack like `"Times New Roman", serif` and drops anything that is not one. */
+function cleanFontFamily(raw: string): string | null {
+  const value = raw.replace(/"/g, "'").replace(/[^\w\s,'.-]/g, "").trim();
+  return value || null;
+}
+
+const TRANSPARENT = /^(transparent|initial|inherit|unset|none|rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\))$/i;
+
+/**
+ * Inline-style span mark. Parsed with a `style` rule rather than a `span[style*=…]` tag rule:
+ * a tag rule claims the element for the first mark that matches, so a pasted
+ * `<span style="font-size:11pt;color:red">` used to keep only one of the two.
+ */
+function styleMark(
+  name: string,
+  property: "font-size" | "color" | "font-family" | "background-color",
+  parse: (raw: string) => string | number | null,
+  unit = "",
+) {
   return Mark.create({
     name,
     addAttributes() {
       return {
         value: {
           default: null,
-          parseHTML: (element: HTMLElement) => {
-            const raw = element.style.getPropertyValue(property);
-            if (!raw) return null;
-            return unit ? Number.parseInt(raw, 10) || null : raw;
-          },
           renderHTML: (attributes: { value?: string | number | null }) =>
             attributes.value !== null && attributes.value !== undefined
               ? { style: `${property}: ${attributes.value}${unit}` }
@@ -88,7 +112,15 @@ function styleMark(name: string, property: "font-size" | "color", unit = "") {
       };
     },
     parseHTML() {
-      return [{ tag: `span[style*="${property}"]` }];
+      return [
+        {
+          style: property,
+          getAttrs: (raw) => {
+            const value = parse(raw);
+            return value === null ? false : { value };
+          },
+        },
+      ];
     },
     renderHTML({ HTMLAttributes }) {
       return ["span", mergeAttributes(HTMLAttributes), 0];
@@ -96,9 +128,59 @@ function styleMark(name: string, property: "font-size" | "color", unit = "") {
   });
 }
 
-export const FontSizeMark = styleMark("fontSize", "font-size", "px");
+export const FontSizeMark = styleMark("fontSize", "font-size", toPx, "px");
 /** Arbitrary hex colours intentionally remain separate from palette class colours. */
-export const CustomColorMark = styleMark("customColor", "color");
+export const CustomColorMark = styleMark("customColor", "color", (raw) => raw.trim() || null);
+/** A pasted document's own font (Calibri, Times New Roman…), kept as an inline stack. */
+export const FontFamilyMark = styleMark("fontFamily", "font-family", cleanFontFamily);
+export const HighlightMark = styleMark("highlight", "background-color", (raw) =>
+  !raw.trim() || TRANSPARENT.test(raw.trim()) ? null : raw.trim(),
+);
+
+export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
+type TextAlign = (typeof TEXT_ALIGNS)[number];
+
+/** Paragraph/heading alignment as an inline `text-align`, which Word and Docs both emit. */
+export const TextAlignAttribute = Extension.create({
+  name: "textAlign",
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["paragraph", "heading"],
+        attributes: {
+          textAlign: {
+            default: null,
+            parseHTML: (element: HTMLElement) => {
+              const raw = (element.style.textAlign || element.getAttribute("align") || "").toLowerCase();
+              return raw !== "left" && (TEXT_ALIGNS as readonly string[]).includes(raw) ? raw : null;
+            },
+            renderHTML: (attributes: { textAlign?: TextAlign | null }) =>
+              attributes.textAlign ? { style: `text-align: ${attributes.textAlign}` } : {},
+          },
+        },
+      },
+    ];
+  },
+});
+
+/**
+ * Word and Docs mark the top-level heading `<h1>`, which this editor does not allow (the page
+ * title is the h1), so pasted headings shift one level down instead of turning into plain text.
+ */
+export function demotePastedHeadings(html: string): string {
+  if (typeof DOMParser === "undefined" || !/<h[1-6]\b/i.test(html)) return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.body.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((heading) => {
+    const level = Math.min(4, Number(heading.tagName[1]) + 1);
+    const replacement = doc.createElement(`h${level}`);
+    for (const attribute of Array.from(heading.attributes)) {
+      replacement.setAttribute(attribute.name, attribute.value);
+    }
+    replacement.append(...Array.from(heading.childNodes));
+    heading.replaceWith(replacement);
+  });
+  return doc.body.innerHTML;
+}
 
 export const BASE_LINE_HEIGHT = 1.6;
 export const MIN_LINE_HEIGHT = 1;
