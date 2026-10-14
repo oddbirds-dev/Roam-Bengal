@@ -490,6 +490,12 @@ export const siteDefaults = {
     submit_email: "hello@roambengal.com",
     share_line:
       "Share your experience and inspire fellow travellers planning their trip to Bangladesh.",
+    /** The invitation strip under every post's article. */
+    cta_heading: "Plan Your Bangladesh Trip",
+    cta_body:
+      "Tell us your dates, interests and how adventurous you feel — we'll plan the route, arrange the paperwork and meet you at the airport.",
+    cta_label: "Plan My Trip →",
+    cta_link: "/contact",
     /** Label picks the icon: Facebook, X, LinkedIn, Instagram, Threads, Pinterest, Flickr, TikTok, YouTube. */
     social_links: [
       { label: "Facebook", to: "https://www.facebook.com/" },

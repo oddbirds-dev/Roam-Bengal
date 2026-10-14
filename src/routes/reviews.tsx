@@ -3,7 +3,7 @@ import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
-import { ButtonLink } from "@/components/ui/button";
+import { CtaStrip } from "@/components/cta-strip";
 import { PhotoFrame } from "@/components/ui/photo-frame";
 import { imageMeta } from "@/lib/image-meta";
 import { FormatText } from "@/components/ui/format-text";
@@ -28,7 +28,6 @@ export const Route = createFileRoute("/reviews")({
 });
 
 const HERO_BG = "linear-gradient(160deg,#3A1408,#5C2410 55%,#3A1408)";
-const CTA_BG = "linear-gradient(120deg,#EAF4EC,#FDF0E4)";
 /** `.rr-photo` colours, cycled down the list in reference order. */
 const PHOTO_FRAMES = [
   "linear-gradient(150deg,#22B57A,#0B6B47)",
@@ -210,20 +209,13 @@ function Reviews() {
 
           {/* CTA strip */}
           <div className="px-5 pb-[90px] min-[640px]:px-10">
-            <div
-              className="mx-auto flex max-w-[1160px] flex-wrap items-center justify-between gap-[30px] rounded-[20px] px-7 py-9 min-[980px]:px-14 min-[980px]:py-[50px]"
-              style={{ background: CTA_BG }}
-            >
-              <div>
-                <h3 className="mb-2 font-display text-[1.4rem] font-bold">
-                  {reviews.cta_heading}
-                </h3>
-                <p className="max-w-[400px] text-[0.88rem] text-muted"><FormatText>{reviews.cta_body}</FormatText></p>
-              </div>
-              <ButtonLink to={reviews.cta_link} variant="green-dark">
-                {reviews.cta_label}
-              </ButtonLink>
-            </div>
+            <CtaStrip
+              heading={reviews.cta_heading}
+              body={reviews.cta_body}
+              label={reviews.cta_label}
+              link={reviews.cta_link}
+              className="mx-auto max-w-[1160px]"
+            />
           </div>
         </main>
 

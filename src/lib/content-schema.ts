@@ -686,7 +686,7 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
 
   blog_page: {
     title: "Blog page",
-    description: "The blog index banner, introduction and social icons.",
+    description: "The blog index banner, introduction and social icons, plus the call to action under every post.",
     where: "/blog",
     previewPath: "/blog",
     sections: [
@@ -731,6 +731,16 @@ export const SETTINGS_SCHEMA: Record<string, SettingsSchema> = {
             hint: "The label picks the icon: Facebook, X, LinkedIn, Instagram, Threads, Pinterest, Flickr, TikTok or YouTube.",
             addLabel: "Add social link",
           },
+        ],
+      },
+      {
+        title: "Call to action under every post",
+        description: "The banner at the end of each blog article. Leave the heading empty to hide it.",
+        fields: [
+          { kind: "text", key: "cta_heading", label: "Heading" },
+          { kind: "textarea", key: "cta_body", label: "Paragraph", rows: 2 },
+          { kind: "text", key: "cta_label", label: "Button text" },
+          { kind: "text", key: "cta_link", label: "Button goes to" },
         ],
       },
     ],

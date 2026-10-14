@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { InitialAvatar } from "@/components/sections";
-import { ButtonLink } from "@/components/ui/button";
+import { CtaStrip } from "@/components/cta-strip";
 import { PhotoFrame, gradientFor } from "@/components/ui/photo-frame";
 import { getPostBySlug, listPublishedPosts, listPublishedTours } from "@/lib/site-content.functions";
 import { getSeoMeta } from "@/lib/seo.functions";
@@ -12,6 +12,7 @@ import { buildSeoMeta } from "@/lib/seo-head";
 import { BlogShare } from "@/components/blog/blog-share";
 import { BlogSidebar } from "@/components/blog/blog-sidebar";
 import { FormatDocument } from "@/components/ui/format-text";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { postPreviewChannel } from "@/lib/post-preview";
 import { toPostDTO } from "@/lib/post-dto";
 import type { BlogPostDTO } from "@/lib/content-types";
@@ -94,6 +95,7 @@ export const Route = createFileRoute("/blog/$slug")({
   const { post: saved, related, tours } = Route.useLoaderData();
   const { preview } = Route.useSearch();
   const draft = postPreviewChannel.useDraft(preview === true);
+  const { blog_page } = useSiteSettings();
   const post = draft ?? saved;
   const fullUrl = `https://roambengal.com/blog/${post.slug}`; // Could be dynamic, but this is fine for share links
 
@@ -175,6 +177,16 @@ export const Route = createFileRoute("/blog/$slug")({
                 )}
               </div>
             </div>
+
+            {blog_page.cta_heading ? (
+              <CtaStrip
+                heading={blog_page.cta_heading}
+                body={blog_page.cta_body}
+                label={blog_page.cta_label}
+                link={blog_page.cta_link}
+                className="mt-10"
+              />
+            ) : null}
           </div>
 
           {/* Cancels the grid's pull-up so only the article card laps onto the banner.
