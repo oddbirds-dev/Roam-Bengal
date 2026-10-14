@@ -190,6 +190,19 @@ export const LINE_HEIGHT_STEP = 0.1;
 const clampLineHeight = (value: number) =>
   Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Math.round(value * 10) / 10));
 
+/**
+ * Word pastes `line-height:115%` (and sometimes `14pt`/`1.5em`); read as a bare number that
+ * became a 115× line and left a screen-tall gap. Percent and em are relative to the text, so
+ * they convert; absolute lengths can't without the font size, so they are dropped.
+ */
+function parseLineHeight(raw: string): number | null {
+  const match = /^([\d.]+)\s*(%|em)?$/i.exec(raw.trim());
+  if (!match) return null;
+  const amount = Number.parseFloat(match[1] ?? "");
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return clampLineHeight(match[2] === "%" ? amount / 100 : amount);
+}
+
 /** Unlike font-size, line-height is unitless, so it needs its own float parsing rather
  * than styleMark's integer-px handling. Mod-Shift-Up/Down mirror the toolbar stepper so
  * the shortcut users reach for instinctively actually does something. */
@@ -199,10 +212,6 @@ export const LineHeightMark = Mark.create({
     return {
       value: {
         default: null,
-        parseHTML: (element: HTMLElement) => {
-          const raw = element.style.getPropertyValue("line-height");
-          return raw ? Number.parseFloat(raw) || null : null;
-        },
         renderHTML: (attributes: { value?: number | null }) =>
           attributes.value !== null && attributes.value !== undefined
             ? { style: `line-height: ${attributes.value}` }
@@ -211,7 +220,15 @@ export const LineHeightMark = Mark.create({
     };
   },
   parseHTML() {
-    return [{ tag: 'span[style*="line-height"]' }];
+    return [
+      {
+        style: "line-height",
+        getAttrs: (raw) => {
+          const value = parseLineHeight(raw);
+          return value === null ? false : { value };
+        },
+      },
+    ];
   },
   renderHTML({ HTMLAttributes }) {
     return ["span", mergeAttributes(HTMLAttributes), 0];
