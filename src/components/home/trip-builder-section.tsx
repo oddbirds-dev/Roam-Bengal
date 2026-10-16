@@ -5,7 +5,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { FormatText } from "@/components/ui/format-text";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { submitInquiry } from "@/lib/capture.functions";
-import craftsCustomImage from "@/assets/why choose.avif";
+import craftsCustomImage from "@/assets/why-choose.avif";
 import type { HomeSectionProps } from "./registry";
 
 interface TripBuilderArea {
@@ -216,7 +216,7 @@ export function TripBuilderSection(_props: HomeSectionProps) {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 bg-no-repeat"
         style={{
-          backgroundImage: `url(${craftsCustomImage})`,
+          backgroundImage: `url("${craftsCustomImage}")`,
           backgroundPosition: "center bottom",
           backgroundSize: "100% auto",
         }}
