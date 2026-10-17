@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, DollarSign } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
@@ -514,7 +514,21 @@ function TourDetail() {
                 Tour Cost
               </div>
               <div className="mt-1 font-display text-[2rem] leading-none font-bold text-green">
-                {formatPrice(tour.discountPriceUsd ?? tour.priceUsd)}
+                {(() => {
+                  const price = formatPrice(tour.discountPriceUsd ?? tour.priceUsd);
+                  return price.startsWith("$") ? (
+                    <>
+                      <DollarSign
+                        aria-hidden="true"
+                        className="mr-0.5 inline-block size-[1.45rem] align-[-0.08em]"
+                        strokeWidth={2.5}
+                      />
+                      {price.slice(1)}
+                    </>
+                  ) : (
+                    price
+                  );
+                })()}
                 <span className="ml-1 text-[0.78rem] font-normal text-muted">
                   / Adult* From
                 </span>
@@ -556,7 +570,7 @@ function TourDetail() {
                 className="mt-6 w-full cta-pulse-glow hover:scale-[1.05]"
                 search={{ tour: tour.slug }}
               >
-                Book Now
+                View Details
                 <ArrowRight className="h-4 w-4" />
               </ButtonLink>
             </div>
