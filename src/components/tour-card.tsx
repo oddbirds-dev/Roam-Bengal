@@ -144,7 +144,7 @@ export function TourCard({
             params={{ slug: tour.slug }}
             className="inline-flex items-center justify-center gap-2 rounded-[30px] bg-orange px-5 py-2.75 text-[0.8rem] font-semibold whitespace-nowrap text-white transition-colors hover:bg-[#D9600F]"
           >
-            Book Now →
+            View Details →
           </Link>
         </div>
       </div>
